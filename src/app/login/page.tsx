@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginCoach } from "@/actions/auth";
+import { signIn } from "next-auth/react";
 import { Mail, KeyRound } from "lucide-react";
 
 export default function CoachLogin() {
@@ -15,12 +15,18 @@ export default function CoachLogin() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    const res = await loginCoach(email, password);
-    if (res.success) {
-      router.push("/dashboard");
-    } else {
-      setError(res.error || "خطأ");
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      isCoach: "true",
+    });
+
+    if (res?.error) {
+      setError(res.error);
       setIsLoading(false);
+    } else {
+      router.push("/dashboard");
     }
   };
 

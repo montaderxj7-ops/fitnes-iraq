@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Authentication check
-  const settings = await prisma.settings.findFirst();
+  const settings = await prisma.coachProfile.findFirst();
   if (settings?.dashboardLoginEnabled) {
     const cookieStore = await cookies();
     if (cookieStore.get("coach_auth")?.value !== "true") {

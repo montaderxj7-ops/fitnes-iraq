@@ -63,8 +63,7 @@ export async function addClient(data: {
     const newClient = await prisma.client.create({
       data: {
         name: data.name,
-        email: data.email,
-        password: data.password,
+        // email and password removed since they belong to User now
         age: data.age,
         weight: data.weight,
         height: data.height,

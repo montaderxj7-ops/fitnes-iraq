@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User, Loader2, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { signIn } from "next-auth/react";
+import { registerCoach } from "@/actions/auth";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -50,25 +52,52 @@ export default function AuthModal({ isOpen, onClose, plan, billing }: AuthModalP
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     
     setIsLoading(true);
-    setTimeout(() => {
+    
+    try {
+      if (authMode === "signup") {
+        const res = await registerCoach({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        });
+        
+        if (!res.success) {
+          setErrors({ ...errors, email: res.error || "خطأ" });
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // For both signup (after successful creation) and login
+      const signInRes = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+        isCoach: "true"
+      });
+
+      if (signInRes?.error) {
+        setErrors({ ...errors, password: signInRes.error });
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        onClose();
+        router.push(`/checkout?plan=${plan}&billing=${billing}`);
+      }
+    } catch (error) {
+      console.error(error);
       setIsLoading(false);
-      onClose();
-      router.push(`/checkout?plan=${plan}&billing=${billing}`);
-    }, 1500);
+    }
   };
 
   const handleGoogleAuth = () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      onClose();
-      router.push(`/checkout?plan=${plan}&billing=${billing}`);
-    }, 1500);
+    signIn("google", { callbackUrl: `/checkout?plan=${plan}&billing=${billing}` });
   };
 
   // Staggered animation variants

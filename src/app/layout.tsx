@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
+import Providers from '@/components/Providers';
 import "./globals.css";
 
 const cairo = Cairo({
@@ -25,8 +26,10 @@ export default function RootLayout({
       className={`${cairo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster position="bottom-center" />
+        <Providers>
+          {children}
+          <Toaster position="bottom-center" />
+        </Providers>
       </body>
     </html>
   );

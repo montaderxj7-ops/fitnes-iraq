@@ -45,29 +45,7 @@ export async function publishCoachProfile(data: {
       }
     });
 
-    // Sync with Settings so dashboard reflects the published name and logo
-    const settings = await prisma.settings.findFirst();
-    if (settings) {
-      await prisma.settings.update({
-        where: { id: settings.id },
-        data: {
-          coachName: data.name,
-          coachAvatar: data.image || settings.coachAvatar,
-          appLogo: data.logo || settings.appLogo,
-        }
-      });
-    } else {
-      await prisma.settings.create({
-        data: {
-          coachName: data.name,
-          coachAvatar: data.image || "",
-          appName: "Gym System",
-          appLogo: data.logo || "",
-          primaryColor: data.primaryColor || "#D6F854"
-        }
-      });
-    }
-
+    // Settings logic removed because Settings model is deleted. Profile handles it.
     revalidatePath("/"); // Revalidate marketplace page
     revalidatePath("/dashboard");
     
@@ -94,9 +72,8 @@ export async function getPublicCoachData(slug: string) {
   try {
     const profile = await prisma.coachProfile.findUnique({ where: { slug } });
     
-    // Fallback to global settings if profile doesn't exist
-    const settings = await prisma.settings.findFirst() || { coachName: "كابتن برو", appName: "Gym System", primaryColor: "#D6F854", appLogo: "" };
-    const packages = await prisma.package.findMany({ orderBy: { createdAt: "desc" } });
+    const settings = profile || { name: "كابتن برو", appName: "Gym System", primaryColor: "#D6F854", logo: "" };
+    const packages = await prisma.package.findMany({ where: { coachId: profile?.id }, orderBy: { createdAt: "desc" } });
     const paymentMethods = await prisma.paymentMethod.findMany({ where: { isActive: true } });
 
     return {
@@ -142,23 +119,16 @@ export async function getPublicCoachData(slug: string) {
   }
 }
 
-export async function updateCoachSettings(data: {
-  coachName?: string;
-  coachAvatar?: string;
-  appName?: string;
-  appLogo?: string;
+export async function updateCoachSettings(coachId: string, data: {
+  name?: string;
+  logo?: string;
   primaryColor?: string;
   bio?: string;
-  welcomeImage?: string;
+  image?: string;
 }) {
   try {
-    let settings = await prisma.settings.findFirst();
-    if (!settings) {
-      settings = await prisma.settings.create({ data: {} });
-    }
-    
-    const updated = await prisma.settings.update({
-      where: { id: settings.id },
+    const updated = await prisma.coachProfile.update({
+      where: { id: coachId },
       data
     });
     

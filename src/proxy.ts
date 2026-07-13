@@ -1,18 +1,20 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { withAuth } from "next-auth/middleware";
 
-export function proxy(request: NextRequest) {
-  const auth = request.cookies.get('coach_auth');
-  
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!auth || auth.value !== 'true') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  }
-  
-  return NextResponse.next();
-}
+export const proxy = withAuth({
+  pages: {
+    signIn: "/login",
+  },
+  callbacks: {
+    authorized: ({ req, token }) => {
+      if (req.nextUrl.pathname.startsWith('/dashboard')) {
+        // @ts-ignore
+        return token?.role === "COACH";
+      }
+      return true;
+    },
+  },
+});
 
 export const config = {
-  matcher: '/dashboard/:path*',
+  matcher: ['/dashboard/:path*'],
 };

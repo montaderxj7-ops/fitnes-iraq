@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 
 export async function getSettings() {
   try {
-    let settings = await prisma.settings.findFirst();
+    let settings = await prisma.coachProfile.findFirst();
     if (!settings) {
-      settings = await prisma.settings.create({
+      settings = await prisma.coachProfile.create({
         data: {
           coachName: "كابتن برو",
           appName: "Gym System",
@@ -36,14 +36,14 @@ export async function updateSettings(data: {
   subscriptionTier?: string;
 }) {
   try {
-    let settings = await prisma.settings.findFirst();
+    let settings = await prisma.coachProfile.findFirst();
     if (settings) {
-      settings = await prisma.settings.update({
+      settings = await prisma.coachProfile.update({
         where: { id: settings.id },
         data
       });
     } else {
-      settings = await prisma.settings.create({
+      settings = await prisma.coachProfile.create({
         data: {
           coachName: data.coachName || "كابتن برو",
           coachAvatar: data.coachAvatar,
