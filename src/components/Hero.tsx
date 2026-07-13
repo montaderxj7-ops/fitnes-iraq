@@ -203,7 +203,7 @@ export default function Hero() {
           
           {/* Calories Line (Forehead -> Top Right) */}
           <motion.path
-            d="M 56 27 Q 65 20 78 15"
+            d="M 56 27 Q 65 25 78 25"
             fill="none"
             stroke="url(#lineGrad)"
             strokeWidth="0.8"
@@ -214,7 +214,7 @@ export default function Hero() {
           />
           {/* Heart Rate Line (Fist -> Inner Right) */}
           <motion.path
-            d="M 62 32 Q 67 30 72 29"
+            d="M 62 32 Q 67 35 72 39"
             fill="none"
             stroke="url(#lineGrad)"
             strokeWidth="0.8"
@@ -225,7 +225,7 @@ export default function Hero() {
           />
           {/* SpO2 Line (Elbow -> Inner Bottom) */}
           <motion.path
-            d="M 45 55 Q 58 49 72 43"
+            d="M 45 55 Q 58 54 72 53"
             fill="none"
             stroke="url(#lineGrad)"
             strokeWidth="0.8"
@@ -236,7 +236,7 @@ export default function Hero() {
           />
           {/* Weight Line (Knee -> Outer Bottom) */}
           <motion.path
-            d="M 43 75 Q 60 66 78 57"
+            d="M 43 75 Q 60 71 78 67"
             fill="none"
             stroke="url(#lineGrad)"
             strokeWidth="0.8"
@@ -252,7 +252,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.5, x: 50 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 1, type: "spring" }}
-          className="absolute top-[12%] left-[78%]"
+          className="absolute top-[22%] left-[78%]"
         >
           <div className="absolute top-1/2 -left-3 w-2.5 h-2.5 rounded-full bg-neon shadow-[0_0_12px_#D6F854] -translate-y-1/2 z-10" />
           <motion.div
@@ -277,7 +277,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.5, x: 50 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 1.2, type: "spring" }}
-          className="absolute top-[26%] left-[72%]"
+          className="absolute top-[36%] left-[72%]"
         >
           <div className="absolute top-1/2 -left-3 w-2.5 h-2.5 rounded-full bg-neon shadow-[0_0_12px_#D6F854] -translate-y-1/2 z-10" />
           <motion.div
@@ -307,7 +307,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.5, x: 50 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 1.4, type: "spring" }}
-          className="absolute top-[40%] left-[72%]"
+          className="absolute top-[50%] left-[72%]"
         >
           <div className="absolute top-1/2 -left-3 w-2.5 h-2.5 rounded-full bg-neon shadow-[0_0_12px_#D6F854] -translate-y-1/2 z-10" />
           <motion.div
@@ -337,7 +337,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.5, x: 50 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 1.6, type: "spring" }}
-          className="absolute top-[54%] left-[78%]"
+          className="absolute top-[64%] left-[78%]"
         >
           <div className="absolute top-1/2 -left-3 w-2.5 h-2.5 rounded-full bg-neon shadow-[0_0_12px_#D6F854] -translate-y-1/2 z-10" />
           <motion.div
