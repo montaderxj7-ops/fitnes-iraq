@@ -6,6 +6,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { publishCoachProfile } from "@/actions/coach";
+import { forceLoginCoach } from "@/actions/auth";
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -54,6 +55,8 @@ export function PublishModal({ isOpen, onClose, appName, appLogo }: PublishModal
 
       if (result.success) {
         setIsSuccess(true);
+        // Automatically log them in so they don't see the login screen
+        await forceLoginCoach();
         // Redirect to dashboard after a short delay
         setTimeout(() => {
           router.push("/dashboard");
