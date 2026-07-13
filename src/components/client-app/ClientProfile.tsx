@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Settings, CreditCard, Bell, ChevronLeft, ChevronRight, User, Mail, Calendar, ShieldCheck, Activity, ArrowRight, ArrowLeft, Moon, Sun, Globe, Lock, Trash2, Smartphone } from 'lucide-react';
 import { CoachData } from './ClientAppFlow';
-import { useLanguage, Language } from '@/lib/i18n/LanguageContext';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface ClientProfileProps {
   coach: CoachData;

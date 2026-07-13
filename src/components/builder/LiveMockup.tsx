@@ -97,14 +97,6 @@ export default function LiveMockup({ state, currentView, onViewChange, currentSt
                           hasChat: true,
                         }
                       ],
-                      paymentMethods: [
-                        ...(state.payments.zainCash ? [{ id: 'zainCash', name: 'زين كاش', details: state.payments.zainCashNumber }] : []),
-                        ...(state.payments.fib ? [{ id: 'fib', name: 'البنوك الرقمية (FIB)', details: state.payments.fibAccount }] : []),
-                        ...(state.payments.asiaHawala ? [{ id: 'asiaHawala', name: 'آسيا حوالة', details: state.payments.asiaHawalaNumber }] : []),
-                        ...(state.payments.masterCard ? [{ id: 'masterCard', name: 'ماستر كارد (MasterCard)', details: state.payments.masterCardNumber }] : []),
-                        ...(state.payments.visaCard ? [{ id: 'visaCard', name: 'فيزا كارد (Visa)', details: state.payments.visaCardNumber }] : []),
-                      ],
-                      payments: state.payments
                     }} 
                   />
                 </motion.div>

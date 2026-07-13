@@ -24,7 +24,7 @@ interface PackagesScreenProps {
 
 export function PackagesScreen({ coach, onSelectPackage, onBack }: PackagesScreenProps) {
   const { t, dir } = useLanguage();
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -34,7 +34,7 @@ export function PackagesScreen({ coach, onSelectPackage, onBack }: PackagesScree
     }
   };
 
-  const cardVariants = {
+  const cardVariants: any = {
     hidden: { opacity: 0, y: 40, scale: 0.95 },
     visible: { 
       opacity: 1, 

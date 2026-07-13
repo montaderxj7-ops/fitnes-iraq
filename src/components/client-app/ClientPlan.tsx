@@ -248,7 +248,7 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
                         className="overflow-hidden border-t border-white/5 bg-black/20"
                       >
                         <div className="p-3 space-y-2">
-                          {day.exercises.map((ex, idx) => {
+                          {day.exercises.map((ex: any, idx: number) => {
                             const exId = `${day.day}-${idx}`;
                             const isEditing = editingWeightId === exId;
                             return (

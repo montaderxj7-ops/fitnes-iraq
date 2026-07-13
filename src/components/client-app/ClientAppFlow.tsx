@@ -42,25 +42,8 @@ export interface CoachData {
     chatHours: string;
     hasChat: boolean;
   }[];
-  payments: {
-    zainCash: boolean;
-    zainCashNumber: string;
-    zainCashName: string;
-    fib: boolean;
-    fibAccount: string;
-    fibName: string;
-    asiaHawala: boolean;
-    asiaHawalaNumber: string;
-    asiaHawalaName: string;
-    masterCard: boolean;
-    masterCardNumber: string;
-    masterCardName: string;
-    visaCard: boolean;
-    visaCardNumber: string;
-    visaCardName: string;
-    card: boolean;
-    cardLink: string;
-  };
+  payments?: any;
+  paymentMethods?: any[];
 }
 
 interface ClientAppFlowProps {

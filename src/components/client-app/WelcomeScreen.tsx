@@ -18,7 +18,7 @@ interface WelcomeScreenProps {
 export function WelcomeScreen({ coach, onNext, onLogin }: WelcomeScreenProps) {
   const { t, dir } = useLanguage();
   // Animation variants
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -29,7 +29,7 @@ export function WelcomeScreen({ coach, onNext, onLogin }: WelcomeScreenProps) {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 

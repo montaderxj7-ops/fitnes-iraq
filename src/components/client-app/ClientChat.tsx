@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, Paperclip, MoreVertical, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { CoachData, ClientUserData } from './ClientAppFlow';
+import { CoachData } from './ClientAppFlow';
 import { cn } from '@/lib/utils';
 import { getOrCreateClientChat, sendClientMessage, getMessages } from '@/actions/inbox';
 
 interface ClientChatProps {
   coach: CoachData;
-  userData: ClientUserData;
+  userData: any;
   onClose: () => void;
 }
 

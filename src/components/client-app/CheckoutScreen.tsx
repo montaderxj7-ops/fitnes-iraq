@@ -7,7 +7,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 interface CheckoutScreenProps {
   coach: {
     primaryColor: string;
-    paymentMethods: {
+    paymentMethods?: {
       id: string;
       name: string;
       details: string;
