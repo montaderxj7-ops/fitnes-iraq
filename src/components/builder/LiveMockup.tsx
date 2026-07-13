@@ -59,7 +59,17 @@ export default function LiveMockup({ state, currentView, onViewChange, currentSt
           <div className="flex-1 p-6 pb-24">
             <AnimatePresence mode="wait">
               {/* Packages View (Now Onboarding/Client App) */}
-              {currentView === "packages" && (
+              {currentView === "packages" && (() => {
+                const p = state.payments || {} as any;
+                const paymentMethods = [];
+                if (p.zainCash) paymentMethods.push({ id: 'zainCash', name: 'زين كاش', details: `${p.zainCashNumber} - ${p.zainCashName}` });
+                if (p.fib) paymentMethods.push({ id: 'fib', name: 'FIB', details: `${p.fibAccount} - ${p.fibName}` });
+                if (p.asiaHawala) paymentMethods.push({ id: 'asiaHawala', name: 'آسيا حوالة', details: `${p.asiaHawalaNumber} - ${p.asiaHawalaName}` });
+                if (p.masterCard) paymentMethods.push({ id: 'masterCard', name: 'ماستر كارد', details: `${p.masterCardNumber} - ${p.masterCardName}` });
+                if (p.visaCard) paymentMethods.push({ id: 'visaCard', name: 'فيزا كارد', details: `${p.visaCardNumber} - ${p.visaCardName}` });
+                if (p.card) paymentMethods.push({ id: 'card', name: 'بطاقة ائتمانية', details: p.cardLink });
+
+                return (
                 <motion.div 
                   key="packages"
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
@@ -97,10 +107,11 @@ export default function LiveMockup({ state, currentView, onViewChange, currentSt
                           hasChat: true,
                         }
                       ],
+                      paymentMethods,
                     }} 
                   />
                 </motion.div>
-              )}
+              )})()}
 
               {/* Login View */}
               {currentView === "login" && (
