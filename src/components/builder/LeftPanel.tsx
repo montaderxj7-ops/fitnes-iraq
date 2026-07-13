@@ -14,6 +14,8 @@ interface LeftPanelProps {
   setCurrentStep: Dispatch<SetStateAction<number>>;
   setMockupView: Dispatch<SetStateAction<MockupView>>;
   onPublish: () => void;
+  isPublishing?: boolean;
+  publishSuccess?: boolean;
 }
 
 const STEPS = [
