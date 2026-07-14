@@ -51,8 +51,8 @@ export default function DashboardOverview() {
       const resSettings = await getSettings();
       if (resSettings.success && resSettings.settings) {
         setSettings({
-          coachName: resSettings.settings.coachName || "كابتن برو",
-          coachAvatar: resSettings.settings.coachAvatar || "",
+          coachName: resSettings.settings.name || "كابتن برو",
+          coachAvatar: resSettings.settings.image || "",
           primaryColor: resSettings.settings.primaryColor || "#82c91e"
         });
       }

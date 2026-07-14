@@ -41,10 +41,10 @@ export default function SettingsPage() {
       const res = await getSettings();
       if (res.success && res.settings) {
         setSettings({
-          coachName: res.settings.coachName || "",
-          coachAvatar: res.settings.coachAvatar || "",
+          coachName: res.settings.name || "",
+          coachAvatar: res.settings.image || "",
           appName: res.settings.appName || "",
-          appLogo: res.settings.appLogo || "",
+          appLogo: res.settings.logo || "",
           primaryColor: res.settings.primaryColor || "#D6F854",
           bio: res.settings.bio || "",
           welcomeImage: res.settings.welcomeImage || "",

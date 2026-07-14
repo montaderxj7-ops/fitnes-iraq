@@ -3,17 +3,31 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function getSettings() {
   try {
-    let settings = await prisma.coachProfile.findFirst();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    let settings = await prisma.coachProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
     if (!settings) {
-      settings = await prisma.coachProfile.create({
-        data: {
-          coachName: "كابتن برو",
+      // If they somehow reached here without a profile, return fallback data
+      return { 
+        success: true, 
+        settings: {
+          name: session.user.name || "كابتن برو",
+          image: session.user.image || "",
           appName: "Gym System",
           primaryColor: "#D6F854"
-        }
-      });
+        } 
+      };
     }
     return { success: true, settings };
   } catch (error: any) {
@@ -35,27 +49,28 @@ export async function updateSettings(data: {
   dashboardPassword?: string;
   subscriptionTier?: string;
 }) {
-  try {
-    let settings = await prisma.coachProfile.findFirst();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    let settings = await prisma.coachProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
     if (settings) {
       settings = await prisma.coachProfile.update({
         where: { id: settings.id },
-        data
-      });
-    } else {
-      settings = await prisma.coachProfile.create({
         data: {
-          coachName: data.coachName || "كابتن برو",
-          coachAvatar: data.coachAvatar,
-          appName: data.appName || "Gym System",
-          appLogo: data.appLogo,
-          primaryColor: data.primaryColor || "#D6F854",
-          bio: data.bio,
-          welcomeImage: data.welcomeImage,
-          dashboardLoginEnabled: data.dashboardLoginEnabled ?? false,
-          dashboardEmail: data.dashboardEmail,
-          dashboardPassword: data.dashboardPassword,
-          subscriptionTier: data.subscriptionTier || "pro"
+          name: data.coachName || settings.name,
+          image: data.coachAvatar !== undefined ? data.coachAvatar : settings.image,
+          appName: data.appName || settings.appName,
+          logo: data.appLogo !== undefined ? data.appLogo : settings.logo,
+          primaryColor: data.primaryColor || settings.primaryColor,
+          bio: data.bio || settings.bio,
+          welcomeImage: data.welcomeImage !== undefined ? data.welcomeImage : settings.welcomeImage,
+          dashboardLoginEnabled: data.dashboardLoginEnabled ?? settings.dashboardLoginEnabled,
+          subscriptionTier: data.subscriptionTier || settings.subscriptionTier
         }
       });
     }
