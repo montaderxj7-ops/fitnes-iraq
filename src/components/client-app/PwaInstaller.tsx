@@ -8,11 +8,13 @@ import { Download, Share, PlusSquare, Smartphone, CheckCircle2 } from "lucide-re
 export function PwaInstaller({
   coachName,
   coachLogo,
-  primaryColor
+  primaryColor,
+  coachSlug
 }: {
   coachName?: string;
   coachLogo?: string | null;
   primaryColor?: string;
+  coachSlug: string;
 }) {
   const searchParams = useSearchParams();
   const shouldInstall = searchParams.get('install') === 'true';
@@ -26,10 +28,10 @@ export function PwaInstaller({
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
 
-    // 1. Register Service Worker
+    // 1. Register Service Worker with isolated scope per coach
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('SW registered', reg.scope))
+      navigator.serviceWorker.register('/sw.js', { scope: `/${coachSlug}` })
+        .then(reg => console.log(`SW registered for scope: ${reg.scope}`))
         .catch(err => console.error('SW failed', err));
     }
 

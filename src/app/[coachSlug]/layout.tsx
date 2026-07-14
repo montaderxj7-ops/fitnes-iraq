@@ -26,7 +26,7 @@ export default async function CoachLayout({
       </head>
       {/* We wrapper the children here, and add the PwaInstaller component */}
       <Suspense fallback={null}>
-        <PwaInstaller coachName={coachName} coachLogo={coachLogo} primaryColor={primaryColor} />
+        <PwaInstaller coachName={coachName} coachLogo={coachLogo} primaryColor={primaryColor} coachSlug={resolvedParams.coachSlug} />
       </Suspense>
       {children}
     </>

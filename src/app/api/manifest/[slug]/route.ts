@@ -30,7 +30,7 @@ export async function GET(
       short_name: appName,
       description: `التطبيق التدريبي الخاص بـ ${coach.name}`,
       start_url: `/${slug}`,
-      scope: '/',
+      scope: `/${slug}`,
       display: 'standalone',
       background_color: '#050505',
       theme_color: primaryColor,
