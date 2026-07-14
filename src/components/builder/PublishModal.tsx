@@ -13,9 +13,17 @@ interface PublishModalProps {
   onClose: () => void;
   appName: string;
   appLogo?: string | null;
+  firstPackage?: {
+    name: string;
+    price: string;
+    hasChat: boolean;
+    chatDays: string;
+    chatHours: string;
+    features: string[];
+  };
 }
 
-export function PublishModal({ isOpen, onClose, appName, appLogo }: PublishModalProps) {
+export function PublishModal({ isOpen, onClose, appName, appLogo, firstPackage }: PublishModalProps) {
   const router = useRouter();
   const [coachName, setCoachName] = useState(appName || "");
   const [specialty, setSpecialty] = useState("");
@@ -51,6 +59,7 @@ export function PublishModal({ isOpen, onClose, appName, appLogo }: PublishModal
         instagram,
         image: photoUrl || undefined, // in a real app, this would upload the file to S3/Cloudinary and get a URL
         logo: appLogo || undefined,
+        firstPackage: firstPackage
       });
 
       if (result.success) {

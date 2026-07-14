@@ -153,6 +153,7 @@ export default function BuilderPage() {
         onClose={() => setIsPublishModalOpen(false)}
         appName={builderState.appName}
         appLogo={builderState.appLogo}
+        firstPackage={builderState.firstPackage}
       />
     </div>
   );

@@ -13,6 +13,14 @@ export async function publishCoachProfile(data: {
   image?: string | null;
   logo?: string | null;
   primaryColor?: string;
+  firstPackage?: {
+    name: string;
+    price: string;
+    hasChat: boolean;
+    chatDays: string;
+    chatHours: string;
+    features: string[];
+  };
 }) {
   try {
     const session = await getServerSession(authOptions);
@@ -52,6 +60,23 @@ export async function publishCoachProfile(data: {
         slug: slug,
       }
     });
+
+    // Create the first package if provided
+    if (data.firstPackage && data.firstPackage.name.trim() !== "") {
+      await prisma.package.create({
+        data: {
+          coachId: coach.id,
+          name: data.firstPackage.name,
+          price: data.firstPackage.price,
+          hasChat: data.firstPackage.hasChat,
+          chatDays: data.firstPackage.chatDays,
+          chatHours: data.firstPackage.chatHours,
+          features: JSON.stringify(data.firstPackage.features),
+          popular: true, // make the first package popular by default
+          hasNutrition: true, // default to true for the main package
+        }
+      });
+    }
 
     // Upgrade the user to COACH role
     await prisma.user.update({
