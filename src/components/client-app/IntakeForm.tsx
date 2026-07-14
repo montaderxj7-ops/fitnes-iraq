@@ -137,6 +137,22 @@ export function IntakeForm({ coach, onComplete }: IntakeFormProps) {
                   </div>
                 )}
 
+                {currentQuestion.type === 'text' && (
+                  <div className="relative group">
+                    <div className="relative bg-[#111] border border-white/10 rounded-2xl overflow-hidden focus-within:border-transparent transition-all" style={{ '--tw-ring-color': coach.primaryColor } as any}>
+                      <input
+                        type="text"
+                        value={formData[currentQuestion.id] || ''}
+                        onChange={e => setFormData({ ...formData, [currentQuestion.id]: e.target.value })}
+                        placeholder={currentQuestion.placeholder}
+                        className="w-full bg-transparent px-6 py-5 text-xl font-bold text-white focus:outline-none transition-all placeholder:text-gray-700"
+                        autoFocus
+                      />
+                      <div className="absolute inset-0 rounded-2xl ring-1 ring-transparent focus-within:ring-2 transition-all pointer-events-none" style={{ borderColor: coach.primaryColor }} />
+                    </div>
+                  </div>
+                )}
+
                 {currentQuestion.type === 'textarea' && (
                   <div className="relative group">
                     <div className="relative bg-[#111] border border-white/10 rounded-2xl overflow-hidden focus-within:border-transparent transition-all" style={{ '--tw-ring-color': coach.primaryColor } as any}>
