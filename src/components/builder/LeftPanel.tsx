@@ -81,7 +81,27 @@ export default function LeftPanel({ state, setState, currentStep, setCurrentStep
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setState({ ...state, [field]: reader.result as string });
+        if (field === 'appLogo' || field === 'appIcon') {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.clearRect(0, 0, 512, 512);
+              const scale = Math.min(512 / img.width, 512 / img.height);
+              const x = (512 / 2) - (img.width / 2) * scale;
+              const y = (512 / 2) - (img.height / 2) * scale;
+              ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+              const dataUrl = canvas.toDataURL('image/png');
+              setState({ ...state, [field]: dataUrl });
+            }
+          };
+          img.src = reader.result as string;
+        } else {
+          setState({ ...state, [field]: reader.result as string });
+        }
       };
       reader.readAsDataURL(file);
     }

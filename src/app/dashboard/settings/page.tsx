@@ -56,7 +56,29 @@ export default function SettingsPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSettings({ ...settings, appLogo: reader.result as string });
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 512;
+          canvas.height = 512;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // Fill background with transparent or black/white depending on preference.
+            // WebAPK prefers non-transparent for some icons, but transparent is safer for general use.
+            // Let's use transparent.
+            ctx.clearRect(0, 0, 512, 512);
+
+            // Calculate scaling to fit image inside 512x512 while preserving aspect ratio
+            const scale = Math.min(512 / img.width, 512 / img.height);
+            const x = (512 / 2) - (img.width / 2) * scale;
+            const y = (512 / 2) - (img.height / 2) * scale;
+            
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            const dataUrl = canvas.toDataURL('image/png');
+            setSettings({ ...settings, appLogo: dataUrl });
+          }
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
