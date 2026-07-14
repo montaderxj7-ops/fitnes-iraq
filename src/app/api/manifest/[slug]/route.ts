@@ -20,10 +20,21 @@ export async function GET(
     const primaryColor = coach.primaryColor || '#D6F854';
     // Use coach.logo if available, even if it's base64
     const iconUrl = coach.logo ? coach.logo : '/favicon.ico';
+    
+    let iconType = 'image/png';
+    if (iconUrl.startsWith('data:image/')) {
+      iconType = iconUrl.split(';')[0].split(':')[1];
+    } else if (iconUrl.endsWith('.jpg') || iconUrl.endsWith('.jpeg')) {
+      iconType = 'image/jpeg';
+    } else if (iconUrl.endsWith('.svg')) {
+      iconType = 'image/svg+xml';
+    } else if (iconUrl.endsWith('.webp')) {
+      iconType = 'image/webp';
+    }
 
     const manifest = {
       name: appName,
-      short_name: coach.name,
+      short_name: appName,
       description: `التطبيق التدريبي الخاص بـ ${coach.name}`,
       start_url: `/${slug}`,
       display: 'standalone',
@@ -33,13 +44,13 @@ export async function GET(
         {
           src: iconUrl,
           sizes: '192x192',
-          type: 'image/png',
+          type: iconType,
           purpose: 'any maskable'
         },
         {
           src: iconUrl,
           sizes: '512x512',
-          type: 'image/png',
+          type: iconType,
           purpose: 'any maskable'
         }
       ]
