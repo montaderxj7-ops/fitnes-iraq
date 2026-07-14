@@ -291,6 +291,102 @@ export default function SettingsPage() {
               )}
             </div>
 
+            {/* Asia Hawala */}
+            <div className={`p-4 rounded-2xl border transition-all ${payments.asiaHawala ? 'bg-white/5 border-[#82c91e]/30' : 'bg-black/50 border-white/5 hover:border-white/10'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain_url=asiacell.com" alt="Asia Hawala" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="font-bold text-white">آسيا حوالة</span>
+                </div>
+                <div 
+                  onClick={() => setPayments({...payments, asiaHawala: !payments.asiaHawala})}
+                  className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${payments.asiaHawala ? 'bg-[#82c91e]' : 'bg-white/10'}`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${payments.asiaHawala ? 'translate-x-0' : '-translate-x-6'}`} />
+                </div>
+              </div>
+              {payments.asiaHawala && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                  <input 
+                    type="text" placeholder="رقم المحفظة (مثال: 077XXXXXXX)" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.asiaHawalaNumber} onChange={(e) => setPayments({...payments, asiaHawalaNumber: e.target.value})}
+                  />
+                  <input 
+                    type="text" placeholder="الاسم الكامل المسجل في المحفظة" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.asiaHawalaName} onChange={(e) => setPayments({...payments, asiaHawalaName: e.target.value})}
+                  />
+                </motion.div>
+              )}
+            </div>
+
+            {/* MasterCard */}
+            <div className={`p-4 rounded-2xl border transition-all ${payments.masterCard ? 'bg-white/5 border-[#82c91e]/30' : 'bg-black/50 border-white/5 hover:border-white/10'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 border border-white/10">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain_url=mastercard.com" alt="MasterCard" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="font-bold text-white">ماستر كارد (MasterCard)</span>
+                </div>
+                <div 
+                  onClick={() => setPayments({...payments, masterCard: !payments.masterCard})}
+                  className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${payments.masterCard ? 'bg-[#82c91e]' : 'bg-white/10'}`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${payments.masterCard ? 'translate-x-0' : '-translate-x-6'}`} />
+                </div>
+              </div>
+              {payments.masterCard && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                  <input 
+                    type="text" placeholder="رابط بوابة الدفع أو رقم البطاقة" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.masterCardNumber} onChange={(e) => setPayments({...payments, masterCardNumber: e.target.value})}
+                  />
+                  <input 
+                    type="text" placeholder="الاسم المطبوع على البطاقة" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.masterCardName} onChange={(e) => setPayments({...payments, masterCardName: e.target.value})}
+                  />
+                </motion.div>
+              )}
+            </div>
+
+            {/* Visa Card */}
+            <div className={`p-4 rounded-2xl border transition-all ${payments.visaCard ? 'bg-white/5 border-[#82c91e]/30' : 'bg-black/50 border-white/5 hover:border-white/10'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 border border-white/10">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain_url=visa.com" alt="Visa" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="font-bold text-white">فيزا كارد (Visa)</span>
+                </div>
+                <div 
+                  onClick={() => setPayments({...payments, visaCard: !payments.visaCard})}
+                  className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${payments.visaCard ? 'bg-[#82c91e]' : 'bg-white/10'}`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${payments.visaCard ? 'translate-x-0' : '-translate-x-6'}`} />
+                </div>
+              </div>
+              {payments.visaCard && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                  <input 
+                    type="text" placeholder="رابط بوابة الدفع أو رقم البطاقة" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.visaCardNumber} onChange={(e) => setPayments({...payments, visaCardNumber: e.target.value})}
+                  />
+                  <input 
+                    type="text" placeholder="الاسم المطبوع على البطاقة" 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#82c91e]/50 transition-all text-right"
+                    value={payments.visaCardName} onChange={(e) => setPayments({...payments, visaCardName: e.target.value})}
+                  />
+                </motion.div>
+              )}
+            </div>
+
             {/* Card Payment (Custom) */}
             <div className={`p-4 rounded-2xl border transition-all ${payments.card ? 'bg-white/5 border-[#82c91e]/30' : 'bg-black/50 border-white/5 hover:border-white/10'}`}>
               <div className="flex items-center justify-between mb-4">
