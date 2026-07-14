@@ -50,8 +50,9 @@ export function PublishModal({ isOpen, onClose, builderState }: PublishModalProp
         specialty,
         bio,
         instagram,
+        appName: builderState.appName,
         image: photoUrl || builderState.welcomeImage || undefined,
-        logo: builderState.appLogo || undefined,
+        logo: builderState.appIcon || builderState.appLogo || undefined,
         primaryColor: builderState.primaryColor,
         firstPackage: builderState.firstPackage,
         payments: builderState.payments

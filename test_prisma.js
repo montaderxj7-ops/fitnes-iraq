@@ -1,20 +1,15 @@
+require('dotenv').config();
 const { PrismaClient } = require('./node_modules/@prisma/client');
 const prisma = new PrismaClient();
 
 async function test() {
   try {
-    const coach = await prisma.coachProfile.create({
-      data: {
-        userId: 'test-user-id-1234',
-        name: 'حسن علي',
-        specialty: 'كمال اجسام و تغذية',
-        bio: 'مرحباً بك في فريقي! أنا هنا لأساعدك',
-        instagram: 'https://www.instagram.com/odessaazion?igsh',
-        primaryColor: '#D6F854',
-        slug: 'حسن-علي'
-      }
+    const methods = await prisma.paymentMethod.findMany();
+    console.log("METHODS:", methods);
+    const coaches = await prisma.coachProfile.findMany({
+      select: { name: true, appName: true, logo: true, slug: true, userId: true }
     });
-    console.log('Success:', coach.id);
+    console.log("COACHES:", coaches);
   } catch(e) {
     console.error('Prisma Error:', e);
   } finally {

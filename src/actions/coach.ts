@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function publishCoachProfile(data: {
   name: string;
+  appName?: string;
   specialty: string;
   bio: string;
   instagram: string;
@@ -77,6 +78,7 @@ export async function publishCoachProfile(data: {
 
     const coachData = {
       name: data.name,
+      appName: data.appName || "Gym System",
       specialty: data.specialty,
       bio: data.bio,
       instagram: data.instagram,

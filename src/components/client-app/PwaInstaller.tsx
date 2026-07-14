@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share, PlusSquare, Smartphone } from "lucide-react";
+import { Download, Share, PlusSquare, Smartphone, CheckCircle2 } from "lucide-react";
 
 export function PwaInstaller({
   coachName,
@@ -19,6 +19,7 @@ export function PwaInstaller({
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showOverlay, setShowOverlay] = useState(shouldInstall);
   const [isIOS, setIsIOS] = useState(false);
+  const [installSuccess, setInstallSuccess] = useState(false);
 
   useEffect(() => {
     // Detect iOS
@@ -51,7 +52,7 @@ export function PwaInstaller({
       const choiceResult = await deferredPrompt.userChoice;
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
-        setShowOverlay(false);
+        setInstallSuccess(true);
       } else {
         console.log('User dismissed the install prompt');
       }
@@ -132,12 +133,30 @@ export function PwaInstaller({
             </div>
           )}
 
-          <button 
-            onClick={() => setShowOverlay(false)}
-            className="mt-8 text-sm text-gray-500 underline hover:text-white transition-colors"
-          >
-            تخطي وفتح عبر المتصفح
-          </button>
+          {installSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute inset-0 z-50 bg-[#050505] flex flex-col items-center justify-center rounded-3xl"
+            >
+              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle2 className="w-10 h-10 text-green-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">تم التحميل بنجاح! 🎉</h3>
+              <p className="text-gray-400 text-sm px-6">
+                يمكنك الآن إغلاق هذه الصفحة وفتح التطبيق مباشرة من شاشة هاتفك الرئيسية.
+              </p>
+            </motion.div>
+          )}
+
+          {!installSuccess && (
+            <button 
+              onClick={() => setShowOverlay(false)}
+              className="mt-8 text-sm text-gray-500 underline hover:text-white transition-colors"
+            >
+              تخطي وفتح عبر المتصفح
+            </button>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>

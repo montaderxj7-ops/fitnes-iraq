@@ -16,10 +16,10 @@ export async function GET(
       return new NextResponse('Not found', { status: 404 });
     }
 
-    const appName = coach.appName || coach.name;
+    const appName = coach.appName && coach.appName !== "Gym System" ? coach.appName : coach.name;
     const primaryColor = coach.primaryColor || '#D6F854';
-    // Use coach.logo if available, otherwise a default gym icon
-    const iconUrl = coach.logo && coach.logo.startsWith('http') ? coach.logo : '/favicon.ico';
+    // Use coach.logo if available, even if it's base64
+    const iconUrl = coach.logo ? coach.logo : '/favicon.ico';
 
     const manifest = {
       name: appName,
