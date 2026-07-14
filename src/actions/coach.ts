@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function publishCoachProfile(data: {
   name: string;
@@ -13,6 +15,11 @@ export async function publishCoachProfile(data: {
   primaryColor?: string;
 }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !session.user.id) {
+      return { success: false, error: "يجب تسجيل الدخول أولاً" };
+    }
+
     // Generate a simple slug from the name
     let slug = data.name
       .toLowerCase()
@@ -34,6 +41,7 @@ export async function publishCoachProfile(data: {
 
     const coach = await prisma.coachProfile.create({
       data: {
+        userId: session.user.id,
         name: data.name,
         specialty: data.specialty,
         bio: data.bio,
@@ -43,6 +51,12 @@ export async function publishCoachProfile(data: {
         primaryColor: data.primaryColor || "#D6F854",
         slug: slug,
       }
+    });
+
+    // Upgrade the user to COACH role
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { role: "COACH" }
     });
 
     // Settings logic removed because Settings model is deleted. Profile handles it.
