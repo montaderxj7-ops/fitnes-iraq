@@ -167,9 +167,9 @@ export async function publishCoachProfile(data: {
     revalidatePath("/dashboard");
     
     return { success: true, data: coach };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error publishing coach profile:", error);
-    return { success: false, error: "فشل في حفظ بيانات الكابتن" };
+    return { success: false, error: `فشل في حفظ البيانات: ${error?.message || "خطأ غير معروف"}` };
   }
 }
 
