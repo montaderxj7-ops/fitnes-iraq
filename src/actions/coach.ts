@@ -47,54 +47,82 @@ export async function publishCoachProfile(data: {
       return { success: false, error: "يجب تسجيل الدخول أولاً" };
     }
 
-    // Generate a simple slug from the name
-    let slug = data.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    
+    // Check if user already has a profile
+    const existingProfile = await prisma.coachProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    let slug = existingProfile?.slug;
+
     if (!slug) {
-      slug = `coach-${Date.now()}`;
-    }
-
-    // Check if slug exists, if so append a random number
-    const existing = await prisma.coachProfile.findUnique({
-      where: { slug }
-    });
-
-    if (existing) {
-      slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
-    }
-
-    const coach = await prisma.coachProfile.create({
-      data: {
-        userId: session.user.id,
-        name: data.name,
-        specialty: data.specialty,
-        bio: data.bio,
-        instagram: data.instagram,
-        image: data.image,
-        logo: data.logo,
-        primaryColor: data.primaryColor || "#D6F854",
-        slug: slug,
+      // Generate a simple slug from the name
+      slug = data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      
+      if (!slug) {
+        slug = `coach-${Date.now()}`;
       }
-    });
 
-    // Create the first package if provided
-    if (data.firstPackage && data.firstPackage.name.trim() !== "") {
-      await prisma.package.create({
+      // Check if slug exists, if so append a random number
+      const existingSlug = await prisma.coachProfile.findUnique({
+        where: { slug }
+      });
+
+      if (existingSlug) {
+        slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
+      }
+    }
+
+    const coachData = {
+      name: data.name,
+      specialty: data.specialty,
+      bio: data.bio,
+      instagram: data.instagram,
+      image: data.image,
+      logo: data.logo,
+      primaryColor: data.primaryColor || "#D6F854",
+      slug: slug,
+    };
+
+    let coach;
+    if (existingProfile) {
+      coach = await prisma.coachProfile.update({
+        where: { id: existingProfile.id },
+        data: coachData
+      });
+      // If they are re-publishing, clear their old payment methods to replace with new ones
+      await prisma.paymentMethod.deleteMany({
+        where: { coachId: coach.id }
+      });
+    } else {
+      coach = await prisma.coachProfile.create({
         data: {
-          coachId: coach.id,
-          name: data.firstPackage.name,
-          price: data.firstPackage.price,
-          hasChat: data.firstPackage.hasChat,
-          chatDays: data.firstPackage.chatDays,
-          chatHours: data.firstPackage.chatHours,
-          features: JSON.stringify(data.firstPackage.features),
-          popular: true, // make the first package popular by default
-          hasNutrition: true, // default to true for the main package
+          ...coachData,
+          userId: session.user.id,
         }
       });
+    }
+
+    // Create the first package if provided and if they don't already have packages
+    if (data.firstPackage && data.firstPackage.name.trim() !== "") {
+      const existingPackages = await prisma.package.count({ where: { coachId: coach.id } });
+      if (existingPackages === 0) {
+        await prisma.package.create({
+          data: {
+            coachId: coach.id,
+            name: data.firstPackage.name,
+            price: data.firstPackage.price,
+            hasChat: data.firstPackage.hasChat,
+            chatDays: data.firstPackage.chatDays,
+            chatHours: data.firstPackage.chatHours,
+            features: JSON.stringify(data.firstPackage.features),
+            popular: true, // make the first package popular by default
+            hasNutrition: true, // default to true for the main package
+          }
+        });
+      }
     }
 
     // Create Payment Methods based on the provided payments object
