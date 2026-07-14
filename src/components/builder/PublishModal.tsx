@@ -8,24 +8,17 @@ import { cn } from "@/lib/utils";
 import { publishCoachProfile } from "@/actions/coach";
 import { forceLoginCoach } from "@/actions/auth";
 
+import { BuilderState } from "@/app/builder/page";
+
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
-  appName: string;
-  appLogo?: string | null;
-  firstPackage?: {
-    name: string;
-    price: string;
-    hasChat: boolean;
-    chatDays: string;
-    chatHours: string;
-    features: string[];
-  };
+  builderState: BuilderState;
 }
 
-export function PublishModal({ isOpen, onClose, appName, appLogo, firstPackage }: PublishModalProps) {
+export function PublishModal({ isOpen, onClose, builderState }: PublishModalProps) {
   const router = useRouter();
-  const [coachName, setCoachName] = useState(appName || "");
+  const [coachName, setCoachName] = useState(builderState.appName || "");
   const [specialty, setSpecialty] = useState("");
   const [bio, setBio] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -57,9 +50,11 @@ export function PublishModal({ isOpen, onClose, appName, appLogo, firstPackage }
         specialty,
         bio,
         instagram,
-        image: photoUrl || undefined, // in a real app, this would upload the file to S3/Cloudinary and get a URL
-        logo: appLogo || undefined,
-        firstPackage: firstPackage
+        image: photoUrl || builderState.welcomeImage || undefined,
+        logo: builderState.appLogo || undefined,
+        primaryColor: builderState.primaryColor,
+        firstPackage: builderState.firstPackage,
+        payments: builderState.payments
       });
 
       if (result.success) {

@@ -151,9 +151,7 @@ export default function BuilderPage() {
       <PublishModal 
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
-        appName={builderState.appName}
-        appLogo={builderState.appLogo}
-        firstPackage={builderState.firstPackage}
+        builderState={builderState}
       />
     </div>
   );

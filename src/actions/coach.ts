@@ -21,6 +21,25 @@ export async function publishCoachProfile(data: {
     chatHours: string;
     features: string[];
   };
+  payments?: {
+    zainCash?: boolean;
+    zainCashNumber?: string;
+    zainCashName?: string;
+    fib?: boolean;
+    fibAccount?: string;
+    fibName?: string;
+    asiaHawala?: boolean;
+    asiaHawalaNumber?: string;
+    asiaHawalaName?: string;
+    masterCard?: boolean;
+    masterCardNumber?: string;
+    masterCardName?: string;
+    visaCard?: boolean;
+    visaCardNumber?: string;
+    visaCardName?: string;
+    card?: boolean;
+    cardLink?: string;
+  };
 }) {
   try {
     const session = await getServerSession(authOptions);
@@ -78,6 +97,37 @@ export async function publishCoachProfile(data: {
       });
     }
 
+    // Create Payment Methods based on the provided payments object
+    if (data.payments) {
+      const pmData = [];
+      const p = data.payments;
+      
+      if (p.zainCash && p.zainCashNumber) {
+        pmData.push({ coachId: coach.id, name: "زين كاش (ZainCash)", details: `${p.zainCashNumber} - ${p.zainCashName || ""}` });
+      }
+      if (p.fib && p.fibAccount) {
+        pmData.push({ coachId: coach.id, name: "FIB", details: `${p.fibAccount} - ${p.fibName || ""}` });
+      }
+      if (p.asiaHawala && p.asiaHawalaNumber) {
+        pmData.push({ coachId: coach.id, name: "حوالة آسيا (AsiaHawala)", details: `${p.asiaHawalaNumber} - ${p.asiaHawalaName || ""}` });
+      }
+      if (p.masterCard && p.masterCardNumber) {
+        pmData.push({ coachId: coach.id, name: "ماستر كارد (MasterCard)", details: `${p.masterCardNumber} - ${p.masterCardName || ""}` });
+      }
+      if (p.visaCard && p.visaCardNumber) {
+        pmData.push({ coachId: coach.id, name: "فيزا كارد (VisaCard)", details: `${p.visaCardNumber} - ${p.visaCardName || ""}` });
+      }
+      if (p.card && p.cardLink) {
+        pmData.push({ coachId: coach.id, name: "دفع إلكتروني (Card)", details: p.cardLink });
+      }
+      
+      if (pmData.length > 0) {
+        await prisma.paymentMethod.createMany({
+          data: pmData
+        });
+      }
+    }
+
     // Upgrade the user to COACH role
     await prisma.user.update({
       where: { id: session.user.id },
@@ -122,7 +172,7 @@ export async function getPublicCoachData(slug: string) {
     }
     
     const packages = await prisma.package.findMany({ where: { coachId: profile.id }, orderBy: { createdAt: "desc" } });
-    const paymentMethods = await prisma.paymentMethod.findMany({ where: { isActive: true } });
+    const paymentMethods = await prisma.paymentMethod.findMany({ where: { coachId: profile.id, isActive: true } });
 
     return {
       success: true,
