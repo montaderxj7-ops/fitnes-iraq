@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function getClients() {
   try {
@@ -60,10 +62,27 @@ export async function addClient(data: {
   paymentMethod?: string;
 }) {
   try {
-    const newClient = await prisma.client.create({
+    // Fetch session first since we need coachId for Task and Payment
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    // Create User for the client
+    const user = await prisma.user.create({
       data: {
         name: data.name,
-        // email and password removed since they belong to User now
+        email: data.email || `${Date.now()}@client.local`,
+        password: data.password || "123456",
+        role: "CLIENT",
+      }
+    });
+
+    const newClient = await prisma.client.create({
+      data: {
+        userId: user.id,
+        coachId: profile.id,
+        name: data.name,
         age: data.age,
         weight: data.weight,
         height: data.height,
@@ -71,13 +90,15 @@ export async function addClient(data: {
         injuries: data.injuries,
         package: data.package,
         status: data.status || "active",
-        avatar: data.avatar || `https://i.pravatar.cc/150?u=${Date.now()}`,
       },
     });
+
+
 
     // Create a corresponding task automatically
     await prisma.task.create({
       data: {
+        coachId: profile.id,
         text: `${data.name} اشترك للتو في ${data.package}، بانتظار إضافة الخطة.`,
         time: new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: 'numeric', hour12: true }).format(new Date()),
         status: "urgent",
@@ -94,6 +115,7 @@ export async function addClient(data: {
     // Create a corresponding payment record
     await prisma.payment.create({
       data: {
+        coachId: profile.id,
         clientName: data.name,
         packageName: data.package,
         amount: Number(priceStr).toLocaleString(),
@@ -124,15 +146,18 @@ export async function deleteClient(id: string) {
 
 export async function loginClient(email: string, password?: string) {
   try {
-    const client = await prisma.client.findUnique({ where: { email } });
-    if (!client) {
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { clientProfile: true }
+    });
+    if (!user || !user.clientProfile) {
       return { success: false, error: "البريد الإلكتروني غير مسجل" };
     }
     // In a real app, use bcrypt. Here we do simple check.
-    if (client.password !== password) {
+    if (user.password !== password) {
       return { success: false, error: "كلمة المرور غير صحيحة" };
     }
-    return { success: true, client };
+    return { success: true, client: { ...user.clientProfile, email: user.email } };
   } catch (error) {
     console.error("Error logging in client:", error);
     return { success: false, error: "حدث خطأ أثناء تسجيل الدخول" };

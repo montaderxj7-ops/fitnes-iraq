@@ -40,18 +40,19 @@ export default function SettingsPage() {
     async function fetchSettings() {
       const res = await getSettings();
       if (res.success && res.settings) {
+        const s = res.settings as any;
         setSettings({
-          coachName: res.settings.name || "",
-          coachAvatar: res.settings.image || "",
-          appName: res.settings.appName || "",
-          appLogo: res.settings.logo || "",
-          primaryColor: res.settings.primaryColor || "#D6F854",
-          bio: res.settings.bio || "",
-          welcomeImage: res.settings.welcomeImage || "",
-          dashboardLoginEnabled: res.settings.dashboardLoginEnabled ?? false,
-          dashboardEmail: res.settings.dashboardEmail || "",
-          dashboardPassword: res.settings.dashboardPassword || "",
-          subscriptionTier: res.settings.subscriptionTier || "pro"
+          coachName: s.name || "",
+          coachAvatar: s.image || "",
+          appName: s.appName || "",
+          appLogo: s.logo || "",
+          primaryColor: s.primaryColor || "#D6F854",
+          bio: s.bio || "",
+          welcomeImage: s.welcomeImage || "",
+          dashboardLoginEnabled: s.dashboardLoginEnabled ?? false,
+          dashboardEmail: s.dashboardEmail || "",
+          dashboardPassword: s.dashboardPassword || "",
+          subscriptionTier: s.subscriptionTier || "pro"
         });
       }
 

@@ -63,9 +63,12 @@ export async function getOrCreateClientChat(clientId: string, clientName: string
     });
 
     if (!chat) {
+      const client = await prisma.client.findUnique({ where: { id: clientId } });
+      if (!client) return { success: false, error: "Client not found" };
       chat = await prisma.chat.create({
         data: {
           id: clientId,
+          coachId: client.coachId,
           clientName: clientName,
           lastMessage: "بدأت المحادثة",
           time: "الآن"

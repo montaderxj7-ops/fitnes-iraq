@@ -3,9 +3,18 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function getPackages() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return [];
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return [];
+
     const packages = await prisma.package.findMany({
+      where: { coachId: profile.id },
       orderBy: { createdAt: 'desc' }
     });
     return packages;
@@ -26,8 +35,14 @@ export async function createPackage(data: {
   features: string[];
 }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) throw new Error("No coach profile found");
+
     const newPackage = await prisma.package.create({
       data: {
+        coachId: profile.id,
         name: data.name,
         price: data.price,
         hasNutrition: data.hasNutrition,

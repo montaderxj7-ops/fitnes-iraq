@@ -3,10 +3,19 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 // -- Exercises Library --
 export async function getExercises() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     const exercises = await prisma.exercise.findMany({
+      where: { coachId: profile.id },
       orderBy: { createdAt: 'desc' }
     });
     
@@ -25,8 +34,14 @@ export async function getExercises() {
 // Add new exercise
 export async function addExercise(data: { name: string; targetMuscle: string; mediaUrl?: string }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     const exercise = await prisma.exercise.create({
       data: {
+        coachId: profile.id,
         name: data.name,
         targetMuscle: data.targetMuscle,
         mediaUrl: data.mediaUrl || null,
@@ -68,6 +83,11 @@ export async function getWorkoutPlan(clientId: string) {
 // Create or update full workout plan
 export async function saveWorkoutPlan(clientId: string, planData: any) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     // Basic upsert approach: delete old plan entirely and recreate to avoid complex diffing
     await prisma.workoutPlan.deleteMany({
       where: { clientId }
@@ -75,6 +95,7 @@ export async function saveWorkoutPlan(clientId: string, planData: any) {
 
     const newPlan = await prisma.workoutPlan.create({
       data: {
+        coachId: profile.id,
         clientId,
         name: "النظام التدريبي",
         days: {
@@ -105,6 +126,11 @@ export async function saveWorkoutPlan(clientId: string, planData: any) {
 // Smart Clone
 export async function cloneWorkoutPlan(fromClientId: string, toClientId: string) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     const oldPlan = await prisma.workoutPlan.findFirst({
       where: { clientId: fromClientId },
       include: {
@@ -122,6 +148,7 @@ export async function cloneWorkoutPlan(fromClientId: string, toClientId: string)
 
     const newPlan = await prisma.workoutPlan.create({
       data: {
+        coachId: profile.id,
         clientId: toClientId,
         name: oldPlan.name,
         days: {

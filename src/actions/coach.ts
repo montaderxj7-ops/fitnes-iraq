@@ -93,8 +93,8 @@ export async function getPublicCoachData(slug: string) {
     return {
       success: true,
       coach: {
-        name: profile?.name || settings.coachName,
-        logo: profile?.logo || settings.appLogo || "",
+        name: profile?.name || settings.name,
+        logo: profile?.logo || settings.logo || "",
         welcomeImage: profile?.image || "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop",
         bio: profile?.bio || "مرحباً بك في فريقي! أنا هنا لأساعدك في الوصول إلى هدفك وتغيير حياتك للأفضل من خلال التزامك وتوجيهاتي المستمرة.",
         primaryColor: profile?.primaryColor || settings.primaryColor,
@@ -155,10 +155,15 @@ export async function updateCoachSettings(coachId: string, data: {
 
 export async function updatePaymentMethods(methods: { id?: string; name: string; details: string; isActive?: boolean }[]) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     // Delete missing ones
     const incomingIds = methods.map(m => m.id).filter(Boolean) as string[];
     await prisma.paymentMethod.deleteMany({
-      where: { id: { notIn: incomingIds } }
+      where: { coachId: profile.id, id: { notIn: incomingIds } }
     });
 
     for (const method of methods) {
@@ -169,7 +174,7 @@ export async function updatePaymentMethods(methods: { id?: string; name: string;
         });
       } else {
         await prisma.paymentMethod.create({
-          data: { name: method.name, details: method.details, isActive: method.isActive ?? true }
+          data: { coachId: profile.id, name: method.name, details: method.details, isActive: method.isActive ?? true }
         });
       }
     }

@@ -54,9 +54,10 @@ export async function updateSettings(data: {
       return { success: false, error: "Unauthorized" };
     }
 
-    let settings = await prisma.coachProfile.findUnique({
-      where: { userId: session.user.id }
-    });
+    try {
+      let settings = await prisma.coachProfile.findUnique({
+        where: { userId: session.user.id }
+      });
 
     if (settings) {
       settings = await prisma.coachProfile.update({
@@ -88,7 +89,13 @@ export async function updateSettings(data: {
 
 export async function getPaymentMethods() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     const methods = await prisma.paymentMethod.findMany({
+      where: { coachId: profile.id },
       orderBy: { createdAt: 'asc' }
     });
     return { success: true, methods };
@@ -100,8 +107,14 @@ export async function getPaymentMethods() {
 
 export async function addPaymentMethod(data: { name: string; details: string; isActive?: boolean }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
     const method = await prisma.paymentMethod.create({
       data: {
+        coachId: profile.id,
         name: data.name,
         details: data.details,
         isActive: data.isActive ?? true
