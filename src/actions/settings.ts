@@ -154,3 +154,52 @@ export async function deletePaymentMethod(id: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function updatePaymentMethodsBulk(payments: any) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    // Clear old methods
+    await prisma.paymentMethod.deleteMany({
+      where: { coachId: profile.id }
+    });
+
+    const pmData = [];
+    const p = payments;
+    
+    if (p.zainCash && p.zainCashNumber) {
+      pmData.push({ coachId: profile.id, name: "زين كاش (ZainCash)", details: `${p.zainCashNumber} - ${p.zainCashName || ""}` });
+    }
+    if (p.fib && p.fibAccount) {
+      pmData.push({ coachId: profile.id, name: "FIB", details: `${p.fibAccount} - ${p.fibName || ""}` });
+    }
+    if (p.asiaHawala && p.asiaHawalaNumber) {
+      pmData.push({ coachId: profile.id, name: "حوالة آسيا (AsiaHawala)", details: `${p.asiaHawalaNumber} - ${p.asiaHawalaName || ""}` });
+    }
+    if (p.masterCard && p.masterCardNumber) {
+      pmData.push({ coachId: profile.id, name: "ماستر كارد (MasterCard)", details: `${p.masterCardNumber} - ${p.masterCardName || ""}` });
+    }
+    if (p.visaCard && p.visaCardNumber) {
+      pmData.push({ coachId: profile.id, name: "فيزا كارد (Visa)", details: `${p.visaCardNumber} - ${p.visaCardName || ""}` });
+    }
+    if (p.card && p.cardLink) {
+      pmData.push({ coachId: profile.id, name: "دفع إلكتروني (Card)", details: p.cardLink });
+    }
+
+    if (pmData.length > 0) {
+      await prisma.paymentMethod.createMany({
+        data: pmData
+      });
+    }
+
+    revalidatePath('/dashboard/settings');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating bulk payment methods:', error);
+    return { success: false, error: error.message };
+  }
+}
+
