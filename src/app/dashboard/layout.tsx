@@ -3,14 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Authentication check
-  const settings = await prisma.coachProfile.findFirst();
-  if (settings?.dashboardLoginEnabled) {
-    const cookieStore = await cookies();
-    if (cookieStore.get("coach_auth")?.value !== "true") {
-      redirect("/login");
-    }
+  const session = await getServerSession(authOptions);
+  
+  if (!session || session.user.role !== "COACH") {
+    redirect("/login");
   }
 
   return (

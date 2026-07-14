@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,48 +8,36 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// --- NextAuth Models ---
-
-enum Role {
-  COACH
-  CLIENT
-}
-
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  role          Role      @default(CLIENT)
-  
+  role          Role          @default(CLIENT)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   accounts      Account[]
-  sessions      Session[]
-  
-  // Relations to Profiles
-  coachProfile  CoachProfile?
   clientProfile Client?
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  coachProfile  CoachProfile?
+  sessions      Session[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -73,62 +58,52 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- Application Models ---
-
 model CoachProfile {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  slug          String   @unique
-  name          String
-  specialty     String
-  bio           String
-  instagram     String
-  image         String?
-  logo          String?
-  primaryColor  String   @default("#D6F854")
-  
-  // Backwards compatibility with the single-tenant settings
-  appName               String   @default("Gym System")
+  id                    String          @id @default(cuid())
+  userId                String          @unique
+  slug                  String          @unique
+  name                  String
+  specialty             String
+  bio                   String
+  instagram             String
+  image                 String?
+  logo                  String?
+  primaryColor          String          @default("#D6F854")
+  appName               String          @default("Gym System")
   welcomeImage          String?
-  dashboardLoginEnabled Boolean  @default(false)
-  subscriptionTier      String   @default("pro") // "pro" (50$) or "basic"
-
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Multi-tenant relations
-  packages      Package[]
-  clients       Client[]     @relation("CoachClients")
-  exercises     Exercise[]
-  workoutPlans  WorkoutPlan[]
-  paymentMethods PaymentMethod[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  dashboardLoginEnabled Boolean         @default(false)
+  subscriptionTier      String          @default("pro")
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  clients               Client[]        @relation("CoachClients")
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises             Exercise[]
+  packages              Package[]
+  paymentMethods        PaymentMethod[]
+  workoutPlans          WorkoutPlan[]
 }
 
 model Package {
-  id           String   @id @default(cuid())
-  coachId      String   @default("default_coach")
+  id           String       @id @default(cuid())
+  coachId      String
   name         String
   price        String
-  clientsCount Int      @default(0)
-  hasNutrition Boolean  @default(false)
-  hasChat      Boolean  @default(true)
-  chatDays     String   @default("يومياً")
-  chatHours    String   @default("مفتوح")
-  popular      Boolean  @default(false)
-  features     String   @default("[]") // JSON stringified array
-  
+  clientsCount Int          @default(0)
+  hasNutrition Boolean      @default(false)
+  hasChat      Boolean      @default(true)
+  chatDays     String       @default("يومياً")
+  chatHours    String       @default("مفتوح")
+  popular      Boolean      @default(false)
+  features     String       @default("[]")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   coach        CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  coachId   String   @default("default_coach")
+  id        String       @id @default(cuid())
+  userId    String       @unique
+  coachId   String
   name      String
   age       Int?
   weight    Float?
@@ -136,38 +111,34 @@ model Client {
   goal      String?
   injuries  String?
   package   String
-  status    String   @default("active") // active, pending, offline
-  startDate DateTime @default(now())
+  status    String       @default("active")
+  startDate DateTime     @default(now())
   endDate   DateTime?
-  
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   coach     CoachProfile @relation("CoachClients", fields: [coachId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PaymentMethod {
-  id        String   @id @default(cuid())
-  coachId   String   @default("default_coach")
+  id        String       @id @default(cuid())
+  coachId   String
   name      String
   details   String
-  isActive  Boolean  @default(true)
-  
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   coach     CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Payment {
   id          String   @id @default(cuid())
-  coachId     String   @default("default_coach")
+  coachId     String
   clientName  String
   packageName String
   amount      String
   method      String
-  status      String   @default("completed") // completed, pending
+  status      String   @default("completed")
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -175,12 +146,12 @@ model Payment {
 
 model Chat {
   id          String   @id @default(cuid())
-  coachId     String   @default("default_coach")
+  coachId     String
   clientName  String
   lastMessage String
   time        String
   unread      Int      @default(0)
-  status      String   @default("active") // active, closed
+  status      String   @default("active")
   avatar      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -188,8 +159,8 @@ model Chat {
 
 model Message {
   id        String   @id @default(cuid())
-  chatId    String   
-  sender    String   // 'coach' or 'client'
+  chatId    String
+  sender    String
   content   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -197,65 +168,65 @@ model Message {
 
 model Task {
   id          String   @id @default(cuid())
-  coachId     String   @default("default_coach")
+  coachId     String
   text        String
   time        String
-  status      String   @default("info") // urgent, warning, info
+  status      String   @default("info")
   isCompleted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Exercise {
-  id           String   @id @default(cuid())
-  coachId      String   @default("default_coach")
-  name         String
-  targetMuscle String
-  mediaUrl     String?
-  defaultSets  Int      @default(3)
-  defaultReps  Int      @default(12)
-  
-  coach        CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String            @id @default(cuid())
+  coachId          String
+  name             String
+  targetMuscle     String
+  mediaUrl         String?
+  defaultSets      Int               @default(3)
+  defaultReps      Int               @default(12)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  coach            CoachProfile      @relation(fields: [coachId], references: [id], onDelete: Cascade)
   workoutExercises WorkoutExercise[]
 }
 
 model WorkoutPlan {
-  id        String   @id @default(cuid())
+  id        String       @id @default(cuid())
   clientId  String
-  coachId   String   @default("default_coach")
-  name      String   @default("النظام التدريبي")
-  
-  coach     CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  coachId   String
+  name      String       @default("النظام التدريبي")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   days      WorkoutDay[]
+  coach     CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 }
 
 model WorkoutDay {
-  id        String   @id @default(cuid())
+  id        String            @id @default(cuid())
   planId    String
-  name      String   // e.g., "اليوم الأول" or "صدر وتراي"
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  plan      WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  name      String
+  order     Int               @default(0)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  plan      WorkoutPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
   exercises WorkoutExercise[]
 }
 
 model WorkoutExercise {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   dayId      String
   exerciseId String
   sets       Int
   reps       Int
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+  order      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   day        WorkoutDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
   exercise   Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  COACH
+  CLIENT
 }

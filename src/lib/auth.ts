@@ -1,12 +1,11 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
-  // @ts-ignore
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
@@ -28,7 +27,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          role: "CLIENT", // Default role, could be changed depending on logic
+          role: "COACH", // Google OAuth is primarily for coaches subscribing
         };
       },
     }),
