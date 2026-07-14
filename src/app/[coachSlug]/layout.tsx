@@ -1,17 +1,18 @@
 import React, { Suspense } from 'react';
 import { PwaInstaller } from '@/components/client-app/PwaInstaller';
 
-export default function CoachLayout({
+export default async function CoachLayout({
   children,
   params
 }: {
   children: React.ReactNode;
-  params: { coachSlug: string };
+  params: Promise<{ coachSlug: string }> | { coachSlug: string };
 }) {
+  const resolvedParams = await params;
   return (
     <>
       <head>
-        <link rel="manifest" href={`/api/manifest/${params.coachSlug}`} />
+        <link rel="manifest" href={`/api/manifest/${resolvedParams.coachSlug}`} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>

@@ -3,10 +3,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> | { slug: string } }
 ) {
   try {
-    const slug = decodeURIComponent(params.slug);
+    const resolvedParams = await params;
+    const slug = decodeURIComponent(resolvedParams.slug);
     const coach = await prisma.coachProfile.findUnique({
       where: { slug }
     });
