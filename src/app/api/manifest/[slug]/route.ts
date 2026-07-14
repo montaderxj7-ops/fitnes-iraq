@@ -18,18 +18,15 @@ export async function GET(
 
     const appName = coach.appName && coach.appName !== "Gym System" ? coach.appName : coach.name;
     const primaryColor = coach.primaryColor || '#D6F854';
-    // Use coach.logo if available, even if it's base64
-    const iconUrl = coach.logo ? coach.logo : '/favicon.ico';
     
+    // Instead of using base64 directly which Google WebAPK generator rejects,
+    // we use a dedicated API route that serves the binary image.
+    const iconUrl = coach.logo ? `/api/icon/${slug}` : '/favicon.ico';
     let iconType = 'image/png';
-    if (iconUrl.startsWith('data:image/')) {
-      iconType = iconUrl.split(';')[0].split(':')[1];
-    } else if (iconUrl.endsWith('.jpg') || iconUrl.endsWith('.jpeg')) {
-      iconType = 'image/jpeg';
-    } else if (iconUrl.endsWith('.svg')) {
-      iconType = 'image/svg+xml';
-    } else if (iconUrl.endsWith('.webp')) {
-      iconType = 'image/webp';
+    
+    // Try to guess the type from the base64 string if available
+    if (coach.logo && coach.logo.startsWith('data:image/')) {
+      iconType = coach.logo.split(';')[0].split(':')[1];
     }
 
     const manifest = {
