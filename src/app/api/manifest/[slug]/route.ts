@@ -19,15 +19,10 @@ export async function GET(
     const appName = coach.appName && coach.appName !== "Gym System" ? coach.appName : coach.name;
     const primaryColor = coach.primaryColor || '#D6F854';
     
-    // Instead of using base64 directly which Google WebAPK generator rejects,
-    // we use a dedicated API route that serves the binary image.
+    // We use a dedicated API route that serves a perfectly square SVG wrapper
+    // around the coach's logo to guarantee WebAPK generation works.
     const iconUrl = coach.logo ? `/api/icon/${slug}` : '/favicon.ico';
-    let iconType = 'image/png';
-    
-    // Try to guess the type from the base64 string if available
-    if (coach.logo && coach.logo.startsWith('data:image/')) {
-      iconType = coach.logo.split(';')[0].split(':')[1];
-    }
+    const iconType = coach.logo ? 'image/svg+xml' : 'image/x-icon';
 
     const manifest = {
       id: `/${slug}`,
@@ -35,6 +30,7 @@ export async function GET(
       short_name: appName,
       description: `التطبيق التدريبي الخاص بـ ${coach.name}`,
       start_url: `/${slug}`,
+      scope: '/',
       display: 'standalone',
       background_color: '#050505',
       theme_color: primaryColor,

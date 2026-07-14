@@ -18,24 +18,25 @@ export async function GET(
 
     const iconUrl = coach.logo;
 
-    if (iconUrl.startsWith('data:image/')) {
-      const parts = iconUrl.split(',');
-      const meta = parts[0];
-      const base64Data = parts[1];
-      const mimeType = meta.split(':')[1].split(';')[0];
-      
-      const buffer = Buffer.from(base64Data, 'base64');
-      
-      return new NextResponse(buffer, {
-        headers: {
-          'Content-Type': mimeType,
-          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-        },
-      });
-    }
+    // To guarantee that Android WebAPK generation accepts the image,
+    // we MUST provide a perfectly square image (e.g., 512x512).
+    // The easiest way to ensure this without an image processing library is 
+    // to wrap their base64 image inside a perfectly square SVG container.
+    const primaryColor = coach.primaryColor || '#D6F854';
+    
+    const svgContent = `
+      <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" fill="${primaryColor}" />
+        <image href="${iconUrl}" width="512" height="512" preserveAspectRatio="xMidYMid slice" />
+      </svg>
+    `.trim();
 
-    // If it's a regular URL, just redirect to it
-    return NextResponse.redirect(iconUrl);
+    return new NextResponse(svgContent, {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    });
     
   } catch (error) {
     console.error('Error serving icon:', error);
