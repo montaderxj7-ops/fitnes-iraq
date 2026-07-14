@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const slug = params.slug;
+    const slug = decodeURIComponent(params.slug);
     const coach = await prisma.coachProfile.findUnique({
       where: { slug }
     });

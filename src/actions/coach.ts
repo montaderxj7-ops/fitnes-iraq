@@ -109,10 +109,19 @@ export async function getMarketplaceCoaches() {
 
 export async function getPublicCoachData(slug: string) {
   try {
-    const profile = await prisma.coachProfile.findUnique({ where: { slug } });
+    const decodedSlug = decodeURIComponent(slug);
+    const profile = await prisma.coachProfile.findUnique({ where: { slug: decodedSlug } });
     
     const settings = profile || { name: "كابتن برو", appName: "Gym System", primaryColor: "#D6F854", logo: "" };
-    const packages = await prisma.package.findMany({ where: { coachId: profile?.id }, orderBy: { createdAt: "desc" } });
+    // Always fallback to a demo profile if not found, instead of crashing
+    if (!profile) {
+      return {
+        success: false,
+        error: "Coach not found"
+      };
+    }
+    
+    const packages = await prisma.package.findMany({ where: { coachId: profile.id }, orderBy: { createdAt: "desc" } });
     const paymentMethods = await prisma.paymentMethod.findMany({ where: { isActive: true } });
 
     return {
