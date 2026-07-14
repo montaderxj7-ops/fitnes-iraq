@@ -61,6 +61,47 @@ export async function createPackage(data: {
   }
 }
 
+export async function updatePackage(id: string, data: {
+  name: string;
+  price: string;
+  hasNutrition: boolean;
+  hasChat: boolean;
+  chatDays: string;
+  chatHours: string;
+  popular: boolean;
+  features: string[];
+}) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) throw new Error("No coach profile found");
+
+    // verify ownership
+    const existing = await prisma.package.findUnique({ where: { id } });
+    if (!existing || existing.coachId !== profile.id) throw new Error("Not found or unauthorized");
+
+    const updatedPackage = await prisma.package.update({
+      where: { id },
+      data: {
+        name: data.name,
+        price: data.price,
+        hasNutrition: data.hasNutrition,
+        hasChat: data.hasChat,
+        chatDays: data.chatDays,
+        chatHours: data.chatHours,
+        popular: data.popular,
+        features: JSON.stringify(data.features)
+      }
+    });
+    revalidatePath('/dashboard/packages');
+    return updatedPackage;
+  } catch (error) {
+    console.error("Error updating package:", error);
+    throw new Error("Failed to update package");
+  }
+}
+
 export async function deletePackage(id: string) {
   try {
     await prisma.package.delete({

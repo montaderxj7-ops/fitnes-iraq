@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Package, Plus, DollarSign, ArrowUpRight, CheckCircle2, Clock, Check, TrendingUp, CreditCard, ChevronLeft, Users, X, MessageCircle, ChevronDown } from "lucide-react";
+import { Package, Plus, DollarSign, ArrowUpRight, CheckCircle2, Clock, Check, TrendingUp, CreditCard, ChevronLeft, Users, X, MessageCircle, ChevronDown, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { getPackages, createPackage } from "@/actions/packages";
+import { getPackages, createPackage, updatePackage, deletePackage } from "@/actions/packages";
 import { getPayments } from "@/actions/payments";
 import { getDashboardStats } from "@/actions/dashboard";
 
@@ -21,6 +21,7 @@ const itemVariants = {
 export default function PackagesPage() {
   const [packages, setPackages] = useState<any[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
   const [isDaysDropdownOpen, setIsDaysDropdownOpen] = useState(false);
   const [isHoursDropdownOpen, setIsHoursDropdownOpen] = useState(false);
   const [newFeatureText, setNewFeatureText] = useState("");
@@ -76,39 +77,91 @@ export default function PackagesPage() {
     if (!newPackage.name || !newPackage.price) return;
     
     try {
-      const created = await createPackage({
-        name: newPackage.name,
-        price: newPackage.price,
-        hasNutrition: newPackage.hasNutrition,
-        hasChat: newPackage.hasChat,
-        chatDays: newPackage.chatDays,
-        chatHours: newPackage.chatHours,
-        popular: newPackage.popular,
-        features: newPackage.features
-      });
-      
-      setPackages([
-        {
-          id: created.id,
-          name: created.name,
-          price: created.price,
-          clients: created.clientsCount,
-          hasNutrition: created.hasNutrition,
-          hasChat: created.hasChat,
-          chatDays: created.chatDays,
-          chatHours: created.chatHours,
-          popular: created.popular,
-          features: JSON.parse(created.features || "[]")
-        },
-        ...packages
-      ]);
+      if (editingPackageId) {
+        const updated = await updatePackage(editingPackageId, {
+          name: newPackage.name,
+          price: newPackage.price,
+          hasNutrition: newPackage.hasNutrition,
+          hasChat: newPackage.hasChat,
+          chatDays: newPackage.chatDays,
+          chatHours: newPackage.chatHours,
+          popular: newPackage.popular,
+          features: newPackage.features
+        });
+
+        setPackages(packages.map(pkg => pkg.id === editingPackageId ? {
+          id: updated.id,
+          name: updated.name,
+          price: updated.price,
+          clients: updated.clientsCount,
+          hasNutrition: updated.hasNutrition,
+          hasChat: updated.hasChat,
+          chatDays: updated.chatDays,
+          chatHours: updated.chatHours,
+          popular: updated.popular,
+          features: JSON.parse(updated.features || "[]")
+        } : pkg));
+      } else {
+        const created = await createPackage({
+          name: newPackage.name,
+          price: newPackage.price,
+          hasNutrition: newPackage.hasNutrition,
+          hasChat: newPackage.hasChat,
+          chatDays: newPackage.chatDays,
+          chatHours: newPackage.chatHours,
+          popular: newPackage.popular,
+          features: newPackage.features
+        });
+        
+        setPackages([
+          {
+            id: created.id,
+            name: created.name,
+            price: created.price,
+            clients: created.clientsCount,
+            hasNutrition: created.hasNutrition,
+            hasChat: created.hasChat,
+            chatDays: created.chatDays,
+            chatHours: created.chatHours,
+            popular: created.popular,
+            features: JSON.parse(created.features || "[]")
+          },
+          ...packages
+        ]);
+      }
       
       setIsAddModalOpen(false);
+      setEditingPackageId(null);
       setNewFeatureText("");
       setNewPackage({ name: "", price: "", hasNutrition: false, hasChat: true, chatDays: "يومياً", chatHours: "مفتوح", popular: false, features: [] });
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDeletePackage = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذه الباقة؟")) return;
+    try {
+      await deletePackage(id);
+      setPackages(packages.filter(p => p.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openEditModal = (pkg: any) => {
+    setNewPackage({
+      name: pkg.name,
+      price: pkg.price,
+      hasNutrition: pkg.hasNutrition,
+      hasChat: pkg.hasChat,
+      chatDays: pkg.chatDays,
+      chatHours: pkg.chatHours,
+      popular: pkg.popular,
+      features: pkg.features
+    });
+    setEditingPackageId(pkg.id);
+    setIsAddModalOpen(true);
   };
 
   return (
@@ -138,7 +191,11 @@ export default function PackagesPage() {
               باقاتي
             </h2>
             <button 
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => {
+                setEditingPackageId(null);
+                setNewPackage({ name: "", price: "", hasNutrition: false, hasChat: true, chatDays: "يومياً", chatHours: "مفتوح", popular: false, features: [] });
+                setIsAddModalOpen(true);
+              }}
               className="w-10 h-10 bg-[#82c91e] text-[#1a1f1a] rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_20px_rgba(130,201,30,0.3)] relative z-10"
             >
               <Plus className="w-6 h-6 font-bold" />
@@ -149,10 +206,18 @@ export default function PackagesPage() {
             {packages.map((pkg) => (
               <div key={pkg.id} className="bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] p-6 shadow-xl relative overflow-hidden group hover:border-white/20 transition-all hover:-translate-y-1">
                 {pkg.popular && (
-                  <div className="absolute top-4 left-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)] z-20">
                     الأكثر طلباً 🔥
                   </div>
                 )}
+                <div className="absolute top-4 left-4 flex gap-2 z-20">
+                  <button onClick={() => openEditModal(pkg)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDeletePackage(pkg.id)} className="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-500 hover:text-red-400 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-[#82c91e]/10 transition-colors" />
                 
                 <div className="mb-6 relative z-10">
@@ -356,7 +421,7 @@ export default function PackagesPage() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#82c91e]/10 blur-[80px] rounded-full pointer-events-none" />
               
               <div className="flex items-center justify-between mb-8 relative z-10">
-                <h3 className="text-2xl font-black text-white">إضافة باقة جديدة</h3>
+                <h3 className="text-2xl font-black text-white">{editingPackageId ? "تعديل الباقة التدريبية" : "إضافة باقة جديدة"}</h3>
                 <button 
                   onClick={() => setIsAddModalOpen(false)}
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
@@ -580,7 +645,7 @@ export default function PackagesPage() {
               type="submit"
               className="w-full py-4 rounded-2xl bg-[#82c91e] text-[#1a1f1a] font-black text-lg hover:bg-[#94d82d] transition-colors shadow-[0_0_20px_rgba(130,201,30,0.2)]"
             >
-              إضافة الباقة الآن
+              {editingPackageId ? "حفظ التعديلات" : "إضافة الباقة الآن"}
             </button>
           </form>
             </motion.div>
