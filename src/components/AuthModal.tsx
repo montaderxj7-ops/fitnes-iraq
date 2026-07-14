@@ -97,7 +97,8 @@ export default function AuthModal({ isOpen, onClose, plan, billing }: AuthModalP
 
   const handleGoogleAuth = () => {
     setIsLoading(true);
-    signIn("google", { callbackUrl: `${window.location.origin}/checkout?plan=${plan}&billing=${billing}` });
+    const cbUrl = `${window.location.origin}/checkout?plan=${encodeURIComponent(plan)}&billing=${encodeURIComponent(billing)}`;
+    signIn("google", { callbackUrl: cbUrl });
   };
 
   // Staggered animation variants
