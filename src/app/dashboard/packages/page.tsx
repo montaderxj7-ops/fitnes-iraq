@@ -22,6 +22,8 @@ export default function PackagesPage() {
   const [packages, setPackages] = useState<any[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
+  const [packageToDelete, setPackageToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isDaysDropdownOpen, setIsDaysDropdownOpen] = useState(false);
   const [isHoursDropdownOpen, setIsHoursDropdownOpen] = useState(false);
   const [newFeatureText, setNewFeatureText] = useState("");
@@ -140,12 +142,15 @@ export default function PackagesPage() {
   };
 
   const handleDeletePackage = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذه الباقة؟")) return;
+    setIsDeleting(true);
     try {
       await deletePackage(id);
       setPackages(packages.filter(p => p.id !== id));
+      setPackageToDelete(null);
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -214,7 +219,7 @@ export default function PackagesPage() {
                   <button onClick={() => openEditModal(pkg)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDeletePackage(pkg.id)} className="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-500 hover:text-red-400 transition-colors">
+                  <button onClick={() => setPackageToDelete(pkg.id)} className="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-500 hover:text-red-400 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -401,7 +406,56 @@ export default function PackagesPage() {
         </motion.div>
       </div>
 
-      {/* Add Package Modal */}
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {packageToDelete && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setPackageToDelete(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#1a1f1a] border border-red-500/20 rounded-[32px] p-8 shadow-2xl overflow-hidden text-center"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] rounded-full pointer-events-none" />
+              
+              <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                <Trash2 className="w-10 h-10 text-red-500" />
+              </div>
+              
+              <h3 className="text-2xl font-black text-white mb-3">حذف الباقة التدريبية</h3>
+              <p className="text-gray-400 font-medium mb-8">
+                هل أنت متأكد من رغبتك في حذف هذه الباقة؟ لا يمكن التراجع عن هذا الإجراء وسيتم إخفاؤها عن المتدربين.
+              </p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => !isDeleting && setPackageToDelete(null)}
+                  disabled={isDeleting}
+                  className="flex-1 py-4 rounded-2xl bg-white/5 text-white font-bold hover:bg-white/10 transition-colors disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button 
+                  onClick={() => packageToDelete && handleDeletePackage(packageToDelete)}
+                  disabled={isDeleting}
+                  className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.2)] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? "جاري الحذف..." : "نعم، احذف الباقة"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Add/Edit Package Modal */}
       <AnimatePresence>
         {isAddModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
