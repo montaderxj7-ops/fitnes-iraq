@@ -151,7 +151,7 @@ export default function Marketplace({ initialCoaches = [] }: { initialCoaches?: 
                     
                     {/* Neon Download Button */}
                     <Link 
-                      href={`/${coach.slug || 'coach-demo'}`}
+                      href={`/${coach.slug || 'coach-demo'}?install=true`}
                       className="w-full flex items-center justify-center gap-2 bg-neon hover:bg-[#c4e649] text-black py-3.5 rounded-xl font-black transition-all duration-300 hover:shadow-[0_0_20px_rgba(214,248,84,0.3)] hover:-translate-y-1 active:translate-y-0"
                     >
                       <Download className="h-5 w-5" />
