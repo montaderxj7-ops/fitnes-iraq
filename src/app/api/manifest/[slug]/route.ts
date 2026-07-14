@@ -33,6 +33,7 @@ export async function GET(
     }
 
     const manifest = {
+      id: `/${slug}`,
       name: appName,
       short_name: appName,
       description: `التطبيق التدريبي الخاص بـ ${coach.name}`,
@@ -45,13 +46,25 @@ export async function GET(
           src: iconUrl,
           sizes: '192x192',
           type: iconType,
-          purpose: 'any maskable'
+          purpose: 'any'
+        },
+        {
+          src: iconUrl,
+          sizes: '192x192',
+          type: iconType,
+          purpose: 'maskable'
         },
         {
           src: iconUrl,
           sizes: '512x512',
           type: iconType,
-          purpose: 'any maskable'
+          purpose: 'any'
+        },
+        {
+          src: iconUrl,
+          sizes: '512x512',
+          type: iconType,
+          purpose: 'maskable'
         }
       ]
     };
