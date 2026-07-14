@@ -20,7 +20,7 @@ export default async function CoachLayout({
   return (
     <>
       <head>
-        <link rel="manifest" href={`/api/manifest/${resolvedParams.coachSlug}`} />
+        <link rel="manifest" href={`/api/manifest/${resolvedParams.coachSlug}?v=${Date.now()}`} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>

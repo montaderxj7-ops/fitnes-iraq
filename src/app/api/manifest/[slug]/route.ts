@@ -65,8 +65,10 @@ export async function GET(
     return NextResponse.json(manifest, {
       headers: {
         'Content-Type': 'application/manifest+json',
-        // Cache control to allow refreshing if coach changes logo/color
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        // Disable caching so Chrome always fetches the latest appName and logo
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (error) {
