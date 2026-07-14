@@ -170,23 +170,23 @@ export async function updatePaymentMethodsBulk(payments: any) {
     const pmData = [];
     const p = payments;
     
-    if (p.zainCash && p.zainCashNumber) {
-      pmData.push({ coachId: profile.id, name: "زين كاش (ZainCash)", details: `${p.zainCashNumber} - ${p.zainCashName || ""}` });
+    if (p.zainCash) {
+      pmData.push({ coachId: profile.id, name: "زين كاش (ZainCash)", details: p.zainCashNumber ? `${p.zainCashNumber} - ${p.zainCashName || ""}` : "متوفر" });
     }
-    if (p.fib && p.fibAccount) {
-      pmData.push({ coachId: profile.id, name: "FIB", details: `${p.fibAccount} - ${p.fibName || ""}` });
+    if (p.fib) {
+      pmData.push({ coachId: profile.id, name: "FIB", details: p.fibAccount ? `${p.fibAccount} - ${p.fibName || ""}` : "متوفر" });
     }
-    if (p.asiaHawala && p.asiaHawalaNumber) {
-      pmData.push({ coachId: profile.id, name: "حوالة آسيا (AsiaHawala)", details: `${p.asiaHawalaNumber} - ${p.asiaHawalaName || ""}` });
+    if (p.asiaHawala) {
+      pmData.push({ coachId: profile.id, name: "حوالة آسيا (AsiaHawala)", details: p.asiaHawalaNumber ? `${p.asiaHawalaNumber} - ${p.asiaHawalaName || ""}` : "متوفر" });
     }
-    if (p.masterCard && p.masterCardNumber) {
-      pmData.push({ coachId: profile.id, name: "ماستر كارد (MasterCard)", details: `${p.masterCardNumber} - ${p.masterCardName || ""}` });
+    if (p.masterCard) {
+      pmData.push({ coachId: profile.id, name: "ماستر كارد (MasterCard)", details: p.masterCardNumber ? `${p.masterCardNumber} - ${p.masterCardName || ""}` : "متوفر" });
     }
-    if (p.visaCard && p.visaCardNumber) {
-      pmData.push({ coachId: profile.id, name: "فيزا كارد (Visa)", details: `${p.visaCardNumber} - ${p.visaCardName || ""}` });
+    if (p.visaCard) {
+      pmData.push({ coachId: profile.id, name: "فيزا كارد (Visa)", details: p.visaCardNumber ? `${p.visaCardNumber} - ${p.visaCardName || ""}` : "متوفر" });
     }
-    if (p.card && p.cardLink) {
-      pmData.push({ coachId: profile.id, name: "دفع إلكتروني (Card)", details: p.cardLink });
+    if (p.card) {
+      pmData.push({ coachId: profile.id, name: "دفع إلكتروني (Card)", details: p.cardLink || "رابط غير متوفر" });
     }
 
     if (pmData.length > 0) {
