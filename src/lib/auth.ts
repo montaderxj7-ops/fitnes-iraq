@@ -59,8 +59,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Validate role matches intent
-        if (credentials.isCoach === "true" && user.role !== "COACH") {
-          throw new Error("هذا الحساب ليس حساب مدرب");
+        if (credentials.isCoach === "true") {
+          if (user.role !== "COACH") {
+            throw new Error("هذا الحساب ليس حساب مدرب");
+          }
+          const coachProfile = await prisma.coachProfile.findUnique({ where: { userId: user.id } });
+          if (coachProfile && !coachProfile.hasPaid) {
+            throw new Error("عذراً، لم تكتمل عملية الدفع لاشتراكك في المنصة. يرجى إتمام الدفع أولاً.");
+          }
         }
 
         return user;

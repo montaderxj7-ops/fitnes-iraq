@@ -45,6 +45,19 @@ export async function registerCoach(data: { name: string; email: string; passwor
   }
 }
 
+export async function markCoachAsPaid(userId: string) {
+  try {
+    await prisma.coachProfile.update({
+      where: { userId },
+      data: { hasPaid: true }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking coach as paid:", error);
+    return { success: false, error: "Failed to update payment status" };
+  }
+}
+
 export async function logoutCoach() {
   const cookieStore = await cookies();
   cookieStore.delete("coach_auth");

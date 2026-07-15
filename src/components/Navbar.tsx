@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CoachLoginModal from "./CoachLoginModal";
 
 const navLinks = [
   { name: "الرئيسية", href: "#home" },
@@ -16,6 +17,7 @@ const navLinks = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -103,12 +105,12 @@ export default function Navbar() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link 
-              href="/login"
-              className="text-white hover:text-neon font-bold py-2.5 px-4 text-sm transition-colors"
+            <button 
+              onClick={() => setIsLoginModalOpen(true)}
+              className="text-white hover:text-neon font-bold py-2.5 px-4 text-sm transition-colors cursor-pointer"
             >
               دخول الكباتن
-            </Link>
+            </button>
             <motion.button 
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSmoothScroll(e as any, "#pricing")}
               whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px rgba(214,248,84,0.6)" }}
@@ -151,13 +153,15 @@ export default function Navbar() {
                 {link.name}
               </motion.a>
             ))}
-            <Link
-              href="/login"
-              className="text-white hover:text-neon text-lg font-medium transition-colors pb-2 border-b border-white/5 cursor-pointer block mt-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsLoginModalOpen(true);
+              }}
+              className="text-white hover:text-neon text-lg font-medium transition-colors pb-2 border-b border-white/5 cursor-pointer block mt-2 text-right"
             >
               تسجيل دخول الكباتن
-            </Link>
+            </button>
             <motion.button 
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSmoothScroll(e as any, "#pricing")}
               whileHover={{ scale: 1.02 }}
@@ -169,6 +173,11 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      <CoachLoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+      />
     </header>
   );
 }

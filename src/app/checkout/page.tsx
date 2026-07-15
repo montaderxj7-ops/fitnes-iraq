@@ -7,8 +7,11 @@ import { cn } from "@/lib/utils";
 import NumberFlow from "@number-flow/react";
 import { SparklesComp as Sparkles } from "@/components/ui/sparkles";
 import { Suspense } from "react";
+import { useSession } from "next-auth/react";
+import { markCoachAsPaid } from "@/actions/auth";
 
 function CheckoutContent() {
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -36,9 +39,12 @@ function CheckoutContent() {
     if (!selectedMethod) return;
     setIsProcessing(true);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsProcessing(false);
       setIsSuccess(true);
+      if (session?.user?.id) {
+        await markCoachAsPaid(session.user.id);
+      }
       setTimeout(() => {
         router.push("/builder");
       }, 2000);
