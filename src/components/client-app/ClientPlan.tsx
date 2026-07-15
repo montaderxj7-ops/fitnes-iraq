@@ -34,21 +34,7 @@ const mockWorkoutPlan = [
   ]},
 ];
 
-const mockNutritionPlan = {
-  macros: { calories: 2450, protein: 180, carbs: 250, fats: 80 },
-  meals: [
-    { time: '08:00 AM', name: 'وجبة الإفطار', items: '4 بيضات كاملة، 100 جرام شوفان، كوب حليب قليل الدسم' },
-    { time: '01:00 PM', name: 'وجبة الغداء', items: '200 جرام صدر دجاج، 150 جرام رز أبيض، صحن سلطة خضراء' },
-    { time: '05:00 PM', name: 'وجبة قبل التمرين', items: 'موزة، سكوب بروتين واي، ملعقة زبدة فول سوداني' },
-    { time: '09:00 PM', name: 'وجبة العشاء', items: '150 جرام لحم مفروم قليل الدسم، 100 جرام بطاطا مشوية' },
-  ]
-};
-
-const mockSupplements = [
-  { name: 'Whey Protein', dose: '1 Scoop (30g)', timing: 'بعد التمرين مباشرة' },
-  { name: 'Creatine Monohydrate', dose: '5g', timing: 'في أي وقت خلال اليوم' },
-  { name: 'Omega 3', dose: '1 Capsule', timing: 'مع وجبة الغداء' },
-];
+// Mock Data removed
 
 export function ClientPlan({ coach, userData }: ClientPlanProps) {
   const { t, dir } = useLanguage();
@@ -95,8 +81,8 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
   }, [userData]);
   
   const completedMealsCount = Object.values(completedMeals).filter(Boolean).length;
-  const totalMealsCount = mockNutritionPlan.meals.length;
-  const nutritionProgress = totalMealsCount > 0 ? (completedMealsCount / totalMealsCount) * 100 : 0;
+  const totalMealsCount = 0;
+  const nutritionProgress = 0;
 
   const getDayInfo = (dayNumber: number) => {
     const date = new Date();
@@ -330,93 +316,9 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               initial="hidden"
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
-              className="px-6 space-y-6"
+              className="px-6 space-y-6 flex flex-col items-center justify-center min-h-[300px]"
             >
-              {/* Macros Summary (Premium) */}
-              <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#1c1c1c] to-[#111] border border-white/5 rounded-[2rem] p-6 relative overflow-hidden shadow-xl group">
-                <div className="absolute -top-10 -right-10 w-40 h-40 blur-[50px] opacity-20 rounded-full pointer-events-none transition-opacity group-hover:opacity-40" style={{ backgroundColor: coach.primaryColor }} />
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                
-                <div className="flex justify-between items-center mb-6 relative z-10">
-                  <h3 className="text-white font-black text-lg flex items-center gap-2 drop-shadow-sm">
-                    <div className="p-2 rounded-xl bg-white/5 backdrop-blur-md">
-                      <Flame className="w-5 h-5" style={{ color: coach.primaryColor }} />
-                    </div>
-                    {t('plan.macros')}
-                  </h3>
-                  <div className="text-xs font-bold text-gray-400 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                    الالتزام: {Math.round(nutritionProgress)}%
-                  </div>
-                </div>
-                
-                {/* Progress Bar */}
-                <div className="w-full h-2 bg-black/50 rounded-full mb-6 relative z-10 overflow-hidden border border-white/5">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${nutritionProgress}%` }}
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ backgroundColor: coach.primaryColor, boxShadow: `0 0 10px ${coach.primaryColor}` }}
-                  />
-                </div>
-                
-                <div className="flex justify-between items-end mb-8 relative z-10">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight drop-shadow-md">
-                      {mockNutritionPlan.macros.calories}
-                    </span>
-                    <span className="text-gray-500 font-bold text-sm tracking-wide">{t('plan.calories')}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 relative z-10">
-                  <div className="bg-black/40 rounded-2xl p-4 border border-white/5 shadow-inner flex flex-col items-center justify-center group-hover:bg-black/60 transition-colors">
-                    <span className="text-2xl font-black text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.3)]">{mockNutritionPlan.macros.protein}g</span>
-                    <span className="text-[10px] text-gray-400 font-bold mt-1.5 uppercase tracking-wider">{t('plan.protein')}</span>
-                  </div>
-                  <div className="bg-black/40 rounded-2xl p-4 border border-white/5 shadow-inner flex flex-col items-center justify-center group-hover:bg-black/60 transition-colors">
-                    <span className="text-2xl font-black text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.3)]">{mockNutritionPlan.macros.carbs}g</span>
-                    <span className="text-[10px] text-gray-400 font-bold mt-1.5 uppercase tracking-wider">{t('plan.carbs')}</span>
-                  </div>
-                  <div className="bg-black/40 rounded-2xl p-4 border border-white/5 shadow-inner flex flex-col items-center justify-center group-hover:bg-black/60 transition-colors">
-                    <span className="text-2xl font-black text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">{mockNutritionPlan.macros.fats}g</span>
-                    <span className="text-[10px] text-gray-400 font-bold mt-1.5 uppercase tracking-wider">{t('plan.fats')}</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Meals (Premium) */}
-              <motion.div variants={itemVariants}>
-                <h3 className="text-white font-black text-xl mb-5 flex items-center gap-2 drop-shadow-sm">
-                  <div className="p-2 rounded-xl bg-white/5 backdrop-blur-md">
-                    <Utensils className="w-5 h-5" style={{ color: coach.primaryColor }} />
-                  </div>
-                  {t('plan.meals')}
-                </h3>
-                <div className="space-y-4">
-                  {mockNutritionPlan.meals.map((meal, idx) => {
-                    const isCompleted = completedMeals[idx] || false;
-                    return (
-                    <div key={idx} onClick={() => setCompletedMeals(prev => ({ ...prev, [idx]: !isCompleted }))} className={cn("cursor-pointer border border-white/5 rounded-3xl p-5 flex gap-4 shadow-lg hover:shadow-xl transition-all relative overflow-hidden group", isCompleted ? "bg-gradient-to-r from-green-900/20 to-[#151515] border-green-500/20" : "bg-gradient-to-r from-[#1a1a1a] to-[#151515]")}>
-                      <div className={cn("w-14 h-14 rounded-2xl border shadow-inner flex items-center justify-center shrink-0 transition-colors", isCompleted ? "bg-green-500/10 border-green-500/30" : "bg-black/50 border-white/10")}>
-                        {isCompleted ? <Check className="w-6 h-6 text-green-500" /> : <Clock className="w-6 h-6 text-gray-400 group-hover:text-white" />}
-                      </div>
-                      <div className="flex-1 pt-1 flex flex-col justify-center">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <h4 className={cn("font-bold text-lg leading-tight transition-colors", isCompleted ? "text-green-400" : "text-white")}>{meal.name}</h4>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-black/40 border border-white/5 text-gray-400" dir="ltr">{meal.time}</span>
-                            <div className="w-6 h-6 rounded-md border border-white/20 flex items-center justify-center bg-black/30">
-                              {isCompleted && <CheckSquare className="w-4 h-4 text-green-500" />}
-                              {!isCompleted && <Square className="w-4 h-4 text-transparent group-hover:text-white/20 transition-colors" />}
-                            </div>
-                          </div>
-                        </div>
-                        <p className={cn("text-sm leading-relaxed font-medium transition-colors", isCompleted ? "text-gray-500 line-through" : "text-gray-400")}>{meal.items}</p>
-                      </div>
-                    </div>
-                  )})}
-                </div>
-              </motion.div>
+              <div className="text-center text-gray-500 text-sm">لا توجد خطة تغذية مخصصة لك حتى الآن.</div>
             </motion.div>
           )}
 
@@ -428,33 +330,9 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               initial="hidden"
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
-              className="px-6 space-y-4"
+              className="px-6 space-y-4 flex flex-col items-center justify-center min-h-[300px]"
             >
-              {mockSupplements.map((supp, idx) => (
-                <motion.div variants={itemVariants} key={idx} className="bg-gradient-to-r from-[#1c1c1c] to-[#151515] border border-white/5 rounded-3xl p-5 relative overflow-hidden group shadow-lg">
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  <div className="absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 transition-opacity group-hover:opacity-20" style={{ backgroundColor: coach.primaryColor }} />
-                  
-                  <div className="flex items-start gap-4 relative z-10">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-white/10 shadow-inner" style={{ backgroundColor: `${coach.primaryColor}15` }}>
-                      <Pill className="w-7 h-7 drop-shadow-md" style={{ color: coach.primaryColor }} />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-center min-h-[56px]">
-                      <h4 className="font-black text-white text-xl mb-3 drop-shadow-sm leading-tight">{supp.name}</h4>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <div className="flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-white/5 shadow-inner">
-                          <CheckCircle2 className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs text-gray-300 font-medium"><strong>الجرعة:</strong> {supp.dose}</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-white/5 shadow-inner">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs text-gray-300 font-medium"><strong>الوقت:</strong> {supp.timing}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              <div className="text-center text-gray-500 text-sm">لا توجد مكملات غذائية مخصصة لك حتى الآن.</div>
             </motion.div>
           )}
         </AnimatePresence>

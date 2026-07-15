@@ -71,6 +71,10 @@ model CoachProfile {
   primaryColor          String          @default("#D6F854")
   appName               String          @default("Gym System")
   welcomeImage          String?
+  dashboardHeroImage    String?
+  dashboardHeroTopText  String?
+  dashboardHeroMainText String?
+  dashboardHeroBottomText String?
   dashboardLoginEnabled Boolean         @default(false)
   subscriptionTier      String          @default("pro")
   createdAt             DateTime        @default(now())
