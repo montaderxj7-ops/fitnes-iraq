@@ -11,7 +11,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await getServerSession(authOptions);
   
   if (!session || session.user.role !== "COACH") {
-    redirect("/login");
+    redirect("/");
+  }
+
+  const coachProfile = await prisma.coachProfile.findUnique({
+    where: { userId: session.user.id }
+  });
+
+  if (!coachProfile || !coachProfile.hasPaid) {
+    redirect("/checkout");
   }
 
   return (

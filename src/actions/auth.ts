@@ -47,9 +47,23 @@ export async function registerCoach(data: { name: string; email: string; passwor
 
 export async function markCoachAsPaid(userId: string) {
   try {
-    await prisma.coachProfile.update({
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return { success: false, error: "User not found" };
+
+    const slug = user.name ? user.name.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, "-").replace(/^-+|-+$/g, "") : `coach-${Date.now()}`;
+
+    await prisma.coachProfile.upsert({
       where: { userId },
-      data: { hasPaid: true }
+      update: { hasPaid: true },
+      create: {
+        userId,
+        name: user.name || "كابتن",
+        slug: slug || `coach-${Date.now()}`,
+        specialty: "مدرب شخصي",
+        bio: "مرحباً بك في فريقي!",
+        instagram: "",
+        hasPaid: true
+      }
     });
     return { success: true };
   } catch (error) {
