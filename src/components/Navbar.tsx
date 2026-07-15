@@ -101,8 +101,14 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link 
+              href="/login"
+              className="text-white hover:text-neon font-bold py-2.5 px-4 text-sm transition-colors"
+            >
+              دخول الكباتن
+            </Link>
             <motion.button 
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSmoothScroll(e as any, "#pricing")}
               whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px rgba(214,248,84,0.6)" }}
@@ -145,6 +151,13 @@ export default function Navbar() {
                 {link.name}
               </motion.a>
             ))}
+            <Link
+              href="/login"
+              className="text-white hover:text-neon text-lg font-medium transition-colors pb-2 border-b border-white/5 cursor-pointer block mt-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              تسجيل دخول الكباتن
+            </Link>
             <motion.button 
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSmoothScroll(e as any, "#pricing")}
               whileHover={{ scale: 1.02 }}
