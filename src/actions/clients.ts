@@ -7,7 +7,13 @@ import { authOptions } from "@/lib/auth";
 
 export async function getClients() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return [];
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return [];
+
     let clients = await prisma.client.findMany({
+      where: { coachId: profile.id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -144,10 +150,15 @@ export async function deleteClient(id: string) {
   }
 }
 
-export async function loginClient(email: string, password?: string) {
+export async function loginClient(coachId: string, email: string, password?: string) {
   try {
-    const user = await prisma.user.findUnique({ 
-      where: { email },
+    const user = await prisma.user.findFirst({ 
+      where: { 
+        email,
+        clientProfile: {
+          coachId: coachId
+        }
+      },
       include: { clientProfile: true }
     });
     if (!user || !user.clientProfile) {
@@ -161,5 +172,90 @@ export async function loginClient(email: string, password?: string) {
   } catch (error) {
     console.error("Error logging in client:", error);
     return { success: false, error: "حدث خطأ أثناء تسجيل الدخول" };
+  }
+}
+
+export async function registerClientPwa(coachId: string, data: {
+  name: string;
+  email?: string;
+  password?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  goal?: string;
+  injuries?: string;
+  package: string;
+  paymentMethod?: string;
+}) {
+  try {
+    const coach = await prisma.coachProfile.findUnique({ where: { id: coachId } });
+    if (!coach) return { success: false, error: "Coach not found" };
+
+    // Check if email is already taken in the system
+    if (data.email) {
+      const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+      if (existingUser) {
+        return { success: false, error: "البريد الإلكتروني مستخدم بالفعل" };
+      }
+    }
+
+    // Create User for the client
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email || `${Date.now()}@client.local`,
+        password: data.password || "123456",
+        role: "CLIENT",
+      }
+    });
+
+    const newClient = await prisma.client.create({
+      data: {
+        userId: user.id,
+        coachId: coachId,
+        name: data.name,
+        age: data.age,
+        weight: data.weight,
+        height: data.height,
+        goal: data.goal,
+        injuries: data.injuries,
+        package: data.package,
+        status: "active",
+      },
+    });
+
+    // Create a corresponding task automatically
+    await prisma.task.create({
+      data: {
+        coachId: coachId,
+        text: `${data.name} اشترك للتو في ${data.package}، بانتظار إضافة الخطة.`,
+        time: new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: 'numeric', hour12: true }).format(new Date()),
+        status: "urgent",
+        isCompleted: false
+      }
+    });
+
+    // Fetch package price for the payment record
+    const pkg = await prisma.package.findFirst({
+      where: { name: data.package, coachId: coachId }
+    });
+    const priceStr = pkg ? pkg.price.replace(/\D/g, '') : "25000";
+
+    // Create a corresponding payment record
+    await prisma.payment.create({
+      data: {
+        coachId: coachId,
+        clientName: data.name,
+        packageName: data.package,
+        amount: Number(priceStr).toLocaleString(),
+        method: data.paymentMethod || "زين كاش",
+        status: "completed"
+      }
+    });
+
+    return { success: true, client: newClient };
+  } catch (error) {
+    console.error("Error registering client:", error);
+    return { success: false, error: "Failed to register client" };
   }
 }

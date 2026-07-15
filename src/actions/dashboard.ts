@@ -2,15 +2,28 @@
 
 import { prisma } from "@/lib/prisma";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function getDashboardStats() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return getDefaultStats();
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return getDefaultStats();
+
+    const coachId = profile.id;
+
     const clientsCount = await prisma.client.count({
-      where: { status: "active" }
+      where: { status: "active", coachId }
     });
 
-    const totalClientsCount = await prisma.client.count();
+    const totalClientsCount = await prisma.client.count({
+      where: { coachId }
+    });
 
     const packages = await prisma.package.findMany({
+      where: { coachId },
       select: { price: true, clientsCount: true }
     });
 
@@ -31,6 +44,7 @@ export async function getDashboardStats() {
 
     const newClientsThisMonth = await prisma.client.count({
       where: {
+        coachId,
         createdAt: {
           gte: oneMonthAgo
         }
@@ -39,6 +53,7 @@ export async function getDashboardStats() {
 
     const newClientsLastMonth = await prisma.client.count({
       where: {
+        coachId,
         createdAt: {
           gte: twoMonthsAgo,
           lt: oneMonthAgo
@@ -64,13 +79,17 @@ export async function getDashboardStats() {
     };
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
-    return {
-      activeClients: 0,
-      activeClientsTrend: "0",
-      totalRevenue: "$0",
-      revenueTrend: "+0%",
-      newClients: 0,
-      newClientsTrend: "0",
-    };
+    return getDefaultStats();
   }
+}
+
+function getDefaultStats() {
+  return {
+    activeClients: 0,
+    activeClientsTrend: "0",
+    totalRevenue: "$0",
+    revenueTrend: "+0%",
+    newClients: 0,
+    newClientsTrend: "0",
+  };
 }

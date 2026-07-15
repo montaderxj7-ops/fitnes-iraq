@@ -10,7 +10,7 @@ import { IntakeForm } from '@/components/client-app/IntakeForm';
 import { ClientDashboard } from '@/components/client-app/ClientDashboard';
 import { LoginScreen } from '@/components/client-app/LoginScreen';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
-import { addClient } from '@/actions/clients';
+import { registerClientPwa } from '@/actions/clients';
 import { cn } from "@/lib/utils";
 
 export interface IntakeQuestion {
@@ -155,12 +155,11 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
                 setUserData(prev => prev ? { ...prev, intakeData: data } : null);
                 // Call the backend to save client and trigger a task!
                 if (userData) {
-                  await addClient({
+                  await registerClientPwa(coach.id, {
                     name: userData.name,
                     email: userData.email,
                     password: userData.password,
                     package: selectedPackage?.name || coach.packages[0].name,
-                    status: "active",
                     paymentMethod: paymentMethod,
                     age: data.age ? Number(data.age) : undefined,
                     weight: data.weight ? Number(data.weight) : undefined,

@@ -59,7 +59,8 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
   const [tempWeight, setTempWeight] = useState<string>('');
   const [completedMeals, setCompletedMeals] = useState<Record<number, boolean>>({});
   
-  const [workoutPlan, setWorkoutPlan] = useState<any[]>(mockWorkoutPlan);
+  const [workoutPlan, setWorkoutPlan] = useState<any[]>([]);
+  const [hasPlan, setHasPlan] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(true);
 
   React.useEffect(() => {
@@ -81,6 +82,7 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
             }));
             if (mappedDays.length > 0) {
               setWorkoutPlan(mappedDays);
+              setHasPlan(true);
             }
           }
         } catch (error) {

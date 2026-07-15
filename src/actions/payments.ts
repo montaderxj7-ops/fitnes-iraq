@@ -3,9 +3,18 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function getPayments() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, payments: [] };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, payments: [] };
+
     const payments = await prisma.payment.findMany({
+      where: { coachId: profile.id },
       orderBy: { createdAt: "desc" },
       take: 50
     });

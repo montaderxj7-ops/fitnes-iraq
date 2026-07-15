@@ -16,7 +16,7 @@ export function LoginScreen({ coach, onSuccess, onBack }: any) {
     setIsLoading(true);
     setError('');
     
-    const res = await loginClient(email, password);
+    const res = await loginClient(coach.id, email, password);
     if (res.success && res.client) {
       onSuccess({
         id: res.client.id,

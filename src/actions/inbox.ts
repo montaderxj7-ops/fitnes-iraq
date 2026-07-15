@@ -3,9 +3,18 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function getChats() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return [];
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return [];
+
     let chats = await prisma.chat.findMany({
+      where: { coachId: profile.id },
       orderBy: { updatedAt: "desc" },
     });
     return chats;
