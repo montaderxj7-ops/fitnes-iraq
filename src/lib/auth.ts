@@ -63,10 +63,6 @@ export const authOptions: NextAuthOptions = {
           if (user.role !== "COACH") {
             throw new Error("هذا الحساب ليس حساب مدرب");
           }
-          const coachProfile = await prisma.coachProfile.findUnique({ where: { userId: user.id } });
-          if (coachProfile && !coachProfile.hasPaid) {
-            throw new Error("عذراً، لم تكتمل عملية الدفع لاشتراكك في المنصة. يرجى إتمام الدفع أولاً.");
-          }
         }
 
         return user;
