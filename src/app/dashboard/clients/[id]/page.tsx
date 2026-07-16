@@ -190,17 +190,27 @@ export default function ClientProfilePage() {
         </motion.div>
 
         {/* Nutrition Plan Section */}
-        <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 flex flex-col relative overflow-hidden group opacity-50 grayscale pointer-events-none">
+        <motion.div variants={itemVariants} className={`bg-[#111] border border-white/5 rounded-[2rem] p-6 flex flex-col relative overflow-hidden group ${!clientData.hasNutrition ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
           <div className="flex flex-col items-center justify-center h-[300px] text-center z-10 relative">
             <div className="w-20 h-20 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-500 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
               <Apple className="w-10 h-10 text-blue-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">الخطة الغذائية</h3>
             <p className="text-gray-400 mb-8 max-w-[250px]">
-              باقة المشترك لا تتضمن خطة غذائية (أو غير مدعومة حالياً).
+              {clientData.hasNutrition 
+                ? "قم بإعداد أو تعديل الخطة الغذائية المخصصة لهذا المشترك."
+                : "باقة المشترك لا تتضمن خطة غذائية (أو غير مدعومة حالياً)."}
             </p>
             
-            <button className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-blue-500 text-white font-black hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:-translate-y-1 transition-all">
+            <button 
+              onClick={() => {
+                if (clientData.hasNutrition) {
+                  // setIsBuildingNutrition(true); // TODO: implement nutrition builder
+                  alert("ميزة الخطة الغذائية قيد التطوير!");
+                }
+              }}
+              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-blue-500 text-white font-black hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:-translate-y-1 transition-all"
+            >
               <Plus className="w-5 h-5" />
               إضافة خطة غذائية
             </button>

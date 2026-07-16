@@ -40,10 +40,21 @@ export async function getClientById(id: string) {
 
     if (!client) return { success: false, error: "Client not found" };
 
+    let hasNutrition = false;
+    if (client.package) {
+      const pkg = await prisma.package.findFirst({
+        where: { name: client.package, coachId: client.coachId }
+      });
+      if (pkg) {
+        hasNutrition = pkg.hasNutrition;
+      }
+    }
+
     return { 
       success: true, 
       client: {
         ...client,
+        hasNutrition,
         expiry: client.createdAt ? new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000)) : "غير محدد"
       } 
     };
