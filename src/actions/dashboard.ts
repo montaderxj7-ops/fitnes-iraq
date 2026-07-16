@@ -64,10 +64,10 @@ export async function getDashboardStats() {
     const revenueTrendStr = `+${revenueTrendPct}%`;
 
     return {
-      activeClients: clientsCount,
-      activeClientsTrend: activeClientsTrendStr,
-      totalRevenue: "$" + totalRevenue.toLocaleString(), // Format nicely
-      revenueTrend: revenueTrendStr,
+      activeClients: totalClientsCount,
+      activeClientsTrend: `+${newClientsThisMonth}`,
+      totalRevenue: `${totalRevenue.toLocaleString()} IQD`,
+      revenueTrend: "+100%",
       newClients: newClientsThisMonth,
       newClientsTrend: newClientsTrendStr,
     };
@@ -81,7 +81,7 @@ function getDefaultStats() {
   return {
     activeClients: 0,
     activeClientsTrend: "0",
-    totalRevenue: "$0",
+    totalRevenue: "0 IQD",
     revenueTrend: "+0%",
     newClients: 0,
     newClientsTrend: "0",
