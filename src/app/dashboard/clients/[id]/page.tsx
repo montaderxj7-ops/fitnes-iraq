@@ -7,7 +7,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { WorkoutWorkspace } from "@/components/dashboard/WorkoutWorkspace";
+import { NutritionWorkspace } from "@/components/dashboard/NutritionWorkspace";
 import { getExercises, getWorkoutPlan } from "@/actions/workouts";
+import { getNutritionPlan, getFoodItems } from "@/actions/nutrition";
 import { getClientById } from "@/actions/clients";
 
 const containerVariants = {
@@ -27,7 +29,9 @@ export default function ClientProfilePage() {
   const [isBuildingWorkout, setIsBuildingWorkout] = useState(false);
   const [isBuildingNutrition, setIsBuildingNutrition] = useState(false);
   const [exercisesLib, setExercisesLib] = useState<any[]>([]);
+  const [foodsLib, setFoodsLib] = useState<any[]>([]);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
+  const [currentNutritionPlan, setCurrentNutritionPlan] = useState<any>(null);
   const [clientData, setClientData] = useState<any>(null);
 
   // Fetch data
@@ -39,6 +43,14 @@ export default function ClientProfilePage() {
       const planRes = await getWorkoutPlan(clientId);
       if (planRes.success && planRes.plan) {
         setCurrentPlan(planRes.plan);
+      }
+
+      const foodRes = await getFoodItems();
+      if (foodRes.success) setFoodsLib(foodRes.foodItems || []);
+
+      const nutPlanRes = await getNutritionPlan(clientId);
+      if (nutPlanRes.success && nutPlanRes.plan) {
+        setCurrentNutritionPlan(nutPlanRes.plan);
       }
 
       const clientRes = await getClientById(clientId);
@@ -60,6 +72,23 @@ export default function ClientProfilePage() {
           // Refresh plan data
           getWorkoutPlan(clientId).then(res => {
             if (res.success && res.plan) setCurrentPlan(res.plan);
+          });
+        }} 
+      />
+    );
+  }
+
+  if (isBuildingNutrition && clientData) {
+    return (
+      <NutritionWorkspace 
+        clientId={clientId} 
+        initialFoods={foodsLib} 
+        initialPlan={currentNutritionPlan}
+        onClose={() => {
+          setIsBuildingNutrition(false);
+          // Refresh plan data
+          getNutritionPlan(clientId).then(res => {
+            if (res.success && res.plan) setCurrentNutritionPlan(res.plan);
           });
         }} 
       />
@@ -198,21 +227,20 @@ export default function ClientProfilePage() {
             <h3 className="text-2xl font-bold text-white mb-2">الخطة الغذائية</h3>
             <p className="text-gray-400 mb-8 max-w-[250px]">
               {clientData.hasNutrition 
-                ? "قم بإعداد أو تعديل الخطة الغذائية المخصصة لهذا المشترك."
+                ? (currentNutritionPlan ? "يوجد خطة غذائية مخصصة لهذا المشترك." : "قم بإعداد الخطة الغذائية المخصصة لهذا المشترك.")
                 : "باقة المشترك لا تتضمن خطة غذائية (أو غير مدعومة حالياً)."}
             </p>
             
             <button 
               onClick={() => {
                 if (clientData.hasNutrition) {
-                  // setIsBuildingNutrition(true); // TODO: implement nutrition builder
-                  alert("ميزة الخطة الغذائية قيد التطوير!");
+                  setIsBuildingNutrition(true);
                 }
               }}
               className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-blue-500 text-white font-black hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:-translate-y-1 transition-all"
             >
               <Plus className="w-5 h-5" />
-              إضافة خطة غذائية
+              {currentNutritionPlan ? "تعديل الخطة الغذائية" : "إضافة خطة غذائية"}
             </button>
           </div>
         </motion.div>

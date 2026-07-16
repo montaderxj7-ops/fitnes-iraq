@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { getWorkoutPlan } from '@/actions/workouts';
+import { getNutritionPlan } from '@/actions/nutrition';
 
 interface ClientPlanProps {
   coach: CoachData;
@@ -46,6 +47,7 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
   const [completedMeals, setCompletedMeals] = useState<Record<number, boolean>>({});
   
   const [workoutPlan, setWorkoutPlan] = useState<any[]>([]);
+  const [nutritionPlan, setNutritionPlan] = useState<any>(null);
   const [hasPlan, setHasPlan] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(true);
 
@@ -70,6 +72,11 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               setWorkoutPlan(mappedDays);
               setHasPlan(true);
             }
+          }
+
+          const nutRes = await getNutritionPlan(userData.id);
+          if (nutRes.success && nutRes.plan) {
+            setNutritionPlan(nutRes.plan);
           }
         } catch (error) {
           console.error("Error loading plan:", error);
@@ -316,9 +323,78 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               initial="hidden"
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
-              className="px-6 space-y-6 flex flex-col items-center justify-center min-h-[300px]"
+              className="px-6 space-y-6"
             >
-              <div className="text-center text-gray-500 text-sm">لا توجد خطة تغذية مخصصة لك حتى الآن.</div>
+              {isLoadingPlan ? (
+                <div className="text-center text-gray-500 text-sm py-10">جاري تحميل الخطة الغذائية...</div>
+              ) : !nutritionPlan || nutritionPlan.days.length === 0 ? (
+                <div className="text-center text-gray-500 text-sm py-10 flex flex-col items-center justify-center min-h-[300px]">لا توجد خطة تغذية مخصصة لك حتى الآن.</div>
+              ) : (
+                <div className="space-y-4">
+                  {nutritionPlan.days.map((day: any) => {
+                    let totalCalories = 0;
+                    let totalProtein = 0;
+                    let totalCarbs = 0;
+                    let totalFats = 0;
+                    day.meals.forEach((meal: any) => {
+                      meal.foods.forEach((mf: any) => {
+                        totalCalories += mf.food?.calories || 0;
+                        totalProtein += mf.food?.protein || 0;
+                        totalCarbs += mf.food?.carbs || 0;
+                        totalFats += mf.food?.fats || 0;
+                      });
+                    });
+
+                    return (
+                      <motion.div variants={itemVariants} key={day.id} className="bg-[#111] border border-white/5 rounded-[2rem] overflow-hidden shadow-lg">
+                        <div className="p-5 flex flex-col gap-3 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent">
+                          <h3 className="text-xl font-bold text-white">{day.name}</h3>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="text-xs font-bold text-gray-300 bg-white/10 px-3 py-1.5 rounded-xl">{totalCalories.toFixed(0)} سعرة</span>
+                            <span className="text-xs font-bold text-red-400 bg-red-400/10 px-3 py-1.5 rounded-xl">P: {totalProtein.toFixed(0)}g</span>
+                            <span className="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1.5 rounded-xl">C: {totalCarbs.toFixed(0)}g</span>
+                            <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-xl">F: {totalFats.toFixed(0)}g</span>
+                          </div>
+                        </div>
+                        
+                        <div className="p-4 space-y-4 bg-black/20">
+                          {day.meals.map((meal: any, idx: number) => {
+                            const mealCalories = meal.foods.reduce((acc: number, curr: any) => acc + (curr.food?.calories || 0), 0);
+                            return (
+                              <div key={meal.id} className="bg-white/5 border border-white/5 rounded-2xl p-4">
+                                <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">{idx + 1}</div>
+                                    <h4 className="text-white font-bold">{meal.name}</h4>
+                                  </div>
+                                  <span className="text-xs text-gray-400">{mealCalories.toFixed(0)} سعرة</span>
+                                </div>
+                                <div className="space-y-3">
+                                  {meal.foods.map((mf: any) => (
+                                    <div key={mf.id} className="flex items-center justify-between group">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-200">{mf.food?.name}</p>
+                                          <p className="text-[10px] text-gray-500">{mf.food?.calories} سعرة | P:{mf.food?.protein} C:{mf.food?.carbs} F:{mf.food?.fats}</p>
+                                        </div>
+                                      </div>
+                                      <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg border border-blue-400/20">{mf.amount}</span>
+                                    </div>
+                                  ))}
+                                  {meal.foods.length === 0 && (
+                                    <p className="text-xs text-gray-500 text-center py-2">لا توجد أصناف في هذه الوجبة</p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
 

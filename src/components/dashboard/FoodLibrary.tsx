@@ -1,0 +1,247 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { Search, Plus, X, Apple } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { addFoodItem } from '@/actions/nutrition';
+import toast from 'react-hot-toast';
+
+interface FoodItem {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mediaUrl?: string | null;
+}
+
+interface FoodLibraryProps {
+  foodItems: FoodItem[];
+  onAddFood: (food: FoodItem) => void;
+}
+
+function DraggableFood({ food }: { food: FoodItem }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `lib-food-${food.id}`,
+    data: { type: 'FoodLibraryItem', food }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        "p-3 rounded-xl bg-black/40 border border-white/10 hover:border-blue-500/50 transition-all cursor-grab active:cursor-grabbing flex items-center gap-3",
+        isDragging && "opacity-50 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] z-50 relative"
+      )}
+    >
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+        <Apple className="w-6 h-6 text-blue-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-bold text-white truncate">{food.name}</h4>
+        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+          <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-md">
+            {food.calories} سعرة
+          </span>
+          <span className="text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded-md">
+            P: {food.protein}g
+          </span>
+          <span className="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-md">
+            C: {food.carbs}g
+          </span>
+          <span className="text-[10px] text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-md">
+            F: {food.fats}g
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
+  const [search, setSearch] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newCalories, setNewCalories] = useState('');
+  const [newProtein, setNewProtein] = useState('');
+  const [newCarbs, setNewCarbs] = useState('');
+  const [newFats, setNewFats] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName) return;
+    setIsSubmitting(true);
+    const res = await addFoodItem({
+      name: newName,
+      calories: parseFloat(newCalories) || 0,
+      protein: parseFloat(newProtein) || 0,
+      carbs: parseFloat(newCarbs) || 0,
+      fats: parseFloat(newFats) || 0,
+    });
+    if (res.success && res.foodItem) {
+      toast.success('تمت إضافة الصنف للمكتبة بنجاح');
+      onAddFood(res.foodItem);
+      setIsModalOpen(false);
+      setNewName('');
+      setNewCalories('');
+      setNewProtein('');
+      setNewCarbs('');
+      setNewFats('');
+    } else {
+      toast.error('حدث خطأ أثناء إضافة الصنف');
+    }
+    setIsSubmitting(false);
+  };
+
+  const filteredFoods = foodItems.filter(f => f.name.includes(search));
+
+  return (
+    <div className="flex flex-col h-full bg-[#111] border border-white/5 rounded-[2rem] overflow-hidden">
+      <div className="p-5 border-b border-white/5">
+        <h2 className="text-xl font-bold text-white mb-4">مكتبة الأطعمة</h2>
+        
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="w-5 h-5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2" />
+          <input 
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ابحث عن طعام..."
+            className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pr-10 pl-4 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar">
+        {filteredFoods.length > 0 ? (
+          filteredFoods.map(f => (
+            <DraggableFood key={f.id} food={f} />
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-10 text-sm">
+            لا توجد أطعمة تطابق بحثك.
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 border-t border-white/5 bg-black/20">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="w-full py-2.5 rounded-xl border border-dashed border-white/20 text-gray-400 hover:text-blue-400 hover:border-blue-500/50 transition-colors flex items-center justify-center gap-2 text-sm font-bold"
+        >
+          <Plus className="w-4 h-4" />
+          إضافة صنف للمكتبة
+        </button>
+      </div>
+
+      {/* Add Food Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/20">
+              <h3 className="text-lg font-bold text-white">إضافة صنف جديد</h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddSubmit} className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-300 mb-1.5">اسم الصنف الغذائي</label>
+                <input 
+                  type="text"
+                  required
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="مثال: صدر دجاج مشوي 100غ"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1.5">السعرات الحرارية</label>
+                  <input 
+                    type="number"
+                    required
+                    min="0"
+                    step="0.1"
+                    value={newCalories}
+                    onChange={(e) => setNewCalories(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1.5">البروتين (g)</label>
+                  <input 
+                    type="number"
+                    required
+                    min="0"
+                    step="0.1"
+                    value={newProtein}
+                    onChange={(e) => setNewProtein(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1.5">الكاربوهيدرات (g)</label>
+                  <input 
+                    type="number"
+                    required
+                    min="0"
+                    step="0.1"
+                    value={newCarbs}
+                    onChange={(e) => setNewCarbs(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-yellow-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1.5">الدهون (g)</label>
+                  <input 
+                    type="number"
+                    required
+                    min="0"
+                    step="0.1"
+                    value={newFats}
+                    onChange={(e) => setNewFats(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? 'جاري الإضافة...' : 'إضافة الصنف'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
