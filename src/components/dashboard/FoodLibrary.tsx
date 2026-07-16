@@ -68,6 +68,7 @@ function DraggableFood({ food }: { food: FoodItem }) {
   );
 }
 
+export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
   const [search, setSearch] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);

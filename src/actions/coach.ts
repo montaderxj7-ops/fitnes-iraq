@@ -12,6 +12,11 @@ export async function publishCoachProfile(data: {
   bio: string;
   instagram: string;
   image?: string | null;
+  welcomeImage?: string | null;
+  dashboardHeroImage?: string | null;
+  dashboardHeroTopText?: string;
+  dashboardHeroMainText?: string;
+  dashboardHeroBottomText?: string;
   logo?: string | null;
   primaryColor?: string;
   firstPackage?: {

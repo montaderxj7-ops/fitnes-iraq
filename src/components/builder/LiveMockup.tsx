@@ -78,6 +78,7 @@ export default function LiveMockup({ state, currentView, onViewChange, currentSt
                   <ClientAppFlow 
                     builderStep={currentStep}
                     coach={{
+                      id: "preview-id",
                       name: state.appName || "اسم التطبيق",
                       logo: state.appLogo || "",
                       welcomeImage: state.welcomeImage,
