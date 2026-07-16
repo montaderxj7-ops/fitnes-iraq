@@ -63,7 +63,7 @@ export function PwaInstaller({
       // Just keep showing the iOS instructions
     } else {
       // Fallback if prompt isn't ready
-      alert("يرجى المحاولة مرة أخرى أو تثبيت التطبيق من قائمة المتصفح.");
+      alert("إذا كان التطبيق مثبتاً بالفعل على جهازك، لا يمكنك تثبيته مرة أخرى. قم بفتحه من الشاشة الرئيسية! أو يرجى المحاولة من قائمة المتصفح.");
     }
   };
 
