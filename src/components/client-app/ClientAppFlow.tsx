@@ -23,6 +23,7 @@ export interface IntakeQuestion {
 }
 
 export interface CoachData {
+  id: string;
   name: string;
   logo: string;
   welcomeImage?: string | null;
@@ -155,7 +156,7 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
                 setUserData(prev => prev ? { ...prev, intakeData: data } : null);
                 // Call the backend to save client and trigger a task!
                 if (userData) {
-                  await registerClientPwa(coach.id, {
+                  const res = await registerClientPwa(coach.id, {
                     name: userData.name,
                     email: userData.email,
                     password: userData.password,
@@ -167,6 +168,10 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
                     goal: data.goal,
                     injuries: data.injuries
                   });
+                  if (!res.success) {
+                    alert(res.error || "حدث خطأ أثناء التسجيل");
+                    return;
+                  }
                 }
                 setStep('success');
               }}

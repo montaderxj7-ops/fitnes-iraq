@@ -212,6 +212,7 @@ export async function getPublicCoachData(slug: string) {
     return {
       success: true,
       coach: {
+        id: profile.id,
         name: profile?.name || settings.name,
         logo: profile?.logo || settings.logo || "",
         welcomeImage: profile?.welcomeImage || profile?.image || "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop",
