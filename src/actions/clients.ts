@@ -74,12 +74,15 @@ export async function addClient(data: {
     const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
     if (!profile) return { success: false, error: "No profile" };
 
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(data.password || "123456", 10);
+
     // Create User for the client
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email || `${Date.now()}@client.local`,
-        password: data.password || "123456",
+        password: hashedPassword,
         role: "CLIENT",
       }
     });
@@ -164,8 +167,17 @@ export async function loginClient(coachId: string, email: string, password?: str
     if (!user || !user.clientProfile) {
       return { success: false, error: "البريد الإلكتروني غير مسجل" };
     }
-    // In a real app, use bcrypt. Here we do simple check.
-    if (user.password !== password) {
+    const bcrypt = require('bcryptjs');
+    let isValid = false;
+    // Check if password is a bcrypt hash (starts with $2a$ or $2b$)
+    if (user.password?.startsWith('$2')) {
+      isValid = await bcrypt.compare(password || "", user.password);
+    } else {
+      // Fallback for plaintext passwords
+      isValid = user.password === password;
+    }
+
+    if (!isValid) {
       return { success: false, error: "كلمة المرور غير صحيحة" };
     }
     return { success: true, client: { ...user.clientProfile, email: user.email } };
@@ -199,12 +211,15 @@ export async function registerClientPwa(coachId: string, data: {
       }
     }
 
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(data.password || "123456", 10);
+
     // Create User for the client
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email || `${Date.now()}@client.local`,
-        password: data.password || "123456",
+        password: hashedPassword,
         role: "CLIENT",
       }
     });
