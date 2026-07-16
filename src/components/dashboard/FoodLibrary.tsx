@@ -271,7 +271,7 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
                            {ingredients.length > 1 && (
                              <button type="button" onClick={() => removeIng(ing.id)} className="absolute top-2 left-2 text-red-500 hover:text-red-400"><X className="w-4 h-4"/></button>
                            )}
-                           <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-2 md:mt-0">
+                           <div className="grid grid-cols-3 gap-2 mt-2 md:mt-0">
                               <div className="col-span-2">
                                 <label className="block text-[10px] font-bold text-gray-400 mb-1">اسم المكون</label>
                                 <input value={ing.name} onChange={(e) => updateIng(ing.id, 'name', e.target.value)} placeholder="مثال: صدر دجاج" className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
@@ -279,22 +279,6 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
                               <div>
                                 <label className="block text-[10px] font-bold text-gray-400 mb-1">الكمية (g)</label>
                                 <input type="number" min="0" step="0.1" value={ing.amount} onChange={(e) => updateIng(ing.id, 'amount', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-gray-400 mb-1">سعرات</label>
-                                <input type="number" min="0" step="0.1" value={ing.calories} onChange={(e) => updateIng(ing.id, 'calories', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-gray-400 mb-1">بروتين (g)</label>
-                                <input type="number" min="0" step="0.1" value={ing.protein} onChange={(e) => updateIng(ing.id, 'protein', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-red-500/50" />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-gray-400 mb-1">كارب (g)</label>
-                                <input type="number" min="0" step="0.1" value={ing.carbs} onChange={(e) => updateIng(ing.id, 'carbs', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-yellow-500/50" />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-gray-400 mb-1">دهون (g)</label>
-                                <input type="number" min="0" step="0.1" value={ing.fats} onChange={(e) => updateIng(ing.id, 'fats', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
                               </div>
                            </div>
                          </div>
