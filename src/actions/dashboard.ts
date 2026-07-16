@@ -22,21 +22,15 @@ export async function getDashboardStats() {
       where: { coachId }
     });
 
-    const packages = await prisma.package.findMany({
-      where: { coachId },
-      select: { price: true, clientsCount: true }
+    const payments = await prisma.payment.findMany({
+      where: { coachId, status: "completed" },
+      select: { amount: true }
     });
 
-    // Approximate total revenue based on package prices
-    let totalRevenue = packages.reduce((acc, pkg) => {
-      const priceVal = parseInt(pkg.price.replace(/\D/g, '')) || 0;
-      return acc + (priceVal * pkg.clientsCount);
+    const totalRevenue = payments.reduce((acc, p) => {
+      const priceVal = parseInt(p.amount.replace(/\D/g, '')) || 0;
+      return acc + priceVal;
     }, 0);
-    
-    // Fallback if packages have 0 clientsCount
-    if (totalRevenue === 0 && totalClientsCount > 0) {
-      totalRevenue = totalClientsCount * 25000; // rough average
-    }
 
     const now = new Date();
     const oneMonthAgo = new Date(new Date().setMonth(now.getMonth() - 1));

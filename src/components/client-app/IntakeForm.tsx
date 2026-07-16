@@ -35,10 +35,14 @@ export function IntakeForm({ coach, onComplete }: IntakeFormProps) {
   };
   
   const CurrentIcon = getIconForType(currentQuestion.type);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLastStep) {
-      onComplete(formData);
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      await onComplete(formData);
+      setIsSubmitting(false);
     } else {
       setStep(s => s + 1);
     }
@@ -233,8 +237,14 @@ export function IntakeForm({ coach, onComplete }: IntakeFormProps) {
               <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              {isLastStep ? t('intake.finish') : t('intake.next')}
-              {!isLastStep && (dir === 'rtl' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />)}
+              {isSubmitting ? (
+                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full" />
+              ) : (
+                <>
+                  {isLastStep ? t('intake.finish') : t('intake.next')}
+                  {!isLastStep && (dir === 'rtl' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />)}
+                </>
+              )}
             </span>
           </motion.button>
         </div>
