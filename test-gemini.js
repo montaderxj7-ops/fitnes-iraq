@@ -30,9 +30,22 @@ ${ingredients.map((ing, i) => `${i + 1}. ${ing.name} - ${ing.amount} جرام`).
 لا تُرجع أي نص آخر، فقط مصفوفة الـ JSON.
 `;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
+    })
+  });
+
+  if (!response.ok) {
+    console.error("Gemini API Error:", response.status, await response.text());
+    return;
+  }
+
   const data = await response.json();
-  console.log(data.models.map(m => m.name).join('\\n'));
+  console.log(JSON.stringify(data, null, 2));
 }
 
 testGemini();
