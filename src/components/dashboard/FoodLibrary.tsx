@@ -73,47 +73,57 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newCalories, setNewCalories] = useState('');
-  const [newProtein, setNewProtein] = useState('');
-  const [newCarbs, setNewCarbs] = useState('');
-  const [newFats, setNewFats] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Recipe Builder States
-  const [ingredients, setIngredients] = useState<{id: string, food: FoodItem, amount: number}[]>([]);
+  interface ManualIngredient {
+    id: string;
+    name: string;
+    amount: string;
+    calories: string;
+    protein: string;
+    carbs: string;
+    fats: string;
+  }
+
+  const [ingredients, setIngredients] = useState<ManualIngredient[]>([
+    { id: Math.random().toString(), name: '', amount: '100', calories: '', protein: '', carbs: '', fats: '' }
+  ]);
   const [selectedFoodId, setSelectedFoodId] = useState('');
-  const [ingredientAmount, setIngredientAmount] = useState('100');
+  const [libraryAmount, setLibraryAmount] = useState('100');
 
-  const recalculateMacros = (ings: {id: string, food: FoodItem, amount: number}[]) => {
-    let cals = 0, pro = 0, car = 0, fat = 0;
-    ings.forEach(ing => {
-      const ratio = ing.amount / 100; // assuming library items are per 100g
-      cals += ing.food.calories * ratio;
-      pro += ing.food.protein * ratio;
-      car += ing.food.carbs * ratio;
-      fat += ing.food.fats * ratio;
-    });
-    setNewCalories(cals.toFixed(1));
-    setNewProtein(pro.toFixed(1));
-    setNewCarbs(car.toFixed(1));
-    setNewFats(fat.toFixed(1));
+  const totalCalories = ingredients.reduce((acc, curr) => acc + (parseFloat(curr.calories) || 0), 0).toFixed(1).replace(/\.0$/, '');
+  const totalProtein = ingredients.reduce((acc, curr) => acc + (parseFloat(curr.protein) || 0), 0).toFixed(1).replace(/\.0$/, '');
+  const totalCarbs = ingredients.reduce((acc, curr) => acc + (parseFloat(curr.carbs) || 0), 0).toFixed(1).replace(/\.0$/, '');
+  const totalFats = ingredients.reduce((acc, curr) => acc + (parseFloat(curr.fats) || 0), 0).toFixed(1).replace(/\.0$/, '');
+
+  const updateIng = (id: string, field: keyof ManualIngredient, value: string) => {
+    setIngredients(prev => prev.map(ing => ing.id === id ? { ...ing, [field]: value } : ing));
   };
 
-  const handleAddIngredient = () => {
+  const addBlankIng = () => {
+    setIngredients(prev => [...prev, { id: Math.random().toString(), name: '', amount: '100', calories: '', protein: '', carbs: '', fats: '' }]);
+  };
+
+  const removeIng = (id: string) => {
+    setIngredients(prev => prev.filter(ing => ing.id !== id));
+  };
+
+  const handleAddFromLibrary = () => {
     const food = foodItems.find(f => f.id === selectedFoodId);
-    if (food && parseFloat(ingredientAmount) > 0) {
-      const newIngs = [...ingredients, { id: Math.random().toString(), food, amount: parseFloat(ingredientAmount) }];
-      setIngredients(newIngs);
-      recalculateMacros(newIngs);
+    if (food) {
+      const ratio = (parseFloat(libraryAmount) || 100) / 100;
+      setIngredients(prev => [...prev, {
+        id: Math.random().toString(),
+        name: food.name,
+        amount: libraryAmount,
+        calories: (food.calories * ratio).toFixed(1).replace(/\.0$/, ''),
+        protein: (food.protein * ratio).toFixed(1).replace(/\.0$/, ''),
+        carbs: (food.carbs * ratio).toFixed(1).replace(/\.0$/, ''),
+        fats: (food.fats * ratio).toFixed(1).replace(/\.0$/, '')
+      }]);
       setSelectedFoodId('');
-      setIngredientAmount('100');
+      setLibraryAmount('100');
     }
-  };
-
-  const handleRemoveIngredient = (id: string) => {
-    const newIngs = ingredients.filter(i => i.id !== id);
-    setIngredients(newIngs);
-    recalculateMacros(newIngs);
   };
 
   const handleAddSubmit = async (e: React.FormEvent) => {
@@ -122,21 +132,17 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
     setIsSubmitting(true);
     const res = await addFoodItem({
       name: newName,
-      calories: parseFloat(newCalories) || 0,
-      protein: parseFloat(newProtein) || 0,
-      carbs: parseFloat(newCarbs) || 0,
-      fats: parseFloat(newFats) || 0,
+      calories: parseFloat(totalCalories) || 0,
+      protein: parseFloat(totalProtein) || 0,
+      carbs: parseFloat(totalCarbs) || 0,
+      fats: parseFloat(totalFats) || 0,
     });
     if (res.success && res.foodItem) {
       toast.success('تمت إضافة الصنف للمكتبة بنجاح');
       onAddFood(res.foodItem);
       setIsModalOpen(false);
       setNewName('');
-      setNewCalories('');
-      setNewProtein('');
-      setNewCarbs('');
-      setNewFats('');
-      setIngredients([]);
+      setIngredients([{ id: Math.random().toString(), name: '', amount: '100', calories: '', protein: '', carbs: '', fats: '' }]);
     } else {
       toast.error('حدث خطأ أثناء إضافة الصنف');
     }
@@ -216,109 +222,100 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
                 {/* Recipe Builder Section */}
                 <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
                   <div>
-                    <h4 className="text-sm font-bold text-white mb-1">إضافة مكونات (اختياري)</h4>
-                    <p className="text-xs text-gray-400 mb-3">اختر من مكتبتك ليتم حساب الماكروز تلقائياً (بافتراض المكونات مسجلة لكل 100غ).</p>
+                    <h4 className="text-sm font-bold text-white mb-1">المكونات</h4>
+                    <p className="text-xs text-gray-400 mb-3">يمكنك إدخال المكونات يدوياً أو استيرادها من المكتبة</p>
                     
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs font-bold text-gray-400 mb-1">المكون</label>
+                    <div className="space-y-3">
+                      {ingredients.map((ing) => (
+                         <div key={ing.id} className="p-3 bg-black/40 border border-white/10 rounded-xl relative group">
+                           {ingredients.length > 1 && (
+                             <button type="button" onClick={() => removeIng(ing.id)} className="absolute top-2 left-2 text-red-500 hover:text-red-400"><X className="w-4 h-4"/></button>
+                           )}
+                           <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-2 md:mt-0">
+                              <div className="col-span-2">
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">اسم المكون</label>
+                                <input value={ing.name} onChange={(e) => updateIng(ing.id, 'name', e.target.value)} placeholder="مثال: صدر دجاج" className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">الكمية (g)</label>
+                                <input type="number" min="0" step="0.1" value={ing.amount} onChange={(e) => updateIng(ing.id, 'amount', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">سعرات</label>
+                                <input type="number" min="0" step="0.1" value={ing.calories} onChange={(e) => updateIng(ing.id, 'calories', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">بروتين (g)</label>
+                                <input type="number" min="0" step="0.1" value={ing.protein} onChange={(e) => updateIng(ing.id, 'protein', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-red-500/50" />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">كارب (g)</label>
+                                <input type="number" min="0" step="0.1" value={ing.carbs} onChange={(e) => updateIng(ing.id, 'carbs', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-yellow-500/50" />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-gray-400 mb-1">دهون (g)</label>
+                                <input type="number" min="0" step="0.1" value={ing.fats} onChange={(e) => updateIng(ing.id, 'fats', e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500/50" />
+                              </div>
+                           </div>
+                         </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-3 mt-4">
+                      <button type="button" onClick={addBlankIng} className="flex-1 py-2 rounded-xl border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/50 transition-colors text-xs font-bold">+ إضافة مكون يدوياً</button>
+                      
+                      <div className="flex-1 flex gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
                         <select 
                           value={selectedFoodId}
                           onChange={(e) => setSelectedFoodId(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500/50 text-sm"
+                          className="flex-1 bg-transparent text-white text-xs focus:outline-none px-1"
                         >
-                          <option value="">اختر من المكتبة...</option>
+                          <option value="" className="text-black">استيراد من المكتبة...</option>
                           {foodItems.map(f => (
-                            <option key={f.id} value={f.id}>{f.name}</option>
+                            <option key={f.id} value={f.id} className="text-black">{f.name}</option>
                           ))}
                         </select>
-                      </div>
-                      <div className="w-24">
-                        <label className="block text-xs font-bold text-gray-400 mb-1">الكمية (g)</label>
                         <input 
                           type="number"
                           min="1"
-                          value={ingredientAmount}
-                          onChange={(e) => setIngredientAmount(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500/50 text-sm text-center"
+                          placeholder="الكمية(g)"
+                          value={libraryAmount}
+                          onChange={(e) => setLibraryAmount(e.target.value)}
+                          className="w-16 bg-black/50 border border-white/10 rounded-lg px-2 text-white text-xs focus:outline-none text-center"
                         />
+                        <button 
+                          type="button"
+                          onClick={handleAddFromLibrary}
+                          disabled={!selectedFoodId}
+                          className="bg-blue-500 text-white rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-blue-600 disabled:opacity-50"
+                        >
+                          إدراج
+                        </button>
                       </div>
-                      <button 
-                        type="button"
-                        onClick={handleAddIngredient}
-                        disabled={!selectedFoodId}
-                        className="bg-blue-500 text-white rounded-xl px-4 py-2 text-sm font-bold hover:bg-blue-600 disabled:opacity-50 h-[38px]"
-                      >
-                        إضافة
-                      </button>
                     </div>
                   </div>
-
-                  {ingredients.length > 0 && (
-                    <div className="space-y-2 mt-4 pt-4 border-t border-white/5">
-                      {ingredients.map((ing) => (
-                        <div key={ing.id} className="flex items-center justify-between bg-black/40 border border-white/5 p-2.5 rounded-lg">
-                          <div>
-                            <p className="text-xs font-bold text-white">{ing.food.name}</p>
-                            <p className="text-[10px] text-gray-400">{ing.amount} جرام</p>
-                          </div>
-                          <button type="button" onClick={() => handleRemoveIngredient(ing.id)} className="text-red-400 hover:text-red-300 p-1">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-300 mb-1.5">السعرات الحرارية</label>
-                    <input 
-                      type="number"
-                      required
-                      min="0"
-                      step="0.1"
-                      value={newCalories}
-                      onChange={(e) => setNewCalories(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-300 mb-1.5">البروتين (g)</label>
-                    <input 
-                      type="number"
-                      required
-                      min="0"
-                      step="0.1"
-                      value={newProtein}
-                      onChange={(e) => setNewProtein(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-300 mb-1.5">الكاربوهيدرات (g)</label>
-                    <input 
-                      type="number"
-                      required
-                      min="0"
-                      step="0.1"
-                      value={newCarbs}
-                      onChange={(e) => setNewCarbs(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-yellow-500/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-300 mb-1.5">الدهون (g)</label>
-                    <input 
-                      type="number"
-                      required
-                      min="0"
-                      step="0.1"
-                      value={newFats}
-                      onChange={(e) => setNewFats(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
-                    />
+                {/* Totals */}
+                <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl">
+                  <h4 className="text-sm font-bold text-blue-400 mb-3 text-center">إجمالي الماكروز للوجبة أو الصنف</h4>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <span className="block text-lg md:text-xl font-black text-white">{totalCalories}</span>
+                      <span className="text-[10px] text-gray-400">سعرة</span>
+                    </div>
+                    <div>
+                      <span className="block text-lg md:text-xl font-black text-white">{totalProtein}</span>
+                      <span className="text-[10px] text-gray-400">بروتين</span>
+                    </div>
+                    <div>
+                      <span className="block text-lg md:text-xl font-black text-white">{totalCarbs}</span>
+                      <span className="text-[10px] text-gray-400">كارب</span>
+                    </div>
+                    <div>
+                      <span className="block text-lg md:text-xl font-black text-white">{totalFats}</span>
+                      <span className="text-[10px] text-gray-400">دهون</span>
+                    </div>
                   </div>
                 </div>
               </div>
