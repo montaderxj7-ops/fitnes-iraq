@@ -68,7 +68,6 @@ function DraggableFood({ food }: { food: FoodItem }) {
   );
 }
 
-export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
   const [search, setSearch] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,6 +77,43 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
   const [newCarbs, setNewCarbs] = useState('');
   const [newFats, setNewFats] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Recipe Builder States
+  const [ingredients, setIngredients] = useState<{id: string, food: FoodItem, amount: number}[]>([]);
+  const [selectedFoodId, setSelectedFoodId] = useState('');
+  const [ingredientAmount, setIngredientAmount] = useState('100');
+
+  const recalculateMacros = (ings: {id: string, food: FoodItem, amount: number}[]) => {
+    let cals = 0, pro = 0, car = 0, fat = 0;
+    ings.forEach(ing => {
+      const ratio = ing.amount / 100; // assuming library items are per 100g
+      cals += ing.food.calories * ratio;
+      pro += ing.food.protein * ratio;
+      car += ing.food.carbs * ratio;
+      fat += ing.food.fats * ratio;
+    });
+    setNewCalories(cals.toFixed(1));
+    setNewProtein(pro.toFixed(1));
+    setNewCarbs(car.toFixed(1));
+    setNewFats(fat.toFixed(1));
+  };
+
+  const handleAddIngredient = () => {
+    const food = foodItems.find(f => f.id === selectedFoodId);
+    if (food && parseFloat(ingredientAmount) > 0) {
+      const newIngs = [...ingredients, { id: Math.random().toString(), food, amount: parseFloat(ingredientAmount) }];
+      setIngredients(newIngs);
+      recalculateMacros(newIngs);
+      setSelectedFoodId('');
+      setIngredientAmount('100');
+    }
+  };
+
+  const handleRemoveIngredient = (id: string) => {
+    const newIngs = ingredients.filter(i => i.id !== id);
+    setIngredients(newIngs);
+    recalculateMacros(newIngs);
+  };
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +135,7 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
       setNewProtein('');
       setNewCarbs('');
       setNewFats('');
+      setIngredients([]);
     } else {
       toast.error('حدث خطأ أثناء إضافة الصنف');
     }
@@ -139,7 +176,10 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
 
       <div className="p-4 border-t border-white/5 bg-black/20">
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIngredients([]);
+            setIsModalOpen(true);
+          }}
           className="w-full py-2.5 rounded-xl border border-dashed border-white/20 text-gray-400 hover:text-blue-400 hover:border-blue-500/50 transition-colors flex items-center justify-center gap-2 text-sm font-bold"
         >
           <Plus className="w-4 h-4" />
@@ -150,95 +190,155 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
       {/* Add Food Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/20">
-              <h3 className="text-lg font-bold text-white">إضافة صنف جديد</h3>
+          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/20 shrink-0">
+              <h3 className="text-lg font-bold text-white">إضافة صنف أو بناء وجبة</h3>
               <button onClick={() => setIsModalOpen(false)} className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             
-            <form onSubmit={handleAddSubmit} className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-300 mb-1.5">اسم الصنف الغذائي</label>
-                <input 
-                  type="text"
-                  required
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="مثال: صدر دجاج مشوي 100غ"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
-                />
-              </div>
+            <div className="p-5 overflow-y-auto custom-scrollbar flex-1">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1.5">اسم الصنف الغذائي أو الوجبة</label>
+                  <input 
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="مثال: وجبة شوفان مع الموز"
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1.5">السعرات الحرارية</label>
-                  <input 
-                    type="number"
-                    required
-                    min="0"
-                    step="0.1"
-                    value={newCalories}
-                    onChange={(e) => setNewCalories(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1.5">البروتين (g)</label>
-                  <input 
-                    type="number"
-                    required
-                    min="0"
-                    step="0.1"
-                    value={newProtein}
-                    onChange={(e) => setNewProtein(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1.5">الكاربوهيدرات (g)</label>
-                  <input 
-                    type="number"
-                    required
-                    min="0"
-                    step="0.1"
-                    value={newCarbs}
-                    onChange={(e) => setNewCarbs(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-yellow-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1.5">الدهون (g)</label>
-                  <input 
-                    type="number"
-                    required
-                    min="0"
-                    step="0.1"
-                    value={newFats}
-                    onChange={(e) => setNewFats(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-              </div>
+                {/* Recipe Builder Section */}
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-1">إضافة مكونات (اختياري)</h4>
+                    <p className="text-xs text-gray-400 mb-3">اختر من مكتبتك ليتم حساب الماكروز تلقائياً (بافتراض المكونات مسجلة لكل 100غ).</p>
+                    
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-bold text-gray-400 mb-1">المكون</label>
+                        <select 
+                          value={selectedFoodId}
+                          onChange={(e) => setSelectedFoodId(e.target.value)}
+                          className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500/50 text-sm"
+                        >
+                          <option value="">اختر من المكتبة...</option>
+                          {foodItems.map(f => (
+                            <option key={f.id} value={f.id}>{f.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-24">
+                        <label className="block text-xs font-bold text-gray-400 mb-1">الكمية (g)</label>
+                        <input 
+                          type="number"
+                          min="1"
+                          value={ingredientAmount}
+                          onChange={(e) => setIngredientAmount(e.target.value)}
+                          className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500/50 text-sm text-center"
+                        />
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={handleAddIngredient}
+                        disabled={!selectedFoodId}
+                        className="bg-blue-500 text-white rounded-xl px-4 py-2 text-sm font-bold hover:bg-blue-600 disabled:opacity-50 h-[38px]"
+                      >
+                        إضافة
+                      </button>
+                    </div>
+                  </div>
 
-              <div className="pt-4 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الإضافة...' : 'إضافة الصنف'}
-                </button>
+                  {ingredients.length > 0 && (
+                    <div className="space-y-2 mt-4 pt-4 border-t border-white/5">
+                      {ingredients.map((ing) => (
+                        <div key={ing.id} className="flex items-center justify-between bg-black/40 border border-white/5 p-2.5 rounded-lg">
+                          <div>
+                            <p className="text-xs font-bold text-white">{ing.food.name}</p>
+                            <p className="text-[10px] text-gray-400">{ing.amount} جرام</p>
+                          </div>
+                          <button type="button" onClick={() => handleRemoveIngredient(ing.id)} className="text-red-400 hover:text-red-300 p-1">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-300 mb-1.5">السعرات الحرارية</label>
+                    <input 
+                      type="number"
+                      required
+                      min="0"
+                      step="0.1"
+                      value={newCalories}
+                      onChange={(e) => setNewCalories(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-300 mb-1.5">البروتين (g)</label>
+                    <input 
+                      type="number"
+                      required
+                      min="0"
+                      step="0.1"
+                      value={newProtein}
+                      onChange={(e) => setNewProtein(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-300 mb-1.5">الكاربوهيدرات (g)</label>
+                    <input 
+                      type="number"
+                      required
+                      min="0"
+                      step="0.1"
+                      value={newCarbs}
+                      onChange={(e) => setNewCarbs(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-yellow-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-300 mb-1.5">الدهون (g)</label>
+                    <input 
+                      type="number"
+                      required
+                      min="0"
+                      step="0.1"
+                      value={newFats}
+                      onChange={(e) => setNewFats(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500/50"
+                    />
+                  </div>
+                </div>
               </div>
-            </form>
+            </div>
+
+            <div className="p-4 border-t border-white/5 bg-black/20 flex gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleAddSubmit}
+                disabled={isSubmitting || !newName}
+                className="flex-1 px-4 py-3 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? 'جاري الحفظ...' : 'حفظ الوجبة/الصنف'}
+              </button>
+            </div>
           </div>
         </div>
       )}
