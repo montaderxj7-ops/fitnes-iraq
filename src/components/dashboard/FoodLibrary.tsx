@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Search, Plus, X, Apple } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { addFoodItem } from '@/actions/nutrition';
+import { calculateMacrosAction } from '@/actions/ai';
 import toast from 'react-hot-toast';
 
 interface FoodItem {
@@ -124,6 +125,45 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
       setSelectedFoodId('');
       setLibraryAmount('100');
     }
+  };
+  const [isCalculatingAI, setIsCalculatingAI] = useState(false);
+
+  const handleCalculateAI = async () => {
+    const validIngredients = ingredients.filter(i => i.name.trim() !== '' && parseFloat(i.amount) > 0);
+    if (validIngredients.length === 0) {
+      toast.error('يرجى إضافة مكونات بكميات صالحة أولاً');
+      return;
+    }
+    
+    setIsCalculatingAI(true);
+    const loadingToast = toast.loading('جاري حساب الماكروز بالذكاء الاصطناعي...');
+    
+    const res = await calculateMacrosAction(validIngredients.map(i => ({
+      name: i.name,
+      amount: parseFloat(i.amount) || 0
+    })));
+
+    if (res.success && res.macros) {
+      setIngredients(prev => prev.map(ing => {
+        const index = validIngredients.findIndex(v => v.id === ing.id);
+        if (index !== -1 && res.macros[index]) {
+          const aiMacro = res.macros[index];
+          return {
+            ...ing,
+            calories: (aiMacro.calories || 0).toString(),
+            protein: (aiMacro.protein || 0).toString(),
+            carbs: (aiMacro.carbs || 0).toString(),
+            fats: (aiMacro.fats || 0).toString()
+          };
+        }
+        return ing;
+      }));
+      toast.success('تم الحساب بنجاح!', { id: loadingToast });
+    } else {
+      toast.error(res.error || 'فشل في حساب الماكروز', { id: loadingToast });
+    }
+    
+    setIsCalculatingAI(false);
   };
 
   const handleAddSubmit = async (e: React.FormEvent) => {
@@ -294,6 +334,18 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <button 
+                    type="button" 
+                    onClick={handleCalculateAI}
+                    disabled={isCalculatingAI}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-bold shadow-lg hover:shadow-purple-500/25 transition-all disabled:opacity-50"
+                  >
+                    <span className="text-xl">✨</span>
+                    {isCalculatingAI ? 'جاري الحساب...' : 'حساب الماكروز بالذكاء الاصطناعي'}
+                  </button>
                 </div>
 
                 {/* Totals */}
