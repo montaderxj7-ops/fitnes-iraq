@@ -49,9 +49,9 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
           id: uuidv4(), 
           name: 'اليوم الأول', 
           meals: [
-            { id: uuidv4(), name: 'الفطور', foods: [] },
-            { id: uuidv4(), name: 'الغداء', foods: [] },
-            { id: uuidv4(), name: 'العشاء', foods: [] },
+            { id: uuidv4(), name: 'وجبة 1', foods: [] },
+            { id: uuidv4(), name: 'وجبة 2', foods: [] },
+            { id: uuidv4(), name: 'وجبة 3', foods: [] },
           ] 
         }
       ]);
@@ -168,9 +168,9 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
       id: uuidv4(), 
       name: `اليوم ${days.length + 1}`, 
       meals: [
-        { id: uuidv4(), name: 'الفطور', foods: [] },
-        { id: uuidv4(), name: 'الغداء', foods: [] },
-        { id: uuidv4(), name: 'العشاء', foods: [] },
+        { id: uuidv4(), name: 'وجبة 1', foods: [] },
+        { id: uuidv4(), name: 'وجبة 2', foods: [] },
+        { id: uuidv4(), name: 'وجبة 3', foods: [] },
       ] 
     }]);
   };
