@@ -116,7 +116,7 @@ export function PwaInstaller({
                 </div>
               </div>
             </div>
-          ) : (
+          ) : deferredPrompt ? (
             <div className="w-full space-y-4">
               <button
                 onClick={handleInstallClick}
@@ -126,12 +126,24 @@ export function PwaInstaller({
                 <Download className="w-6 h-6" />
                 تأكيد التحميل 📥
               </button>
-              
-              {!deferredPrompt && (
-                <p className="text-xs text-gray-500 mt-2">
-                  (جاري تجهيز التحميل... انتظر لحظة من فضلك)
-                </p>
-              )}
+            </div>
+          ) : (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full mb-8 backdrop-blur-md">
+              <h3 className="font-bold text-white mb-4 text-lg">لتثبيت التطبيق على جهازك:</h3>
+              <div className="flex flex-col gap-4 text-right">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-white/10 p-2 rounded-lg text-white font-black">
+                    ⋮
+                  </div>
+                  <p>1. اضغط على <span className="font-bold text-white">القائمة (الثلاث نقاط)</span> أعلى المتصفح</p>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-white/10 p-2 rounded-lg text-white">
+                    <Download className="w-5 h-5" />
+                  </div>
+                  <p>2. اختر <span className="font-bold text-white">تثبيت التطبيق</span> أو <span className="font-bold text-white">إضافة للشاشة الرئيسية</span></p>
+                </div>
+              </div>
             </div>
           )}
 
