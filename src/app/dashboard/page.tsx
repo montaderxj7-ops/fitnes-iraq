@@ -9,6 +9,7 @@ import { getPendingTasks, completeTask } from "@/actions/tasks";
 import { getDashboardStats } from "@/actions/dashboard";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
+import Link from "next/link";
 
 // Tasks will be fetched dynamically
 const containerVariants = {
@@ -207,9 +208,9 @@ export default function DashboardOverview() {
               </span>
               المهام العاجلة
             </h2>
-            <button className="text-sm text-[#82c91e] hover:text-[#93e022] font-medium flex items-center gap-1 bg-[#82c91e]/10 px-4 py-2 rounded-full transition-colors">
+            <Link href="/dashboard/tasks" className="text-sm text-[#82c91e] hover:text-[#93e022] font-medium flex items-center gap-1 bg-[#82c91e]/10 px-4 py-2 rounded-full transition-colors">
               عرض الكل <ChevronLeft className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
