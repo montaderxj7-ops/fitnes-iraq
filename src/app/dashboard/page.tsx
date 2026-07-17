@@ -47,8 +47,13 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     async function fetchData() {
-      // Fetch settings
-      const resSettings = await getSettings();
+      // Fetch all data concurrently to reduce latency
+      const [resSettings, resTasks, dynamicStats] = await Promise.all([
+        getSettings(),
+        getPendingTasks(),
+        getDashboardStats()
+      ]);
+
       if (resSettings.success && resSettings.settings) {
         setSettings({
           coachName: resSettings.settings.name || "كابتن برو",
@@ -57,14 +62,10 @@ export default function DashboardOverview() {
         });
       }
 
-      // Fetch tasks
-      const resTasks = await getPendingTasks();
       if (resTasks.success && resTasks.tasks) {
         setTasks(resTasks.tasks);
       }
 
-      // Fetch dynamic stats
-      const dynamicStats = await getDashboardStats();
       setStatsData(dynamicStats);
     }
     fetchData();
