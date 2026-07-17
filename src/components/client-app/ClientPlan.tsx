@@ -6,6 +6,7 @@ import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { getWorkoutPlan } from '@/actions/workouts';
 import { getNutritionPlan } from '@/actions/nutrition';
+import { getSupplementPlan } from '@/actions/supplements';
 
 interface ClientPlanProps {
   coach: CoachData;
@@ -48,6 +49,7 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
   
   const [workoutPlan, setWorkoutPlan] = useState<any[]>([]);
   const [nutritionPlan, setNutritionPlan] = useState<any>(null);
+  const [supplementPlan, setSupplementPlan] = useState<any>(null);
   const [hasPlan, setHasPlan] = useState(false);
   const [isLoadingPlan, setIsLoadingPlan] = useState(true);
 
@@ -77,6 +79,11 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
           const nutRes = await getNutritionPlan(userData.id);
           if (nutRes.success && nutRes.plan) {
             setNutritionPlan(nutRes.plan);
+          }
+
+          const suppRes = await getSupplementPlan(userData.id);
+          if (suppRes.success && suppRes.plan) {
+            setSupplementPlan(suppRes.plan);
           }
         } catch (error) {
           console.error("Error loading plan:", error);
@@ -406,9 +413,54 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               initial="hidden"
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
-              className="px-6 space-y-4 flex flex-col items-center justify-center min-h-[300px]"
+              className="px-6 space-y-6"
             >
-              <div className="text-center text-gray-500 text-sm">لا توجد مكملات غذائية مخصصة لك حتى الآن.</div>
+              {isLoadingPlan ? (
+                <div className="text-center text-gray-500 text-sm py-10">جاري تحميل خطة المكملات...</div>
+              ) : !supplementPlan || supplementPlan.days.length === 0 ? (
+                <div className="text-center text-gray-500 text-sm py-10 flex flex-col items-center justify-center min-h-[300px]">لا توجد مكملات غذائية مخصصة لك حتى الآن.</div>
+              ) : (
+                <div className="space-y-4">
+                  {supplementPlan.days.map((day: any) => (
+                    <motion.div variants={itemVariants} key={day.id} className="bg-[#111] border border-white/5 rounded-[2rem] overflow-hidden shadow-lg">
+                      <div className="p-5 border-b border-white/5 bg-gradient-to-r from-purple-500/10 to-transparent flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-white">{day.name}</h3>
+                        <span className="text-xs font-bold text-purple-400 bg-purple-400/10 px-3 py-1.5 rounded-xl">{day.items.length} مكملات</span>
+                      </div>
+                      <div className="p-4 space-y-3 bg-black/20">
+                        {day.items.map((item: any, idx: number) => (
+                          <div key={item.id} className="bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                                <Pill className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="text-white font-bold">{item.supplement?.name || item.name}</h4>
+                                {item.supplement?.description && (
+                                  <p className="text-xs text-gray-400 mt-1">{item.supplement.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-col items-center bg-black/40 border border-white/10 rounded-xl px-4 py-2 min-w-[80px]">
+                                <span className="text-[10px] text-gray-500 mb-1">الجرعة</span>
+                                <span className="text-sm font-bold text-white">{item.amount}</span>
+                              </div>
+                              <div className="flex flex-col items-center bg-black/40 border border-white/10 rounded-xl px-4 py-2 min-w-[80px]">
+                                <span className="text-[10px] text-gray-500 mb-1">التوقيت</span>
+                                <span className="text-sm font-bold text-purple-400">{item.timing}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {day.items.length === 0 && (
+                          <p className="text-xs text-gray-500 text-center py-4">لا توجد مكملات في هذا اليوم</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
