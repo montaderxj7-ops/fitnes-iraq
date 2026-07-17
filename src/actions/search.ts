@@ -40,7 +40,9 @@ export async function globalSearch(query: string) {
           id: true,
           name: true,
           package: true,
-          status: true
+          status: true,
+          createdAt: true,
+          endDate: true
         }
       }),
       prisma.package.findMany({
@@ -60,9 +62,25 @@ export async function globalSearch(query: string) {
       })
     ]);
 
+    const clientsWithStatus = clients.map(client => {
+      const finalEndDate = client.endDate || new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      
+      let computedStatus = client.status;
+      if (computedStatus === 'active' && finalEndDate < now) {
+        computedStatus = 'expired';
+      }
+      return {
+        id: client.id,
+        name: client.name,
+        package: client.package,
+        status: computedStatus
+      };
+    });
+
     return { 
       success: true, 
-      clients, 
+      clients: clientsWithStatus, 
       packages 
     };
 

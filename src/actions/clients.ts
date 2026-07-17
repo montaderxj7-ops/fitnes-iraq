@@ -21,11 +21,22 @@ export async function getClients() {
       return [];
     }
     
-    // Map dates nicely
-    return clients.map(client => ({
-      ...client,
-      expiry: new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000))
-    }));
+    // Map dates nicely and compute dynamic status
+    return clients.map(client => {
+      const finalEndDate = client.endDate || new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      
+      let computedStatus = client.status;
+      if (computedStatus === 'active' && finalEndDate < now) {
+        computedStatus = 'expired';
+      }
+
+      return {
+        ...client,
+        status: computedStatus,
+        expiry: new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(finalEndDate)
+      };
+    });
   } catch (error) {
     console.error("Error fetching clients:", error);
     return [];
@@ -50,12 +61,20 @@ export async function getClientById(id: string) {
       }
     }
 
+    const finalEndDate = client.endDate || (client.createdAt ? new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000) : null);
+    const now = new Date();
+    let computedStatus = client.status;
+    if (computedStatus === 'active' && finalEndDate && finalEndDate < now) {
+      computedStatus = 'expired';
+    }
+
     return { 
       success: true, 
       client: {
         ...client,
+        status: computedStatus,
         hasNutrition,
-        expiry: client.createdAt ? new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000)) : "غير محدد"
+        expiry: finalEndDate ? new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(finalEndDate) : "غير محدد"
       } 
     };
   } catch (error) {

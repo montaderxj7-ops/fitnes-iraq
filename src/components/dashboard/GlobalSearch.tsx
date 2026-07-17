@@ -166,8 +166,10 @@ export function GlobalSearch() {
                             </div>
                             {client.status === 'active' ? (
                               <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20">نشط</span>
+                            ) : client.status === 'expired' ? (
+                              <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20">منتهي</span>
                             ) : (
-                              <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20">غير نشط</span>
+                              <span className="text-[10px] bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full border border-gray-500/20">{client.status}</span>
                             )}
                           </button>
                         ))}

@@ -130,8 +130,14 @@ export default function ClientProfilePage() {
               <img src={clientData.avatar || `https://i.pravatar.cc/150?u=${clientData.id}`} alt={clientData.name} className="w-24 h-24 rounded-full object-cover border-4 border-[#1a1a1a] shadow-[0_0_20px_rgba(214,248,84,0.2)]" />
               <div className="text-center">
                 <h2 className="text-xl font-bold text-white">{clientData.name}</h2>
-                <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold mt-2 inline-block border border-green-500/20">
-                  {clientData.status === 'active' ? 'نشط الآن' : clientData.status}
+                <span className={`px-3 py-1 rounded-full text-xs font-bold mt-2 inline-block border ${
+                  clientData.status === 'active' 
+                    ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                    : clientData.status === 'expired'
+                    ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                    : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                }`}>
+                  {clientData.status === 'active' ? 'نشط الآن' : clientData.status === 'expired' ? 'منتهي الصلاحية' : clientData.status}
                 </span>
               </div>
             </div>
