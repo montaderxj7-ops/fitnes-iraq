@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, Plus, X, Check, Trash2, CalendarClock, User, Edit } from "lucide-react";
 import { getAppointments, createAppointment, updateAppointmentStatus, deleteAppointment, editAppointment } from "@/actions/appointments";
@@ -15,6 +15,86 @@ type Appointment = {
   duration: number;
   status: string;
 };
+
+function CustomTimeSelect({ value, onChange }: { value: string, onChange: (v: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const timeOptions = useMemo(() => {
+    const opts = [];
+    for (let i = 0; i < 24; i++) {
+      for (let j = 0; j < 60; j += 30) {
+        const hour = i.toString().padStart(2, '0');
+        const minute = j.toString().padStart(2, '0');
+        const ampm = i >= 12 ? 'م' : 'ص';
+        const displayHour = i % 12 === 0 ? 12 : i % 12;
+        const displayHourStr = displayHour.toString().padStart(2, '0');
+        opts.push({
+          value: `${hour}:${minute}`,
+          label: `${displayHourStr}:${minute} ${ampm}`
+        });
+      }
+    }
+    return opts;
+  }, []);
+
+  const selectedLabel = timeOptions.find(o => o.value === value)?.label || value;
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#82c91e]/50 focus:outline-none transition-colors hover:border-white/20"
+      >
+        <span>{selectedLabel}</span>
+        <Clock className="w-4 h-4 text-gray-400" />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#1a1f1a] border border-white/10 rounded-xl max-h-48 overflow-y-auto custom-scrollbar shadow-2xl"
+          >
+            <div className="p-1">
+              {timeOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={cn(
+                    "w-full text-right px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between",
+                    value === opt.value ? "bg-[#82c91e] text-[#1a1f1a] font-bold" : "text-gray-300 hover:bg-white/5 hover:text-white"
+                  )}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  {opt.label}
+                  {value === opt.value && <Check className="w-4 h-4" />}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function AppointmentsWidget() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -240,12 +320,9 @@ export function AppointmentsWidget() {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="text-[10px] text-gray-500 mb-1 block">الوقت</label>
-                  <input 
-                    type="time" 
-                    required
+                  <CustomTimeSelect 
                     value={newTime}
-                    onChange={(e) => setNewTime(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#82c91e]/50 focus:outline-none [color-scheme:dark]"
+                    onChange={setNewTime}
                   />
                 </div>
                 <div className="flex-1">
