@@ -24,50 +24,61 @@ export async function getDashboardStats() {
 
     const payments = await prisma.payment.findMany({
       where: { coachId, status: "completed" },
-      select: { amount: true }
+      select: { amount: true, createdAt: true }
     });
 
-    const totalRevenue = payments.reduce((acc, p) => {
-      const priceVal = parseInt(p.amount.replace(/\D/g, '')) || 0;
-      return acc + priceVal;
-    }, 0);
-
     const now = new Date();
-    const oneMonthAgo = new Date(new Date().setMonth(now.getMonth() - 1));
-    const twoMonthsAgo = new Date(new Date().setMonth(now.getMonth() - 2));
+    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+
+    let totalRevenue = 0;
+    let revenueThisMonth = 0;
+    let revenueLastMonth = 0;
+
+    for (const p of payments) {
+      const priceVal = parseInt(p.amount.replace(/\D/g, '')) || 0;
+      totalRevenue += priceVal;
+
+      if (p.createdAt >= oneMonthAgo) {
+        revenueThisMonth += priceVal;
+      } else if (p.createdAt >= twoMonthsAgo && p.createdAt < oneMonthAgo) {
+        revenueLastMonth += priceVal;
+      }
+    }
 
     const newClientsThisMonth = await prisma.client.count({
       where: {
         coachId,
-        createdAt: {
-          gte: oneMonthAgo
-        }
+        createdAt: { gte: oneMonthAgo }
       }
     });
 
     const newClientsLastMonth = await prisma.client.count({
       where: {
         coachId,
-        createdAt: {
-          gte: twoMonthsAgo,
-          lt: oneMonthAgo
-        }
+        createdAt: { gte: twoMonthsAgo, lt: oneMonthAgo }
       }
     });
 
+    // Trends logic
     const activeClientsTrendStr = newClientsThisMonth > 0 ? `+${newClientsThisMonth}` : "0";
     
     const newClientsTrend = newClientsThisMonth - newClientsLastMonth;
-    const newClientsTrendStr = newClientsTrend > 0 ? `+${newClientsTrend}` : `${newClientsTrend}`;
+    const newClientsTrendStr = newClientsTrend > 0 ? `+${newClientsTrend}` : newClientsTrend === 0 ? "0" : `${newClientsTrend}`;
 
-    const revenueTrendPct = totalClientsCount > 0 ? Math.round((newClientsThisMonth / totalClientsCount) * 100) : 0;
-    const revenueTrendStr = `+${revenueTrendPct}%`;
+    let revenueTrendPct = 0;
+    if (revenueLastMonth > 0) {
+      revenueTrendPct = Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100);
+    } else if (revenueThisMonth > 0) {
+      revenueTrendPct = 100;
+    }
+    const revenueTrendStr = revenueTrendPct > 0 ? `+${revenueTrendPct}%` : `${revenueTrendPct}%`;
 
     return {
-      activeClients: totalClientsCount,
-      activeClientsTrend: `+${newClientsThisMonth}`,
-      totalRevenue: `${totalRevenue.toLocaleString()} IQD`,
-      revenueTrend: "+100%",
+      activeClients: clientsCount,
+      activeClientsTrend: activeClientsTrendStr,
+      totalRevenue: `${totalRevenue.toLocaleString('en-US')} IQD`,
+      revenueTrend: revenueTrendStr,
       newClients: newClientsThisMonth,
       newClientsTrend: newClientsTrendStr,
     };
