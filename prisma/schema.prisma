@@ -88,6 +88,7 @@ model CoachProfile {
   workoutPlans          WorkoutPlan[]
   nutritionPlans        NutritionPlan[]
   foodItems             FoodItem[]
+  appointments          Appointment[]
 }
 
 model Package {
@@ -125,6 +126,7 @@ model Client {
   updatedAt DateTime     @updatedAt
   coach     CoachProfile @relation("CoachClients", fields: [coachId], references: [id], onDelete: Cascade)
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
 }
 
 model PaymentMethod {
@@ -196,6 +198,23 @@ model Exercise {
   updatedAt        DateTime          @updatedAt
   coach            CoachProfile      @relation(fields: [coachId], references: [id], onDelete: Cascade)
   workoutExercises WorkoutExercise[]
+}
+
+model Appointment {
+  id          String       @id @default(cuid())
+  coachId     String
+  clientId    String?
+  clientName  String?
+  title       String
+  date        DateTime
+  duration    Int          @default(60)
+  status      String       @default("scheduled")
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  coach       CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  client      Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
 }
 
 model WorkoutPlan {

@@ -9,6 +9,7 @@ import { getPendingTasks, completeTask } from "@/actions/tasks";
 import { getDashboardStats } from "@/actions/dashboard";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
+import { AppointmentsWidget } from "@/components/dashboard/AppointmentsWidget";
 import Link from "next/link";
 
 // Tasks will be fetched dynamically
@@ -250,60 +251,9 @@ export default function DashboardOverview() {
       {/* Right Sidebar Panel */}
       <motion.div variants={itemVariants} className="w-full xl:w-[380px] flex flex-col gap-8">
         
-        {/* Calendar / Sessions Widget */}
-        <div className="bg-[#1a1f1a] border border-white/5 rounded-[32px] p-6 flex flex-col relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-40 h-40 bg-[#82c91e]/5 blur-[60px] rounded-full pointer-events-none" />
-          
-          <h2 className="text-xl font-bold mb-6 flex items-center justify-between relative z-10">
-            جلسات التدريب
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-              <Calendar className="w-4 h-4" />
-            </button>
-          </h2>
-
-          {/* Mini Calendar */}
-          <div className="grid grid-cols-7 gap-2 mb-6 text-center relative z-10">
-            {['أ', 'إ', 'ث', 'أ', 'خ', 'ج', 'س'].map((day, i) => (
-              <div key={i} className="text-xs font-bold text-gray-500 mb-2">{day}</div>
-            ))}
-            {currentDate && (() => {
-              const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-              const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay(); // 0 is Sunday
-              const todayDate = currentDate.getDate();
-              
-              const blanks = Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                <div key={`blank-${i}`} className="text-gray-700/30 text-sm py-2"></div>
-              ));
-              
-              const days = Array.from({ length: daysInMonth }).map((_, i) => {
-                const date = i + 1;
-                const isToday = date === todayDate;
-                
-                return (
-                  <div key={`day-${date}`} className={cn(
-                    "text-sm font-medium py-2 rounded-full cursor-pointer transition-all",
-                    isToday ? "bg-[#82c91e] text-[#1a1f1a] font-bold shadow-[0_0_15px_rgba(130,201,30,0.4)]" : "text-gray-400 hover:text-white hover:bg-white/5"
-                  )}>
-                    {date}
-                  </div>
-                );
-              });
-              
-              return [...blanks, ...days];
-            })()}
-          </div>
-
-          <div className="space-y-3 relative z-10">
-            <div className="text-sm font-bold text-gray-400 mb-2">
-              جلسات اليوم ({currentDate ? new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long' }).format(currentDate) : "..."})
-            </div>
-            
-            <div className="p-8 rounded-[20px] bg-black/20 border border-white/5 flex flex-col items-center justify-center text-center">
-              <Calendar className="w-8 h-8 text-gray-500 mb-3" />
-              <p className="text-gray-400 font-medium text-sm">لا توجد جلسات مجدولة لهذا اليوم.</p>
-              <p className="text-gray-500 text-xs mt-1">يمكنك أخذ قسط من الراحة! ☕</p>
-            </div>
-          </div>
+        {/* Appointments / Sessions Widget */}
+        <div className="h-full">
+          <AppointmentsWidget />
         </div>
 
       </motion.div>
