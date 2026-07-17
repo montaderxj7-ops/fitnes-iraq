@@ -90,8 +90,10 @@ export default function DashboardOverview() {
       <div className="flex-1 space-y-8 flex flex-col">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1a1f1a]/80 backdrop-blur-2xl p-8 rounded-[32px] border border-white/10 relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#82c91e]/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1a1f1a]/80 backdrop-blur-2xl p-8 rounded-[32px] border border-white/10 relative shadow-2xl">
+          <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-none">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#82c91e]/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3" />
+          </div>
           
           <div className="relative z-10">
             <h1 className="text-4xl font-black text-white mb-2 flex items-center gap-3 tracking-tight">
