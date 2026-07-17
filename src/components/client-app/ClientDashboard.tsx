@@ -167,6 +167,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
               
               <div className="relative z-10 flex justify-end">
                 <button 
+                  onClick={() => setCurrentTab('plan')}
                   className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 group-hover:scale-105 shadow-[0_10px_20px_rgba(0,0,0,0.3)] relative overflow-hidden"
                   style={{ backgroundColor: coach.primaryColor }}
                 >
@@ -177,7 +178,11 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
             </motion.div>
 
             {/* Nutrition Card (Premium) */}
-            <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#1c1c1c] to-[#111] border border-white/5 rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group shadow-xl">
+            <motion.div 
+              variants={itemVariants} 
+              onClick={() => setCurrentTab('plan')}
+              className="bg-gradient-to-br from-[#1c1c1c] to-[#111] border border-white/5 rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group shadow-xl cursor-pointer hover:border-white/10 transition-colors"
+            >
               <div className="absolute top-0 left-0 w-32 h-32 opacity-10 rounded-full blur-2xl -translate-y-1/2 -translate-x-1/2 transition-opacity group-hover:opacity-30 bg-orange-500" />
               
               <div className="relative z-10 mb-6">
