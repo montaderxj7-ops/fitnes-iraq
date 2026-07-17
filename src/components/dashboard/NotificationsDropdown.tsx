@@ -88,12 +88,9 @@ export function NotificationsDropdown() {
       >
         <Bell className={`w-6 h-6 transition-transform ${isOpen ? 'rotate-12' : 'group-hover:rotate-12'}`} />
         {unreadCount > 0 && (
-          <>
-            <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 rounded-full bg-[#82c91e] border-2 border-[#1a1f1a] shadow-[0_0_10px_#82c91e]" />
-            <span className="absolute -top-1 -right-1 bg-[#82c91e] text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1a1f1a]">
-              {unreadCount > 9 ? '+9' : unreadCount}
-            </span>
-          </>
+          <span className="absolute top-0 right-0 bg-[#82c91e] text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1a1f1a] shadow-[0_0_10px_#82c91e]">
+            {unreadCount > 9 ? '+9' : unreadCount}
+          </span>
         )}
       </button>
 
