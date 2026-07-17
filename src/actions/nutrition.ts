@@ -184,6 +184,79 @@ export async function cloneNutritionPlan(fromClientId: string, toClientId: strin
     return { success: true, plan: newPlan };
   } catch (error) {
     console.error("Error cloning nutrition plan:", error);
-    return { success: false, error: "Failed to clone plan" };
+    return { success: false, error: "Failed to clone nutrition plan" };
+  }
+}
+
+export async function getAllCoachNutritionPlans() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    const plans = await prisma.nutritionPlan.findMany({
+      where: { coachId: profile.id },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const clientIds = plans.map(p => p.clientId);
+    const clients = await prisma.client.findMany({
+      where: { id: { in: clientIds } },
+      select: { id: true, name: true }
+    });
+    
+    const clientMap = new Map(clients.map(c => [c.id, c.name]));
+
+    const plansWithClient = plans.map(p => ({
+      ...p,
+      client: { name: clientMap.get(p.clientId) || null }
+    }));
+
+    return { success: true, plans: plansWithClient };
+  } catch (error) {
+    console.error("Error fetching coach nutrition plans:", error);
+    return { success: false, error: "Failed to fetch coach nutrition plans" };
+  }
+}
+
+export async function getNutritionPlanById(planId: string) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    const plan = await prisma.nutritionPlan.findFirst({
+      where: { 
+        id: planId,
+        coachId: profile.id 
+      },
+      include: {
+        days: {
+          orderBy: { order: 'asc' },
+          include: {
+            meals: {
+              orderBy: { order: 'asc' },
+              include: {
+                foods: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    food: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!plan) return { success: false, error: "Plan not found" };
+
+    return { success: true, plan };
+  } catch (error) {
+    console.error("Error fetching nutrition plan:", error);
+    return { success: false, error: "Failed to fetch nutrition plan" };
   }
 }

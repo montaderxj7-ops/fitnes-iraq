@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { FoodLibrary } from './FoodLibrary';
 import { NutritionPlanBuilder } from './NutritionPlanBuilder';
-import { saveNutritionPlan } from '@/actions/nutrition';
+import { saveNutritionPlan, getAllCoachNutritionPlans, getNutritionPlanById } from '@/actions/nutrition';
+import { ClonePlanModal } from './ClonePlanModal';
 
 interface NutritionWorkspaceProps {
   clientId: string;
@@ -21,6 +22,7 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
   const [days, setDays] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [activeFood, setActiveFood] = useState<any | null>(null);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
 
   useEffect(() => {
     if (initialPlan && initialPlan.days && initialPlan.days.length > 0) {
@@ -187,6 +189,34 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
     }));
   };
 
+  const handleClonePlan = async (planId: string) => {
+    const res = await getNutritionPlanById(planId);
+    if (res.success && res.plan) {
+      const clonedDays = res.plan.days.map((d: any) => ({
+        id: uuidv4(),
+        name: d.name,
+        meals: d.meals.map((m: any) => ({
+          id: uuidv4(),
+          name: m.name,
+          foods: m.foods.map((mf: any) => ({
+            id: uuidv4(),
+            foodId: mf.foodId,
+            name: mf.food?.name || 'صنف',
+            amount: mf.amount || '100g',
+            calories: mf.food?.calories || 0,
+            protein: mf.food?.protein || 0,
+            carbs: mf.food?.carbs || 0,
+            fats: mf.food?.fats || 0,
+          }))
+        }))
+      }));
+      setDays(clonedDays);
+      toast.success('تم استنساخ الخطة بنجاح، يمكنك التعديل عليها الآن');
+    } else {
+      toast.error('حدث خطأ أثناء استنساخ الخطة');
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     const planData = { days };
@@ -212,7 +242,10 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors text-sm font-bold">
+          <button 
+            onClick={() => setIsCloneModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors text-sm font-bold"
+          >
             <Copy className="w-4 h-4" />
             استنساخ خطة
           </button>
@@ -258,6 +291,15 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <ClonePlanModal 
+        isOpen={isCloneModalOpen}
+        onClose={() => setIsCloneModalOpen(false)}
+        type="nutrition"
+        fetchPlans={getAllCoachNutritionPlans}
+        onSelectPlan={handleClonePlan}
+      />
     </div>
   );
 }
+

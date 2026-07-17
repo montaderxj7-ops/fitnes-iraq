@@ -175,3 +175,71 @@ export async function cloneWorkoutPlan(fromClientId: string, toClientId: string)
     return { success: false, error: "Failed to clone plan" };
   }
 }
+
+export async function getAllCoachWorkoutPlans() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    const plans = await prisma.workoutPlan.findMany({
+      where: { coachId: profile.id },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const clientIds = plans.map(p => p.clientId);
+    const clients = await prisma.client.findMany({
+      where: { id: { in: clientIds } },
+      select: { id: true, name: true }
+    });
+    
+    const clientMap = new Map(clients.map(c => [c.id, c.name]));
+
+    const plansWithClient = plans.map(p => ({
+      ...p,
+      client: { name: clientMap.get(p.clientId) || null }
+    }));
+
+    return { success: true, plans: plansWithClient };
+  } catch (error) {
+    console.error("Error fetching coach plans:", error);
+    return { success: false, error: "Failed to fetch coach plans" };
+  }
+}
+
+export async function getWorkoutPlanById(planId: string) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    const profile = await prisma.coachProfile.findUnique({ where: { userId: session.user.id } });
+    if (!profile) return { success: false, error: "No profile" };
+
+    const plan = await prisma.workoutPlan.findFirst({
+      where: { 
+        id: planId,
+        coachId: profile.id 
+      },
+      include: {
+        days: {
+          orderBy: { order: 'asc' },
+          include: {
+            exercises: {
+              orderBy: { order: 'asc' },
+              include: {
+                exercise: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!plan) return { success: false, error: "Plan not found" };
+
+    return { success: true, plan };
+  } catch (error) {
+    console.error("Error fetching plan:", error);
+    return { success: false, error: "Failed to fetch plan" };
+  }
+}

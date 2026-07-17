@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { ExerciseLibrary } from './ExerciseLibrary';
 import { PlanBuilder } from './PlanBuilder';
-import { saveWorkoutPlan } from '@/actions/workouts';
+import { saveWorkoutPlan, getAllCoachWorkoutPlans, getWorkoutPlanById } from '@/actions/workouts';
+import { ClonePlanModal } from './ClonePlanModal';
 
 interface WorkoutWorkspaceProps {
   clientId: string;
@@ -21,6 +22,7 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
   const [days, setDays] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [activeExercise, setActiveExercise] = useState<any | null>(null);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
 
   // Initialize days
   useEffect(() => {
@@ -132,6 +134,28 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
     setDays([...days, { id: uuidv4(), name: `اليوم ${days.length + 1}`, exercises: [] }]);
   };
 
+  const handleClonePlan = async (planId: string) => {
+    const res = await getWorkoutPlanById(planId);
+    if (res.success && res.plan) {
+      const clonedDays = res.plan.days.map((d: any) => ({
+        id: uuidv4(),
+        name: d.name,
+        exercises: d.exercises.map((ex: any) => ({
+          id: uuidv4(),
+          exerciseId: ex.exerciseId,
+          name: ex.exercise?.name || 'تمرين',
+          targetMuscle: ex.exercise?.targetMuscle || '',
+          sets: ex.sets,
+          reps: ex.reps
+        }))
+      }));
+      setDays(clonedDays);
+      toast.success('تم استنساخ الخطة بنجاح، يمكنك التعديل عليها الآن');
+    } else {
+      toast.error('حدث خطأ أثناء استنساخ الخطة');
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     const planData = { days };
@@ -157,7 +181,10 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors text-sm font-bold">
+          <button 
+            onClick={() => setIsCloneModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors text-sm font-bold"
+          >
             <Copy className="w-4 h-4" />
             استنساخ خطة
           </button>
@@ -202,6 +229,15 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <ClonePlanModal 
+        isOpen={isCloneModalOpen}
+        onClose={() => setIsCloneModalOpen(false)}
+        type="workout"
+        fetchPlans={getAllCoachWorkoutPlans}
+        onSelectPlan={handleClonePlan}
+      />
     </div>
   );
 }
+
