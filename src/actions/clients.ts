@@ -23,7 +23,12 @@ export async function getClients() {
     
     // Map dates nicely and compute dynamic status
     return clients.map(client => {
-      const finalEndDate = client.endDate || new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      let finalEndDate = client.endDate;
+      if (!finalEndDate) {
+        const d = new Date(client.createdAt);
+        d.setMonth(d.getMonth() + 1);
+        finalEndDate = d;
+      }
       const now = new Date();
       
       let computedStatus = client.status;
@@ -61,7 +66,12 @@ export async function getClientById(id: string) {
       }
     }
 
-    const finalEndDate = client.endDate || (client.createdAt ? new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000) : null);
+    let finalEndDate = client.endDate;
+    if (!finalEndDate) {
+      const d = client.createdAt ? new Date(client.createdAt) : new Date();
+      d.setMonth(d.getMonth() + 1);
+      finalEndDate = d;
+    }
     const now = new Date();
     let computedStatus = client.status;
     if (computedStatus === 'active' && finalEndDate && finalEndDate < now) {

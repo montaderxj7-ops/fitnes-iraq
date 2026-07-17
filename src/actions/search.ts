@@ -63,7 +63,12 @@ export async function globalSearch(query: string) {
     ]);
 
     const clientsWithStatus = clients.map(client => {
-      const finalEndDate = client.endDate || new Date(new Date(client.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      let finalEndDate = client.endDate;
+      if (!finalEndDate) {
+        const d = new Date(client.createdAt);
+        d.setMonth(d.getMonth() + 1);
+        finalEndDate = d;
+      }
       const now = new Date();
       
       let computedStatus = client.status;
