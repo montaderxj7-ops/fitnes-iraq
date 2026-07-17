@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, Plus, X, Check, Trash2, CalendarClock, User } from "lucide-react";
 import { getAppointments, createAppointment, updateAppointmentStatus, deleteAppointment } from "@/actions/appointments";
 import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 type Appointment = {
   id: string;
@@ -68,6 +69,9 @@ export function AppointmentsWidget() {
       setNewTitle("");
       setNewClientName("");
       setNewTime("10:00");
+      toast.success("تم حفظ الجلسة بنجاح!");
+    } else {
+      toast.error(res.error || "حدث خطأ أثناء حفظ الجلسة");
     }
     setIsSubmitting(false);
   };
@@ -230,7 +234,7 @@ export function AppointmentsWidget() {
                 disabled={isSubmitting}
                 className="w-full bg-[#82c91e] hover:bg-[#93e022] text-[#1a1f1a] font-bold py-3 rounded-xl mt-2 transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? "جاري الإضافة..." : "تأكيد الحجز"}
+                {isSubmitting ? "جاري الحفظ..." : "حفظ الجلسة"}
               </button>
             </div>
           </motion.form>
