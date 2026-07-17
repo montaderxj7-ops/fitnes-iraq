@@ -32,8 +32,8 @@ export function NotificationsDropdown() {
 
     fetchNotifications();
 
-    // Poll every 5 minutes
-    const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
+    // Poll every 1 minute
+    const interval = setInterval(fetchNotifications, 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 

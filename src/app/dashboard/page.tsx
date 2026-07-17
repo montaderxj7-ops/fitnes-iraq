@@ -71,6 +71,10 @@ export default function DashboardOverview() {
       setStatsData(dynamicStats);
     }
     fetchData();
+
+    // Auto-refresh every 1 minute
+    const intervalId = setInterval(fetchData, 60 * 1000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleCompleteTask = async (id: string) => {
