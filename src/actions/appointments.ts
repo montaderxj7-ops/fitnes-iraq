@@ -111,3 +111,28 @@ export async function deleteAppointment(id: string) {
     return { success: false, error: "Failed to delete appointment" };
   }
 }
+
+export async function editAppointment(id: string, data: {
+  title: string;
+  date: Date;
+  clientName?: string;
+  duration?: number;
+}) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+    const appointment = await prisma.appointment.update({
+      where: { id },
+      data: {
+        ...data
+      }
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true, appointment };
+  } catch (error) {
+    console.error("Error editing appointment:", error);
+    return { success: false, error: "Failed to edit appointment" };
+  }
+}

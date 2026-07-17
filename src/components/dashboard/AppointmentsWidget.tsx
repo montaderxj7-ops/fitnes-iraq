@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, Plus, X, Check, Trash2, CalendarClock, User } from "lucide-react";
-import { getAppointments, createAppointment, updateAppointmentStatus, deleteAppointment } from "@/actions/appointments";
+import { Calendar as CalendarIcon, Clock, Plus, X, Check, Trash2, CalendarClock, User, Edit } from "lucide-react";
+import { getAppointments, createAppointment, updateAppointmentStatus, deleteAppointment, editAppointment } from "@/actions/appointments";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -22,6 +22,7 @@ export function AppointmentsWidget() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   // Form State
   const [newTitle, setNewTitle] = useState("");
@@ -56,24 +57,57 @@ export function AppointmentsWidget() {
     const appointmentDate = new Date(selectedDate);
     appointmentDate.setHours(hours, minutes, 0, 0);
     
-    const res = await createAppointment({
-      title: newTitle,
-      date: appointmentDate,
-      clientName: newClientName,
-      duration: newDuration,
-    });
+    if (editingId) {
+      const res = await editAppointment(editingId, {
+        title: newTitle,
+        date: appointmentDate,
+        clientName: newClientName,
+        duration: newDuration,
+      });
 
-    if (res.success && res.appointment) {
-      setAppointments([...appointments, res.appointment as any].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-      setIsAdding(false);
-      setNewTitle("");
-      setNewClientName("");
-      setNewTime("10:00");
-      toast.success("تم حفظ الجلسة بنجاح!");
+      if (res.success && res.appointment) {
+        setAppointments(appointments.map(a => a.id === editingId ? (res.appointment as any) : a).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+        resetForm();
+        toast.success("تم تعديل الجلسة بنجاح!");
+      } else {
+        toast.error(res.error || "حدث خطأ أثناء تعديل الجلسة");
+      }
     } else {
-      toast.error(res.error || "حدث خطأ أثناء حفظ الجلسة");
+      const res = await createAppointment({
+        title: newTitle,
+        date: appointmentDate,
+        clientName: newClientName,
+        duration: newDuration,
+      });
+
+      if (res.success && res.appointment) {
+        setAppointments([...appointments, res.appointment as any].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+        resetForm();
+        toast.success("تم حفظ الجلسة بنجاح!");
+      } else {
+        toast.error(res.error || "حدث خطأ أثناء حفظ الجلسة");
+      }
     }
     setIsSubmitting(false);
+  };
+
+  const resetForm = () => {
+    setIsAdding(false);
+    setEditingId(null);
+    setNewTitle("");
+    setNewClientName("");
+    setNewTime("10:00");
+    setNewDuration(60);
+  };
+
+  const handleEditClick = (appointment: Appointment) => {
+    setNewTitle(appointment.title);
+    setNewClientName(appointment.clientName || "");
+    const d = new Date(appointment.date);
+    setNewTime(`${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`);
+    setNewDuration(appointment.duration);
+    setEditingId(appointment.id);
+    setIsAdding(true);
   };
 
   const handleComplete = async (id: string, currentStatus: string) => {
@@ -129,7 +163,7 @@ export function AppointmentsWidget() {
           جلساتك المجدولة
         </h2>
         <button 
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => { resetForm(); setIsAdding(true); }}
           className="text-sm bg-[#82c91e] text-[#1a1f1a] hover:bg-[#93e022] font-bold flex items-center gap-1 px-4 py-2 rounded-full transition-all shadow-[0_0_15px_rgba(130,201,30,0.3)] hover:shadow-[0_0_20px_rgba(130,201,30,0.5)]"
         >
           <Plus className="w-4 h-4" />
@@ -176,12 +210,12 @@ export function AppointmentsWidget() {
           >
             <button 
               type="button" 
-              onClick={() => setIsAdding(false)}
+              onClick={resetForm}
               className="absolute top-4 left-4 text-gray-500 hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-white font-bold mb-4">تفاصيل الجلسة الجديدة</h3>
+            <h3 className="text-white font-bold mb-4">{editingId ? "تعديل الجلسة" : "تفاصيل الجلسة الجديدة"}</h3>
             
             <div className="space-y-4">
               <div>
@@ -234,7 +268,7 @@ export function AppointmentsWidget() {
                 disabled={isSubmitting}
                 className="w-full bg-[#82c91e] hover:bg-[#93e022] text-[#1a1f1a] font-bold py-3 rounded-xl mt-2 transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? "جاري الحفظ..." : "حفظ الجلسة"}
+                {isSubmitting ? "جاري الحفظ..." : editingId ? "حفظ التعديلات" : "حفظ الجلسة"}
               </button>
             </div>
           </motion.form>
@@ -296,6 +330,13 @@ export function AppointmentsWidget() {
                         title={isCompleted ? "التراجع" : "تحديد كمكتملة"}
                       >
                         <Check className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleEditClick(appointment)}
+                        className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all"
+                        title="تعديل الجلسة"
+                      >
+                        <Edit className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(appointment.id)}
