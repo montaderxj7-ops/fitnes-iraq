@@ -87,7 +87,9 @@ model CoachProfile {
   paymentMethods        PaymentMethod[]
   workoutPlans          WorkoutPlan[]
   nutritionPlans        NutritionPlan[]
+  supplementPlans       SupplementPlan[]
   foodItems             FoodItem[]
+  supplementItems       SupplementItem[]
   appointments          Appointment[]
 }
 
@@ -315,4 +317,51 @@ model MealFood {
   updatedAt  DateTime       @updatedAt
   meal       NutritionMeal  @relation(fields: [mealId], references: [id], onDelete: Cascade)
   food       FoodItem       @relation(fields: [foodId], references: [id], onDelete: Cascade)
+}
+
+model SupplementItem {
+  id           String             @id @default(cuid())
+  coachId      String
+  name         String
+  description  String?
+  mediaUrl     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  coach        CoachProfile       @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  planItems    SupplementPlanItem[]
+}
+
+model SupplementPlan {
+  id        String               @id @default(cuid())
+  clientId  String
+  coachId   String
+  name      String               @default("خطة المكملات")
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  days      SupplementDay[]
+  coach     CoachProfile         @relation(fields: [coachId], references: [id], onDelete: Cascade)
+}
+
+model SupplementDay {
+  id        String               @id @default(cuid())
+  planId    String
+  name      String
+  order     Int                  @default(0)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  plan      SupplementPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  items     SupplementPlanItem[]
+}
+
+model SupplementPlanItem {
+  id           String         @id @default(cuid())
+  dayId        String
+  supplementId String
+  amount       String         @default("1 سكوب")
+  timing       String         @default("صباحاً")
+  order        Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  day          SupplementDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  supplement   SupplementItem @relation(fields: [supplementId], references: [id], onDelete: Cascade)
 }

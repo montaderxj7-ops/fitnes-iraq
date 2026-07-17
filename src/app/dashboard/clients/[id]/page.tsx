@@ -1,15 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronRight, Dumbbell, Apple, Plus, Save, Clock, AlertTriangle, Target, User, Activity } from "lucide-react";
+import { ChevronRight, Dumbbell, Apple, Plus, Save, Clock, AlertTriangle, Target, User, Activity, Pill } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { WorkoutWorkspace } from "@/components/dashboard/WorkoutWorkspace";
 import { NutritionWorkspace } from "@/components/dashboard/NutritionWorkspace";
+import { SupplementWorkspace } from "@/components/dashboard/SupplementWorkspace";
 import { getExercises, getWorkoutPlan } from "@/actions/workouts";
 import { getNutritionPlan, getFoodItems } from "@/actions/nutrition";
+import { getSupplementPlan, getSupplementItems } from "@/actions/supplements";
 import { getClientById } from "@/actions/clients";
 
 const containerVariants = {
@@ -28,10 +30,13 @@ export default function ClientProfilePage() {
   
   const [isBuildingWorkout, setIsBuildingWorkout] = useState(false);
   const [isBuildingNutrition, setIsBuildingNutrition] = useState(false);
+  const [isBuildingSupplement, setIsBuildingSupplement] = useState(false);
   const [exercisesLib, setExercisesLib] = useState<any[]>([]);
   const [foodsLib, setFoodsLib] = useState<any[]>([]);
+  const [supplementsLib, setSupplementsLib] = useState<any[]>([]);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [currentNutritionPlan, setCurrentNutritionPlan] = useState<any>(null);
+  const [currentSupplementPlan, setCurrentSupplementPlan] = useState<any>(null);
   const [clientData, setClientData] = useState<any>(null);
 
   // Fetch data
@@ -51,6 +56,14 @@ export default function ClientProfilePage() {
       const nutPlanRes = await getNutritionPlan(clientId);
       if (nutPlanRes.success && nutPlanRes.plan) {
         setCurrentNutritionPlan(nutPlanRes.plan);
+      }
+
+      const suppItemsRes = await getSupplementItems();
+      if (suppItemsRes.success) setSupplementsLib(suppItemsRes.supplementItems || []);
+
+      const suppPlanRes = await getSupplementPlan(clientId);
+      if (suppPlanRes.success && suppPlanRes.plan) {
+        setCurrentSupplementPlan(suppPlanRes.plan);
       }
 
       const clientRes = await getClientById(clientId);
@@ -89,6 +102,23 @@ export default function ClientProfilePage() {
           // Refresh plan data
           getNutritionPlan(clientId).then(res => {
             if (res.success && res.plan) setCurrentNutritionPlan(res.plan);
+          });
+        }} 
+      />
+    );
+  }
+
+  if (isBuildingSupplement && clientData) {
+    return (
+      <SupplementWorkspace 
+        clientId={clientId} 
+        initialSupplements={supplementsLib} 
+        initialPlan={currentSupplementPlan}
+        onClose={() => {
+          setIsBuildingSupplement(false);
+          // Refresh plan data
+          getSupplementPlan(clientId).then(res => {
+            if (res.success && res.plan) setCurrentSupplementPlan(res.plan);
           });
         }} 
       />
@@ -201,7 +231,7 @@ export default function ClientProfilePage() {
       </div>
 
       {/* Work Area (Plans) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* Workout Plan Section */}
         <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 flex flex-col relative overflow-hidden group">
@@ -247,6 +277,27 @@ export default function ClientProfilePage() {
             >
               <Plus className="w-5 h-5" />
               {currentNutritionPlan ? "تعديل الخطة الغذائية" : "إضافة خطة غذائية"}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Supplement Plan Section */}
+        <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 flex flex-col relative overflow-hidden group">
+          <div className="flex flex-col items-center justify-center h-[300px] text-center z-10 relative">
+            <div className="w-20 h-20 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-500 shadow-[0_0_30px_rgba(168,85,247,0.1)]">
+              <Pill className="w-10 h-10 text-purple-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">خطة المكملات</h3>
+            <p className="text-gray-400 mb-8 max-w-[250px]">
+              {currentSupplementPlan ? "يوجد خطة مكملات مخصصة لهذا المشترك." : "قم بإعداد خطة المكملات المخصصة لهذا المشترك."}
+            </p>
+            
+            <button 
+              onClick={() => setIsBuildingSupplement(true)}
+              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-purple-500 text-white font-black hover:bg-purple-600 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:-translate-y-1 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              {currentSupplementPlan ? "تعديل المكملات" : "إضافة خطة مكملات"}
             </button>
           </div>
         </motion.div>

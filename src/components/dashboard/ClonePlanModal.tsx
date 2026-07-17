@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Copy, Check, AlertCircle, Dumbbell, Apple } from "lucide-react";
+import { X, Search, Copy, Check, AlertCircle, Dumbbell, Apple, Pill } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type PlanOption = {
@@ -17,7 +17,7 @@ type ClonePlanModalProps = {
   onClose: () => void;
   onSelectPlan: (planId: string) => Promise<void>;
   fetchPlans: () => Promise<{ success: boolean; plans?: any[]; error?: string }>;
-  type: "workout" | "nutrition";
+  type: "workout" | "nutrition" | "supplement";
 };
 
 export function ClonePlanModal({ isOpen, onClose, onSelectPlan, fetchPlans, type }: ClonePlanModalProps) {
@@ -86,11 +86,11 @@ export function ClonePlanModal({ isOpen, onClose, onSelectPlan, fetchPlans, type
               <h2 className="text-xl font-bold flex items-center gap-3 text-white">
                 <span className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center",
-                  type === "workout" ? "bg-neon/10 text-neon" : "bg-purple-500/10 text-purple-400"
+                  type === "workout" ? "bg-neon/10 text-neon" : type === "nutrition" ? "bg-blue-500/10 text-blue-500" : "bg-purple-500/10 text-purple-400"
                 )}>
-                  {type === "workout" ? <Dumbbell className="w-5 h-5" /> : <Apple className="w-5 h-5" />}
+                  {type === "workout" ? <Dumbbell className="w-5 h-5" /> : type === "nutrition" ? <Apple className="w-5 h-5" /> : <Pill className="w-5 h-5" />}
                 </span>
-                استنساخ {type === "workout" ? "نظام تدريبي" : "نظام غذائي"}
+                استنساخ {type === "workout" ? "نظام تدريبي" : type === "nutrition" ? "نظام غذائي" : "خطة مكملات"}
               </h2>
               <button 
                 onClick={onClose}
