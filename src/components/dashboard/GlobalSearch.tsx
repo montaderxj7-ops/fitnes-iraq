@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Loader2, User, Package as PackageIcon, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -10,9 +11,14 @@ export function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [results, setResults] = useState<{ clients: any[], packages: any[] }>({ clients: [], packages: [] });
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle Cmd+K / Ctrl+K
   useEffect(() => {
@@ -85,10 +91,11 @@ export function GlobalSearch() {
       </div>
 
       {/* Modal / Command Palette */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div 
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -198,7 +205,9 @@ export function GlobalSearch() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
