@@ -267,6 +267,7 @@ model FoodItem {
   protein      Float          @default(0)
   carbs        Float          @default(0)
   fats         Float          @default(0)
+  ingredients  String?        @db.Text
   mediaUrl     String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt

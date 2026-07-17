@@ -16,6 +16,7 @@ interface FoodItem {
   protein: number;
   carbs: number;
   fats: number;
+  ingredients?: string | null;
   mediaUrl?: string | null;
 }
 
@@ -64,6 +65,9 @@ function DraggableFood({ food }: { food: FoodItem }) {
             F: {food.fats}g
           </span>
         </div>
+        {food.ingredients && (
+          <p className="text-[10px] text-gray-500 mt-1 truncate">{food.ingredients}</p>
+        )}
       </div>
     </div>
   );
@@ -176,6 +180,7 @@ export function FoodLibrary({ foodItems, onAddFood }: FoodLibraryProps) {
       protein: parseFloat(totalProtein) || 0,
       carbs: parseFloat(totalCarbs) || 0,
       fats: parseFloat(totalFats) || 0,
+      ingredients: ingredients.filter(i => i.name.trim() !== '').map(i => `${i.amount}g ${i.name}`).join(' + '),
     });
     if (res.success && res.foodItem) {
       toast.success('تمت إضافة الصنف للمكتبة بنجاح');

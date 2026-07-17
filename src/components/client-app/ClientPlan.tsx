@@ -384,6 +384,9 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
                                         <div>
                                           <p className="text-sm font-medium text-gray-200">{mf.food?.name}</p>
                                           <p className="text-[10px] text-gray-500">{mf.food?.calories} سعرة | P:{mf.food?.protein} C:{mf.food?.carbs} F:{mf.food?.fats}</p>
+                                          {mf.food?.ingredients && (
+                                            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{mf.food.ingredients}</p>
+                                          )}
                                         </div>
                                       </div>
                                       <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg border border-blue-400/20">{mf.amount}</span>

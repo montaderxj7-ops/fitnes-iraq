@@ -26,7 +26,7 @@ export async function getFoodItems() {
 }
 
 // Add new food item
-export async function addFoodItem(data: { name: string; calories: number; protein: number; carbs: number; fats: number; mediaUrl?: string }) {
+export async function addFoodItem(data: { name: string; calories: number; protein: number; carbs: number; fats: number; mediaUrl?: string; ingredients?: string }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
@@ -41,6 +41,7 @@ export async function addFoodItem(data: { name: string; calories: number; protei
         protein: data.protein,
         carbs: data.carbs,
         fats: data.fats,
+        ingredients: data.ingredients || null,
         mediaUrl: data.mediaUrl || null,
       }
     });
