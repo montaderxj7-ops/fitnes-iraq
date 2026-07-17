@@ -6,6 +6,8 @@ import { CoachData } from './ClientAppFlow';
 import { ClientProfile } from './ClientProfile';
 import { ClientPlan } from './ClientPlan';
 import { ClientChat } from './ClientChat';
+import { getWorkoutPlan } from '@/actions/workouts';
+import { getNutritionPlan } from '@/actions/nutrition';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface ClientDashboardProps {
@@ -19,6 +21,49 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
   const { t, dir } = useLanguage();
   const [currentTab, setCurrentTab] = React.useState<'home' | 'profile' | 'plan'>('home');
   const [isChatOpen, setIsChatOpen] = React.useState(false);
+  
+  const [workoutStats, setWorkoutStats] = React.useState({ title: 'لا يوجد تمرين اليوم', duration: '0 دقيقة', hasWorkout: false });
+  const [nutritionStats, setNutritionStats] = React.useState({ calories: 0, protein: 0, carbs: 0, fats: 0 });
+
+  React.useEffect(() => {
+    async function fetchStats() {
+      if (userData?.id) {
+        try {
+          const wRes = await getWorkoutPlan(userData.id);
+          if (wRes.success && wRes.plan && wRes.plan.days.length > 0) {
+            const firstDay = wRes.plan.days.find((d: any) => d.exercises.length > 0) || wRes.plan.days[0];
+            if (firstDay && firstDay.exercises.length > 0) {
+              const estimatedDuration = firstDay.exercises.length * 10; // ~10 mins per exercise
+              setWorkoutStats({
+                title: firstDay.name,
+                duration: `${estimatedDuration} دقيقة`,
+                hasWorkout: true
+              });
+            }
+          }
+
+          const nRes = await getNutritionPlan(userData.id);
+          if (nRes.success && nRes.plan && nRes.plan.days.length > 0) {
+            const firstDay = nRes.plan.days[0];
+            let cals = 0, pro = 0, car = 0, fat = 0;
+            firstDay.meals.forEach((m: any) => {
+              m.foods.forEach((mf: any) => {
+                cals += mf.food?.calories || 0;
+                pro += mf.food?.protein || 0;
+                car += mf.food?.carbs || 0;
+                fat += mf.food?.fats || 0;
+              });
+            });
+            setNutritionStats({ calories: cals, protein: pro, carbs: car, fats: fat });
+          }
+        } catch (error) {
+          console.error("Failed to fetch dashboard stats", error);
+        }
+      }
+    }
+    fetchStats();
+  }, [userData?.id]);
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -114,9 +159,9 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
                   </div>
                   <p className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">{t('dash.workout')}</p>
                 </div>
-                <h4 className="text-white font-black text-xl leading-tight drop-shadow-md">الصدر<br/>والترايسبس</h4>
+                <h4 className="text-white font-black text-xl leading-tight drop-shadow-md whitespace-pre-wrap">{workoutStats.title}</h4>
                 <p className="text-xs text-gray-500 mt-2 font-medium">
-                  45 دقيقة
+                  {workoutStats.duration}
                 </p>
               </div>
               
@@ -143,7 +188,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
                   <p className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">{t('dash.nutrition')}</p>
                 </div>
                 <div className="flex items-baseline gap-1 mb-2">
-                  <h4 className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 font-black text-3xl leading-none tracking-tight">2,450</h4>
+                  <h4 className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 font-black text-3xl leading-none tracking-tight">{nutritionStats.calories.toFixed(0)}</h4>
                   <span className="text-[10px] text-gray-500 font-bold">{t('dash.calories')}</span>
                 </div>
                 
@@ -151,21 +196,21 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
                 <div className="flex gap-2 mt-5">
                   <div className="flex-1">
                     <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden mb-1.5 border border-white/5 shadow-inner">
-                      <div className="h-full bg-blue-400 w-[60%] rounded-full shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
+                      <div className="h-full bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.5)] transition-all" style={{ width: `${Math.min(100, (nutritionStats.protein / (nutritionStats.protein + nutritionStats.carbs + nutritionStats.fats || 1)) * 100)}%` }} />
                     </div>
-                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.protein')}</p>
+                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.protein')} {nutritionStats.protein.toFixed(0)}g</p>
                   </div>
                   <div className="flex-1">
                     <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden mb-1.5 border border-white/5 shadow-inner">
-                      <div className="h-full bg-orange-400 w-[40%] rounded-full shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
+                      <div className="h-full bg-orange-400 rounded-full shadow-[0_0_8px_rgba(251,146,60,0.5)] transition-all" style={{ width: `${Math.min(100, (nutritionStats.carbs / (nutritionStats.protein + nutritionStats.carbs + nutritionStats.fats || 1)) * 100)}%` }} />
                     </div>
-                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.carbs')}</p>
+                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.carbs')} {nutritionStats.carbs.toFixed(0)}g</p>
                   </div>
                   <div className="flex-1">
                     <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden mb-1.5 border border-white/5 shadow-inner">
-                      <div className="h-full bg-yellow-400 w-[30%] rounded-full shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
+                      <div className="h-full bg-yellow-400 rounded-full shadow-[0_0_8px_rgba(250,204,21,0.5)] transition-all" style={{ width: `${Math.min(100, (nutritionStats.fats / (nutritionStats.protein + nutritionStats.carbs + nutritionStats.fats || 1)) * 100)}%` }} />
                     </div>
-                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.fats')}</p>
+                    <p className="text-[9px] text-gray-400 font-medium text-center">{t('dash.fats')} {nutritionStats.fats.toFixed(0)}g</p>
                   </div>
                 </div>
               </div>
