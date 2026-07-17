@@ -8,6 +8,7 @@ import { getSettings } from "@/actions/settings";
 import { getPendingTasks, completeTask } from "@/actions/tasks";
 import { getDashboardStats } from "@/actions/dashboard";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
+import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 
 // Tasks will be fetched dynamically
 const containerVariants = {
@@ -116,10 +117,7 @@ export default function DashboardOverview() {
 
             <GlobalSearch />
 
-            <button className="w-14 h-14 shrink-0 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all relative group shadow-inner">
-              <Bell className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-              <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 rounded-full bg-[#82c91e] border-2 border-[#1a1f1a] shadow-[0_0_10px_#82c91e]" />
-            </button>
+            <NotificationsDropdown />
           </div>
         </div>
 
