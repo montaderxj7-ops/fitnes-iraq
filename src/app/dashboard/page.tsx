@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getSettings } from "@/actions/settings";
 import { getPendingTasks, completeTask } from "@/actions/tasks";
 import { getDashboardStats } from "@/actions/dashboard";
+import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 
 // Tasks will be fetched dynamically
 const containerVariants = {
@@ -113,17 +114,7 @@ export default function DashboardOverview() {
               </span>
             </div>
 
-            <div className="relative flex-1 md:w-72 group">
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#82c91e] transition-colors" />
-              <input 
-                type="text" 
-                placeholder="ابحث عن متدرب أو باقة..." 
-                className="w-full bg-black/40 border border-white/10 rounded-full py-3.5 pr-12 pl-14 text-white placeholder-gray-500 focus:outline-none focus:border-[#82c91e]/50 focus:bg-black/60 transition-all font-medium shadow-inner"
-              />
-              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full border border-white/5">
-                <span className="text-xs font-bold text-gray-400 tracking-widest">⌘K</span>
-              </div>
-            </div>
+            <GlobalSearch />
 
             <button className="w-14 h-14 shrink-0 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all relative group shadow-inner">
               <Bell className="w-6 h-6 group-hover:rotate-12 transition-transform" />
