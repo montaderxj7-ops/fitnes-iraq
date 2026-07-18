@@ -50,6 +50,11 @@ export function NotificationsBell({ userId }: { userId: string }) {
   }, []);
 
   const requestPushPermission = async () => {
+    if (!userId) {
+      alert("هذه الميزة غير متاحة في وضع المعاينة. يرجى تسجيل الدخول كمتدرب حقيقي.");
+      return;
+    }
+    
     if ('serviceWorker' in navigator && 'PushManager' in window && userId) {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');

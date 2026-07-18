@@ -92,7 +92,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
       <div className="flex-1 overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         
         {/* Top Header */}
-        <div className="flex items-center justify-between p-6 pb-2">
+        <div className="flex items-center justify-between p-6 pb-2 relative z-50">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setCurrentTab('profile')}>
             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#222] group-hover:border-white/20 transition-colors">
               <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="User" className="w-full h-full object-cover" />
