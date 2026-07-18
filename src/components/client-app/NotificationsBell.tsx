@@ -41,39 +41,42 @@ export function NotificationsBell({ userId }: { userId: string }) {
     return () => clearInterval(interval);
   }, [userId]);
 
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+
   useEffect(() => {
-    // Push notifications registration
-    async function registerPush() {
-      if ('serviceWorker' in navigator && 'PushManager' in window && userId) {
-        try {
-          const registration = await navigator.serviceWorker.register('/sw.js');
-          console.log('SW Registered');
-          
-          // Request permission
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted') {
-            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-            if (vapidPublicKey) {
-              let subscription = await registration.pushManager.getSubscription();
-              if (!subscription) {
-                subscription = await registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-                });
-              }
-              await savePushSubscription(userId, JSON.parse(JSON.stringify(subscription)));
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestPushPermission = async () => {
+    if ('serviceWorker' in navigator && 'PushManager' in window && userId) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('SW Registered');
+        
+        // Request permission explicitly on user click
+        const perm = await Notification.requestPermission();
+        setPermission(perm);
+        
+        if (perm === 'granted') {
+          const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+          if (vapidPublicKey) {
+            let subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+              subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+              });
             }
+            await savePushSubscription(userId, JSON.parse(JSON.stringify(subscription)));
           }
-        } catch (err) {
-          console.error('Service Worker / Push Error:', err);
         }
+      } catch (err) {
+        console.error('Service Worker / Push Error:', err);
       }
     }
-
-    // Call registration if user clicks or just automatically for web app?
-    // Mobile browsers usually require a user gesture for this, but standard Notification API can be requested on mount.
-    registerPush();
-  }, [userId]);
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -127,6 +130,17 @@ export function NotificationsBell({ userId }: { userId: string }) {
                 <span className="text-xs bg-[#82c91e]/20 text-[#82c91e] px-2 py-1 rounded-full">{unreadCount} جديد</span>
               )}
             </div>
+
+            {permission === 'default' && (
+              <div className="p-3 bg-[#82c91e]/10 border-b border-[#82c91e]/20 text-center">
+                <button 
+                  onClick={requestPushPermission}
+                  className="text-xs font-bold text-[#82c91e] hover:text-white transition-colors"
+                >
+                  تفعيل الإشعارات الخارجية لتصلك فوراً 🔔
+                </button>
+              </div>
+            )}
             
             <div className="max-h-[300px] overflow-y-auto">
               {notifications.length === 0 ? (
