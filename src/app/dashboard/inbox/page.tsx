@@ -192,7 +192,7 @@ export default function InboxPage() {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

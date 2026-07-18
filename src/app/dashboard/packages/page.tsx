@@ -276,7 +276,7 @@ export default function PackagesPage() {
                     <span className="text-lg font-black text-white">{pkg.clients}</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
