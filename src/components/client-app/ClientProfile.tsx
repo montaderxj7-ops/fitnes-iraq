@@ -67,14 +67,6 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
           throw new Error(res.error || "Failed to save subscription");
         }
         
-        // Send a test notification immediately
-        const { sendTestNotification } = await import('@/actions/notifications');
-        const testRes = await sendTestNotification(userData.id as string);
-        
-        if (!testRes.success) {
-           console.error("Test notification failed:", testRes.error);
-        }
-
         alert("تم تفعيل الإشعارات بنجاح!");
         setSettings(prev => ({ ...prev, pushNotifications: true }));
       } catch (err: any) {
