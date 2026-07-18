@@ -36,6 +36,26 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
     twoFactorAuth: false
   });
 
+  useEffect(() => {
+    // Check actual push subscription status when component mounts
+    const checkSubscription = async () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+              setSettings(prev => ({ ...prev, pushNotifications: true }));
+            }
+          }
+        } catch (e) {
+          console.error("Error checking subscription:", e);
+        }
+      }
+    };
+    checkSubscription();
+  }, []);
+
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
