@@ -46,7 +46,16 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
       return;
     }
     
-    if (!settings.pushNotifications && 'serviceWorker' in navigator && 'PushManager' in window) {
+    if (!settings.pushNotifications) {
+      if (!('serviceWorker' in navigator)) {
+        alert("متصفحك لا يدعم الإشعارات، يرجى التحديث لمتصفح أحدث.");
+        return;
+      }
+      if (!('PushManager' in window)) {
+        alert("جهازك لا يدعم الإشعارات في هذا المتصفح. إذا كنت تستخدم آيفون، يجب عليك إضافة التطبيق للشاشة الرئيسية (Add to Home Screen) وتفعيله من هناك.");
+        return;
+      }
+      
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
         const subscription = await registration.pushManager.subscribe({
@@ -63,11 +72,10 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
         setSettings(prev => ({ ...prev, pushNotifications: true }));
       } catch (err) {
         console.error('Service Worker / Push Error:', err);
-        alert("حدث خطأ أثناء تفعيل الإشعارات");
+        alert("حدث خطأ أثناء تفعيل الإشعارات. تأكد من السماح للإشعارات من إعدادات المتصفح.");
       }
     } else {
-      // For now, we just toggle it off in the UI, actual unsubscribe requires more logic
-      setSettings(prev => ({ ...prev, pushNotifications: !prev.pushNotifications }));
+      setSettings(prev => ({ ...prev, pushNotifications: false }));
     }
   };
 
