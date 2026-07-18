@@ -134,3 +134,58 @@ export async function sendNotificationToClient(clientId: string, title: string, 
     return { success: false, error: 'Failed' };
   }
 }
+
+export async function sendTestNotification(clientId: string) {
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      include: { user: true },
+    });
+
+    if (!client || !client.userId) {
+      return { success: false, error: 'Client not found' };
+    }
+
+    const userId = client.userId;
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: { userId },
+    });
+
+    if (subscriptions.length > 0 && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+      webpush.setVapidDetails(
+        'mailto:admin@gym-system.com',
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+      );
+
+      const payload = JSON.stringify({
+        title: "✅ إشعار تجريبي",
+        body: "ممتاز! نظام الإشعارات يعمل الآن على جهازك بنجاح.",
+        icon: '/logos/icon.png',
+        url: '/app',
+      });
+
+      await Promise.all(subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            },
+            payload
+          );
+        } catch (err: any) {
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          }
+        }
+      }));
+
+      return { success: true };
+    }
+    return { success: false, error: 'No subscriptions or VAPID keys missing' };
+  } catch (error) {
+    console.error('Test notification error:', error);
+    return { success: false, error: 'Failed' };
+  }
+}

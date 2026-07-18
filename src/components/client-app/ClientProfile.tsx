@@ -54,6 +54,11 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
           applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
         });
         await savePushSubscription(userData.id as string, JSON.parse(JSON.stringify(subscription)));
+        
+        // Send a test notification immediately
+        const { sendTestNotification } = await import('@/actions/notifications');
+        await sendTestNotification(userData.id as string);
+        
         alert("تم تفعيل الإشعارات بنجاح!");
         setSettings(prev => ({ ...prev, pushNotifications: true }));
       } catch (err) {
