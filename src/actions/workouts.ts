@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { sendNotificationToClient } from './notifications';
 
 // -- Exercises Library --
 export async function getExercises() {
@@ -114,6 +115,14 @@ export async function saveWorkoutPlan(clientId: string, planData: any) {
         }
       }
     });
+
+    // Send push notification
+    await sendNotificationToClient(
+      clientId,
+      "تحديث الخطة التدريبية",
+      "قام الكابتن بتحديث خطتك التدريبية، ادخل لمشاهدتها!",
+      "workout"
+    );
 
     revalidatePath(`/dashboard/clients/${clientId}`);
     return { success: true, plan: newPlan };

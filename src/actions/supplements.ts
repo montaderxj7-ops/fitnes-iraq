@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { sendNotificationToClient } from './notifications';
 
 // -- Supplement Library --
 export async function getSupplementItems() {
@@ -106,6 +107,14 @@ export async function saveSupplementPlan(clientId: string, planData: any) {
         }
       }
     });
+
+    // Send push notification
+    await sendNotificationToClient(
+      clientId,
+      "تحديث خطة المكملات",
+      "قام الكابتن بتحديث خطة المكملات الخاصة بك!",
+      "supplement"
+    );
 
     revalidatePath(`/dashboard/clients/${clientId}`);
     return { success: true, plan: newPlan };

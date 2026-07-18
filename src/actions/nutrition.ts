@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { sendNotificationToClient } from './notifications';
 
 // -- Food Library --
 export async function getFoodItems() {
@@ -120,6 +121,14 @@ export async function saveNutritionPlan(clientId: string, planData: any) {
         }
       }
     });
+
+    // Send push notification
+    await sendNotificationToClient(
+      clientId,
+      "تحديث النظام الغذائي",
+      "قام الكابتن بتحديث نظامك الغذائي، ادخل لمشاهدته!",
+      "nutrition"
+    );
 
     revalidatePath(`/dashboard/clients/${clientId}`);
     return { success: true, plan: newPlan };

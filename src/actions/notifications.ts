@@ -1,108 +1,130 @@
-"use server";
+'use server';
 
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { prisma } from '@/lib/prisma';
+import webpush from 'web-push';
 
-export type DynamicNotification = {
-  id: string;
-  title: string;
-  message: string;
-  type: "NEW_SUBSCRIBER" | "EXPIRING_SOON" | "EXPIRED" | "INFO";
-  link: string;
-  createdAt: Date;
-  isRead?: boolean;
-};
-
-export async function getDynamicNotifications() {
+export async function getNotifications(userId: string) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "COACH") {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const coachProfile = await prisma.coachProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true }
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
-
-    if (!coachProfile) {
-      return { success: false, error: "Profile not found" };
-    }
-
-    const now = new Date();
-    // 7 days ago
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(now.getDate() - 7);
-    
-    // 3 days from now
-    const threeDaysFromNow = new Date();
-    threeDaysFromNow.setDate(now.getDate() + 3);
-
-    // Fetch clients that are either new (created in last 7 days) OR expiring/expired recently
-    const clients = await prisma.client.findMany({
-      where: {
-        coachId: coachProfile.id,
-        OR: [
-          { startDate: { gte: sevenDaysAgo } }, // new subscribers
-          { endDate: { gte: sevenDaysAgo, lte: threeDaysFromNow } } // expiring or recently expired
-        ]
-      },
-      select: {
-        id: true,
-        name: true,
-        startDate: true,
-        endDate: true,
-      }
-    });
-
-    const notifications: DynamicNotification[] = [];
-
-    for (const client of clients) {
-      // Check for New Subscriber
-      if (client.startDate >= sevenDaysAgo) {
-        notifications.push({
-          id: `new-${client.id}`,
-          title: "مشترك جديد",
-          message: `انضم المتدرب ${client.name} إلى باقتك حديثاً!`,
-          type: "NEW_SUBSCRIBER",
-          link: `/dashboard/clients/${client.id}`,
-          createdAt: client.startDate
-        });
-      }
-
-      if (client.endDate) {
-        // Check for Expired
-        if (client.endDate < now && client.endDate >= sevenDaysAgo) {
-          notifications.push({
-            id: `exp-${client.id}`,
-            title: "اشتراك منتهي",
-            message: `انتهى اشتراك المتدرب ${client.name}.`,
-            type: "EXPIRED",
-            link: `/dashboard/clients/${client.id}`,
-            createdAt: client.endDate
-          });
-        }
-        // Check for Expiring Soon
-        else if (client.endDate >= now && client.endDate <= threeDaysFromNow) {
-          notifications.push({
-            id: `soon-${client.id}`,
-            title: "اقتراب انتهاء الاشتراك",
-            message: `اشتراك المتدرب ${client.name} سينتهي قريباً (خلال 3 أيام أو أقل).`,
-            type: "EXPIRING_SOON",
-            link: `/dashboard/clients/${client.id}`,
-            createdAt: new Date(client.endDate.getTime() - 3 * 24 * 60 * 60 * 1000) // pseudo date 3 days before expiry
-          });
-        }
-      }
-    }
-
-    // Sort by createdAt descending
-    notifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
     return { success: true, notifications };
   } catch (error) {
-    console.error("Failed to fetch dynamic notifications:", error);
-    return { success: false, error: "Failed to fetch notifications" };
+    console.error('Error fetching notifications:', error);
+    return { success: false, error: 'Failed to fetch notifications' };
+  }
+}
+
+export async function markNotificationAsRead(id: string) {
+  try {
+    await prisma.notification.update({
+      where: { id },
+      data: { isRead: true },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    return { success: false, error: 'Failed' };
+  }
+}
+
+export async function savePushSubscription(userId: string, subscription: any) {
+  try {
+    const { endpoint, keys } = subscription;
+    if (!endpoint || !keys) return { success: false, error: 'Invalid subscription data' };
+
+    await prisma.pushSubscription.upsert({
+      where: { endpoint },
+      create: {
+        userId,
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+      update: {
+        userId,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving push subscription:', error);
+    return { success: false, error: 'Failed' };
+  }
+}
+
+export async function sendNotificationToClient(clientId: string, title: string, message: string, type: string = 'info') {
+  try {
+    // 1. Fetch user ID from client ID
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      include: { user: true },
+    });
+
+    if (!client || !client.userId) {
+      return { success: false, error: 'Client not found or has no user' };
+    }
+
+    const userId = client.userId;
+
+    // 2. Save in-app Notification
+    const newNotification = await prisma.notification.create({
+      data: {
+        userId,
+        title,
+        message,
+        type,
+      },
+    });
+
+    // 3. Send Web Push
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: { userId },
+    });
+
+    if (subscriptions.length > 0 && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+      webpush.setVapidDetails(
+        'mailto:admin@gym-system.com',
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+      );
+
+      const payload = JSON.stringify({
+        title,
+        body: message,
+        icon: '/logos/icon.png',
+        url: '/app',
+      });
+
+      const promises = subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            },
+            payload
+          );
+        } catch (err: any) {
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            // Subscription has expired or is no longer valid
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          } else {
+            console.error('Error sending push:', err);
+          }
+        }
+      });
+
+      await Promise.allSettled(promises);
+    }
+
+    return { success: true, notification: newNotification };
+  } catch (error) {
+    console.error('Error in sendNotificationToClient:', error);
+    return { success: false, error: 'Failed' };
   }
 }

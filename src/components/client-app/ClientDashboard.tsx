@@ -10,6 +10,7 @@ import { getWorkoutPlan } from '@/actions/workouts';
 import { getNutritionPlan } from '@/actions/nutrition';
 import { getSupplementPlan } from '@/actions/supplements';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { NotificationsBell } from './NotificationsBell';
 
 interface ClientDashboardProps {
   coach: CoachData;
@@ -102,12 +103,8 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
                 <Target className="w-3 h-3" style={{ color: coach.primaryColor }} /> 
                 <span style={{ color: coach.primaryColor }}>بطل</span>
               </p>
-            </div>
           </div>
-          <button className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-white/5 flex items-center justify-center relative hover:bg-white/5 transition-colors">
-            <Bell className="w-5 h-5 text-white" />
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 border border-[#1a1a1a]" />
-          </button>
+          <NotificationsBell userId={userData?.id || ''} />
         </div>
 
         {currentTab === 'home' ? (
