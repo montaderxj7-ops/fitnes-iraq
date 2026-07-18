@@ -169,8 +169,8 @@ export async function sendNotificationToClient(clientId: string, title: string, 
       const payload = JSON.stringify({
         title,
         body: message,
-        icon: client.coach?.logo || '/logos/icon.png',
-        badge: client.coach?.logo || '/logos/icon.png', // Badge is the small monochrome icon in status bar
+        icon: client.coach?.logo || undefined,
+        badge: client.coach?.logo || undefined,
         url: `/${client.coach?.slug || 'app'}`,
       });
 
