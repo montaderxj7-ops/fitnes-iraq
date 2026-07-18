@@ -303,7 +303,7 @@ export default function PackagesPage() {
                   <span className="text-lg font-bold text-[#82c91e]">د.ع</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
             
             {/* Pending Amount Card */}
             <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:border-white/20 transition-all">
@@ -325,7 +325,7 @@ export default function PackagesPage() {
                   <span className="text-lg font-bold text-orange-500">د.ع</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Payments History List */}
