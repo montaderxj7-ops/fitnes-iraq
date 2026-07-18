@@ -95,9 +95,12 @@ export default function DashboardOverview() {
       {/* Main Content Area (Left side in RTL) */}
       <div className="flex-1 space-y-8 flex flex-col">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1a1f1a]/80 backdrop-blur-2xl p-8 rounded-[32px] border border-white/10 relative shadow-2xl z-50">
-          <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-none">
+        {/* Header (Glassmorphism) */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#111111]/80 backdrop-blur-3xl p-8 rounded-[40px] border border-white/10 relative shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+          {/* Subtle Inner Glow */}
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          
+          <div className="absolute inset-0 overflow-hidden rounded-[40px] pointer-events-none">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#82c91e]/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3" />
           </div>
           
@@ -163,15 +166,18 @@ export default function DashboardOverview() {
             <motion.div 
               key={i}
               variants={itemVariants}
-              className="p-6 rounded-[32px] bg-[#1a1f1a] border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors"
+              whileHover={{ y: -5, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="p-6 rounded-[32px] bg-[#111111]/60 backdrop-blur-xl border border-white/10 relative overflow-hidden group shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(130,201,30,0.1)] transition-all"
             >
-              <div className="flex items-start justify-between mb-8">
+              <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+              <div className="flex items-start justify-between mb-8 relative z-10">
                 <div>
-                  <h3 className="text-3xl font-black text-white">{stat.value}</h3>
+                  <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 drop-shadow-sm">{stat.value}</h3>
                   <p className="text-sm font-medium text-gray-400 mt-1">{stat.title}</p>
                 </div>
-                <div className={cn("w-12 h-12 rounded-full bg-white/5 flex items-center justify-center shadow-inner border border-white/5")}>
-                  <stat.icon className={cn("w-5 h-5", stat.color)} />
+                <div className={cn("w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300")}>
+                  <stat.icon className={cn("w-5 h-5 drop-shadow-[0_0_8px_currentColor]", stat.color)} />
                 </div>
               </div>
 
@@ -200,47 +206,52 @@ export default function DashboardOverview() {
           ))}
         </div>
 
-        {/* Tasks Section */}
-        <motion.div variants={itemVariants} className="bg-[#1a1f1a] border border-white/5 rounded-[32px] p-6 flex-1 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-3">
-              <span className="w-10 h-10 rounded-full bg-[#82c91e]/10 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-[#82c91e]" />
+        {/* Tasks Section (Glassmorphism) */}
+        <motion.div variants={itemVariants} className="bg-[#111111]/80 backdrop-blur-2xl border border-white/10 rounded-[40px] p-8 flex-1 flex flex-col relative overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-8 relative z-10">
+            <h2 className="text-2xl font-black flex items-center gap-3 tracking-tight">
+              <span className="w-12 h-12 rounded-2xl bg-[#82c91e]/10 flex items-center justify-center border border-[#82c91e]/20 shadow-[0_0_15px_rgba(130,201,30,0.15)]">
+                <CheckCircle2 className="w-6 h-6 text-[#82c91e] drop-shadow-[0_0_5px_currentColor]" />
               </span>
               المهام العاجلة
             </h2>
-            <Link href="/dashboard/tasks" className="text-sm text-[#82c91e] hover:text-[#93e022] font-medium flex items-center gap-1 bg-[#82c91e]/10 px-4 py-2 rounded-full transition-colors">
+            <Link href="/dashboard/tasks" className="text-sm text-[#82c91e] hover:text-[#93e022] font-bold flex items-center gap-1 bg-[#82c91e]/10 px-5 py-2.5 rounded-xl border border-[#82c91e]/20 transition-all hover:bg-[#82c91e]/20 hover:scale-105 active:scale-95">
               عرض الكل <ChevronLeft className="w-4 h-4" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1 relative z-10">
             {tasks.length === 0 ? (
               <div className="col-span-1 md:col-span-2 flex items-center justify-center p-8 text-gray-500 bg-black/20 border border-white/5 rounded-[24px]">
                 ليس لديك أي مهام عاجلة حالياً. أحسنت! 🎉
               </div>
             ) : (
               tasks.map((task) => (
-                <div 
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   key={task.id} 
                   onClick={() => handleCompleteTask(task.id)}
-                  className="p-5 rounded-[24px] bg-black/20 border border-white/5 hover:border-[#82c91e]/30 hover:bg-black/40 hover:shadow-[0_0_15px_rgba(130,201,30,0.1)] transition-all flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+                  className="p-6 rounded-[24px] bg-white/5 border border-white/10 hover:border-[#82c91e]/40 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(130,201,30,0.15)] transition-all flex flex-col justify-between group cursor-pointer relative overflow-hidden backdrop-blur-md"
                 >
                   <div className={cn(
-                    "absolute top-0 right-0 w-1 h-full",
-                    task.status === 'urgent' ? "bg-[#82c91e]" : task.status === 'warning' ? "bg-orange-400" : "bg-blue-400"
+                    "absolute top-0 right-0 w-1.5 h-full opacity-80",
+                    task.status === 'urgent' ? "bg-[#82c91e] shadow-[0_0_10px_#82c91e]" : task.status === 'warning' ? "bg-orange-400 shadow-[0_0_10px_orange]" : "bg-blue-400 shadow-[0_0_10px_blue]"
                   )} />
-                  <p className="text-gray-300 text-sm font-medium leading-relaxed group-hover:text-white transition-colors mb-4">{task.text}</p>
+                  <p className="text-gray-300 text-sm font-medium leading-relaxed group-hover:text-white transition-colors mb-5 pl-4">{task.text}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
+                    <span className="text-xs font-bold text-gray-500 flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
                       {task.time}
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-[#82c91e] transition-all">
-                      <CheckCircle2 className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-[#82c91e] group-hover:border-[#82c91e] transition-all duration-300 shadow-lg">
+                      <CheckCircle2 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>

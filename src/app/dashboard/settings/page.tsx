@@ -163,8 +163,9 @@ export default function SettingsPage() {
       <div className="space-y-6">
 
         {/* App Identity Settings */}
-        <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
+        <motion.div variants={itemVariants} className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10 relative z-10">
             <div className="p-3 bg-white/5 rounded-2xl">
               <Smartphone className="w-6 h-6 text-[#82c91e]" />
             </div>
@@ -240,8 +241,9 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Payment Gateways Settings */}
-        <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
+        <motion.div variants={itemVariants} className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10 relative z-10">
             <div className="p-3 bg-white/5 rounded-2xl">
               <Wallet className="w-6 h-6 text-[#82c91e]" />
             </div>
@@ -406,8 +408,9 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Security Settings */}
-        <motion.div variants={itemVariants} className="bg-[#111] border border-white/5 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="flex items-center justify-between gap-3 mb-6 pb-6 border-b border-white/5">
+        <motion.div variants={itemVariants} className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="flex items-center justify-between gap-3 mb-6 pb-6 border-b border-white/10 relative z-10">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/5 rounded-2xl">
                 <Lock className="w-6 h-6 text-[#82c91e]" />

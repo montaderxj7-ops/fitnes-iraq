@@ -104,7 +104,6 @@ export function AppointmentsWidget() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
-  // Form State
   const [newTitle, setNewTitle] = useState("");
   const [newClientName, setNewClientName] = useState("");
   const [newTime, setNewTime] = useState("10:00");
@@ -116,16 +115,12 @@ export function AppointmentsWidget() {
 
   const fetchAppointments = async () => {
     setIsLoading(true);
-    
-    // Calculate precise local start and end of day, then convert to absolute ISO
     const startOfDay = new Date(selectedDate);
     startOfDay.setHours(0, 0, 0, 0);
-    
     const endOfDay = new Date(selectedDate);
     endOfDay.setHours(23, 59, 59, 999);
     
     const res = await getAppointments(startOfDay.toISOString(), endOfDay.toISOString());
-    
     if (res.success && res.appointments) {
       setAppointments(res.appointments as any[]);
     }
@@ -135,10 +130,7 @@ export function AppointmentsWidget() {
   const handleAddAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    
     setIsSubmitting(true);
-    
-    // Combine selected date and new time
     const [hours, minutes] = newTime.split(':').map(Number);
     const appointmentDate = new Date(selectedDate);
     appointmentDate.setHours(hours, minutes, 0, 0);
@@ -150,7 +142,6 @@ export function AppointmentsWidget() {
         clientName: newClientName,
         duration: newDuration,
       });
-
       if (res.success && res.appointment) {
         setAppointments(appointments.map(a => a.id === editingId ? (res.appointment as any) : a).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
         resetForm();
@@ -165,7 +156,6 @@ export function AppointmentsWidget() {
         clientName: newClientName,
         duration: newDuration,
       });
-
       if (res.success && res.appointment) {
         setAppointments([...appointments, res.appointment as any].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
         resetForm();
@@ -198,23 +188,18 @@ export function AppointmentsWidget() {
 
   const handleComplete = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === "completed" ? "scheduled" : "completed";
-    
-    // Optimistic update
     setAppointments(appointments.map(a => a.id === id ? { ...a, status: newStatus } : a));
     await updateAppointmentStatus(id, newStatus);
   };
 
   const handleDelete = async (id: string) => {
-    // Optimistic update
     setAppointments(appointments.filter(a => a.id !== id));
     await deleteAppointment(id);
   };
 
-  // Generate simple week days for calendar
   const getWeekDates = () => {
     const dates = [];
     const today = new Date();
-    // Show 3 days before, today, and 3 days after
     for (let i = -3; i <= 3; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -237,50 +222,49 @@ export function AppointmentsWidget() {
   const arabicDays = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 
   return (
-    <div className="bg-[#1a1f1a] border border-white/5 rounded-[32px] p-6 flex flex-col h-full relative overflow-hidden">
-      {/* Background Effect */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#82c91e]/10 rounded-full blur-3xl" />
+    <div className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-6 h-[calc(100vh-3rem)] flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
       
-      <div className="flex items-center justify-between mb-6 relative z-10">
-        <h2 className="text-xl font-bold flex items-center gap-3 text-white">
-          <span className="w-10 h-10 rounded-full bg-[#82c91e]/10 flex items-center justify-center">
-            <CalendarIcon className="w-5 h-5 text-[#82c91e]" />
+      <div className="flex items-center justify-between mb-8 relative z-10">
+        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl bg-[#82c91e]/10 flex items-center justify-center border border-[#82c91e]/20 shadow-[0_0_15px_rgba(130,201,30,0.15)]">
+            <CalendarIcon className="w-6 h-6 text-[#82c91e] drop-shadow-[0_0_5px_currentColor]" />
           </span>
-          جلساتك المجدولة
+          <div className="flex flex-col">
+            <span>جلساتك</span>
+            <span className="text-sm font-medium text-gray-400">المجدولة</span>
+          </div>
         </h2>
-        <button 
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => { resetForm(); setIsAdding(true); }}
-          className="text-sm bg-[#82c91e] text-[#1a1f1a] hover:bg-[#93e022] font-bold flex items-center gap-1 px-4 py-2 rounded-full transition-all shadow-[0_0_15px_rgba(130,201,30,0.3)] hover:shadow-[0_0_20px_rgba(130,201,30,0.5)]"
+          className="bg-[#82c91e] hover:bg-[#93e022] text-[#1a1f1a] w-12 h-12 md:w-auto md:px-5 md:h-12 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all shadow-[0_0_20px_rgba(130,201,30,0.3)]"
         >
-          <Plus className="w-4 h-4" />
-          جلسة جديدة
-        </button>
+          <Plus className="w-5 h-5" />
+          <span className="hidden md:block">جلسة جديدة</span>
+        </motion.button>
       </div>
 
-      {/* Mini Calendar Strip */}
-      <div className="flex justify-between items-center mb-6 relative z-10 bg-black/20 p-2 rounded-[20px] border border-white/5">
+      <div className="bg-black/40 backdrop-blur-md rounded-[24px] p-2 flex justify-between mb-8 border border-white/5 shadow-inner relative z-10">
         {weekDates.map((date, i) => {
           const isSelected = isSameDay(date, selectedDate);
           const isToday = isSameDay(date, new Date());
-          
           return (
-            <button
+            <motion.button
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.95 }}
               key={i}
               onClick={() => setSelectedDate(date)}
               className={cn(
-                "flex flex-col items-center justify-center py-2 px-3 rounded-[16px] transition-all min-w-[45px]",
-                isSelected 
-                  ? "bg-[#82c91e] text-[#1a1f1a] shadow-[0_0_10px_rgba(130,201,30,0.3)]" 
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+                "flex flex-col items-center justify-center w-[13%] py-3 rounded-[18px] transition-all relative overflow-hidden",
+                isSelected ? "bg-[#82c91e] text-[#1a1f1a] shadow-[0_0_20px_rgba(130,201,30,0.3)] border border-[#82c91e]/50" : "text-gray-400 hover:bg-white/5 hover:text-white"
               )}
             >
-              <span className={cn("text-[10px] font-medium mb-1", isSelected ? "text-[#1a1f1a]/70" : "text-gray-500")}>
-                {isToday ? "اليوم" : arabicDays[date.getDay()]}
-              </span>
-              <span className="text-lg font-bold">
-                {date.getDate()}
-              </span>
-            </button>
+              {isSelected && <motion.div layoutId="selectedDay" className="absolute inset-0 bg-[#82c91e] z-0" transition={{ type: "spring", stiffness: 300, damping: 25 }} />}
+              <span className="text-[10px] font-bold mb-1 relative z-10 opacity-80">{isToday ? "اليوم" : arabicDays[date.getDay()]}</span>
+              <span className="text-lg font-black relative z-10 drop-shadow-sm">{date.getDate()}</span>
+            </motion.button>
           );
         })}
       </div>
@@ -288,151 +272,111 @@ export function AppointmentsWidget() {
       <AnimatePresence mode="wait">
         {isAdding ? (
           <motion.form 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -20 }}
             onSubmit={handleAddAppointment}
-            className="flex-1 bg-black/40 border border-white/10 rounded-[24px] p-5 relative z-10"
+            className="flex-1 bg-black/40 border border-white/10 rounded-[32px] p-8 relative z-10 backdrop-blur-xl"
           >
-            <button 
-              type="button" 
-              onClick={resetForm}
-              className="absolute top-4 left-4 text-gray-500 hover:text-white"
-            >
-              <X className="w-4 h-4" />
+            <button type="button" onClick={resetForm} className="absolute top-6 left-6 text-gray-500 hover:text-white transition-colors">
+              <X className="w-6 h-6" />
             </button>
-            <h3 className="text-white font-bold mb-4">{editingId ? "تعديل الجلسة" : "تفاصيل الجلسة الجديدة"}</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <input 
-                  type="text" 
-                  placeholder="عنوان الجلسة (مثال: تدريب شخصي)"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#82c91e]/50 focus:outline-none"
-                />
-              </div>
-              <div>
-                <input 
-                  type="text" 
-                  placeholder="اسم المتدرب (اختياري)"
-                  value={newClientName}
-                  onChange={(e) => setNewClientName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#82c91e]/50 focus:outline-none"
-                />
-              </div>
-              <div className="flex gap-3">
+            <h3 className="text-white text-xl font-bold mb-6">{editingId ? "تعديل الجلسة" : "إضافة جلسة جديدة"}</h3>
+            <div className="space-y-5">
+              <input type="text" placeholder="عنوان الجلسة" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#82c91e]/50 outline-none" />
+              <input type="text" placeholder="اسم المتدرب" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#82c91e]/50 outline-none" />
+              <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="text-[10px] text-gray-500 mb-1 block">الوقت</label>
-                  <CustomTimeSelect 
-                    value={newTime}
-                    onChange={setNewTime}
-                  />
+                  <CustomTimeSelect value={newTime} onChange={setNewTime} />
                 </div>
-                <div className="flex-1">
-                  <label className="text-[10px] text-gray-500 mb-1 block">المدة (دقائق)</label>
-                  <select 
-                    value={newDuration}
-                    onChange={(e) => setNewDuration(Number(e.target.value))}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#82c91e]/50 focus:outline-none appearance-none"
-                  >
-                    <option value={30} className="bg-gray-900">30 دقيقة</option>
-                    <option value={45} className="bg-gray-900">45 دقيقة</option>
-                    <option value={60} className="bg-gray-900">60 دقيقة</option>
-                    <option value={90} className="bg-gray-900">90 دقيقة</option>
-                    <option value={120} className="bg-gray-900">120 دقيقة</option>
-                  </select>
-                </div>
+                <select value={newDuration} onChange={(e) => setNewDuration(Number(e.target.value))} className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white outline-none">
+                  <option value={30}>30 دقيقة</option>
+                  <option value={60}>60 دقيقة</option>
+                </select>
               </div>
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#82c91e] hover:bg-[#93e022] text-[#1a1f1a] font-bold py-3 rounded-xl mt-2 transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? "جاري الحفظ..." : editingId ? "حفظ التعديلات" : "حفظ الجلسة"}
+              <button type="submit" disabled={isSubmitting} className="w-full bg-[#82c91e] text-[#1a1f1a] font-bold py-4 rounded-2xl hover:bg-[#93e022] transition-colors">
+                {isSubmitting ? "جاري الحفظ..." : "حفظ الجلسة"}
               </button>
             </div>
           </motion.form>
         ) : (
           <motion.div 
-            key={selectedDate.toString()}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 relative z-10 min-h-[250px]"
+            className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-4 custom-scrollbar relative z-10 pb-6"
           >
+            <AnimatePresence>
             {isLoading ? (
-              <div className="animate-pulse space-y-3">
-                {[1, 2].map(i => (
-                  <div key={i} className="h-24 bg-white/5 rounded-[20px]" />
-                ))}
-              </div>
+              <div className="animate-pulse space-y-4">{[1, 2].map(i => <div key={i} className="h-28 bg-white/5 rounded-[24px]" />)}</div>
             ) : appointments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-10">
-                <CalendarClock className="w-12 h-12 mb-3 opacity-20" />
-                <p className="font-medium text-lg text-gray-400">لا توجد جلسات مجدولة</p>
-                <p className="text-sm mt-1">لهذا اليوم. يمكنك أخذ قسط من الراحة! ☕</p>
+              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                <CalendarClock className="w-16 h-16 mb-4 opacity-20" />
+                <p className="font-medium text-lg">لا توجد جلسات مجدولة لهذا اليوم</p>
               </div>
             ) : (
-              appointments.map((appointment) => {
-                const isCompleted = appointment.status === "completed";
-                return (
-                  <div 
-                    key={appointment.id} 
-                    className={cn(
-                      "group bg-black/40 border rounded-[20px] p-4 transition-all flex items-start gap-4",
-                      isCompleted ? "border-white/5 opacity-60" : "border-[#82c91e]/20 hover:border-[#82c91e]/50"
-                    )}
-                  >
-                    <div className="flex flex-col items-center justify-center min-w-[60px] bg-white/5 rounded-[12px] p-2">
-                      <span className="text-white font-bold text-sm">{formatTime(appointment.date)}</span>
-                      <span className="text-[10px] text-gray-500 mt-1">{appointment.duration} دقيقة</span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h4 className={cn("font-bold mb-1", isCompleted ? "text-gray-400 line-through" : "text-white")}>
-                        {appointment.title}
-                      </h4>
+              appointments.map((appointment) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  key={appointment.id}
+                  className={cn(
+                    "p-5 rounded-[24px] border transition-all flex items-center justify-between group relative overflow-hidden backdrop-blur-md",
+                    appointment.status === 'completed' 
+                      ? "bg-[#82c91e]/5 border-[#82c91e]/20" 
+                      : "bg-white/5 border-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                  )}
+                >
+                  <div className={cn(
+                    "absolute top-0 right-0 w-1.5 h-full opacity-80",
+                    appointment.status === 'completed' ? "bg-[#82c91e] shadow-[0_0_10px_#82c91e]" : "bg-gray-500 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                  )} />
+                  <div className="flex-1 pl-4">
+                    <p className={cn("font-bold text-lg mb-1 transition-colors", appointment.status === 'completed' ? "text-gray-400 line-through" : "text-white group-hover:text-[#82c91e]")}>
+                      {appointment.title}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
+                      <span className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-md border border-white/5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {formatTime(appointment.date)} ({appointment.duration} دقيقة)
+                      </span>
                       {appointment.clientName && (
-                        <p className="text-sm text-gray-400 flex items-center gap-1.5">
+                        <span className="flex items-center gap-1.5">
                           <User className="w-3.5 h-3.5" />
                           {appointment.clientName}
-                        </p>
+                        </span>
                       )}
                     </div>
-
-                    <div className="flex flex-col gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => handleComplete(appointment.id, appointment.status)}
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-                          isCompleted ? "bg-white/10 text-gray-400 hover:text-white" : "bg-[#82c91e]/10 text-[#82c91e] hover:bg-[#82c91e] hover:text-[#1a1f1a]"
-                        )}
-                        title={isCompleted ? "التراجع" : "تحديد كمكتملة"}
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleEditClick(appointment)}
-                        className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all"
-                        title="تعديل الجلسة"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(appointment.id)}
-                        className="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"
-                        title="إلغاء الجلسة"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
-                );
-              })
+
+                  <div className="flex flex-col gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => handleComplete(appointment.id, appointment.status)}
+                      className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                        appointment.status === 'completed' ? "bg-white/10 text-gray-400 hover:text-white" : "bg-[#82c91e]/10 text-[#82c91e] hover:bg-[#82c91e] hover:text-[#1a1f1a]"
+                      )}
+                      title={appointment.status === 'completed' ? "التراجع" : "تحديد كمكتملة"}
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleEditClick(appointment)}
+                      className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all"
+                      title="تعديل الجلسة"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(appointment.id)}
+                      className="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"
+                      title="إلغاء الجلسة"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))
             )}
+          </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

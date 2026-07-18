@@ -59,45 +59,49 @@ export default function ClientsPage() {
     >
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#1a1f1a]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full" />
+        <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden group">
+          <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full group-hover:bg-blue-500/20 transition-colors" />
           <div className="relative z-10">
             <p className="text-gray-400 font-medium mb-1">إجمالي المشتركين</p>
-            <h3 className="text-3xl font-black text-white">{clients.length}</h3>
+            <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 drop-shadow-sm">{clients.length}</h3>
           </div>
-          <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20 relative z-10">
-            <Users className="w-6 h-6 text-blue-400" />
+          <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 relative z-10 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)] group-hover:scale-110 transition-transform duration-300">
+            <Users className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_currentColor]" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-[#1a1f1a]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#82c91e]/10 blur-[40px] rounded-full" />
+        <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(130,201,30,0.15)] relative overflow-hidden group">
+          <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#82c91e]/10 blur-[40px] rounded-full group-hover:bg-[#82c91e]/20 transition-colors" />
           <div className="relative z-10">
             <p className="text-gray-400 font-medium mb-1">المشتركون النشطون</p>
-            <h3 className="text-3xl font-black text-white">{clients.filter(c => c.status === "active").length}</h3>
+            <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 drop-shadow-sm">{clients.filter(c => c.status === "active").length}</h3>
           </div>
-          <div className="w-14 h-14 rounded-full bg-[#82c91e]/10 flex items-center justify-center border border-[#82c91e]/20 relative z-10">
-            <Activity className="w-6 h-6 text-[#82c91e]" />
+          <div className="w-14 h-14 rounded-2xl bg-[#82c91e]/10 flex items-center justify-center border border-[#82c91e]/20 relative z-10 shadow-[inset_0_0_10px_rgba(130,201,30,0.1)] group-hover:scale-110 transition-transform duration-300">
+            <Activity className="w-6 h-6 text-[#82c91e] drop-shadow-[0_0_8px_currentColor]" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-[#1a1f1a]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-[40px] rounded-full" />
+        <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 flex items-center justify-between shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.15)] relative overflow-hidden group">
+          <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-[40px] rounded-full group-hover:bg-orange-500/20 transition-colors" />
           <div className="relative z-10">
             <p className="text-gray-400 font-medium mb-1">مشتركون جدد</p>
-            <h3 className="text-3xl font-black text-white">{clients.filter(c => {
+            <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 drop-shadow-sm">{clients.filter(c => {
               const diff = new Date().getTime() - new Date(c.createdAt).getTime();
               return diff < 7 * 24 * 60 * 60 * 1000;
             }).length}</h3>
           </div>
-          <div className="w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center border border-orange-500/20 relative z-10">
-            <UserPlus className="w-6 h-6 text-orange-400" />
+          <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 relative z-10 shadow-[inset_0_0_10px_rgba(249,115,22,0.1)] group-hover:scale-110 transition-transform duration-300">
+            <UserPlus className="w-6 h-6 text-orange-400 drop-shadow-[0_0_8px_currentColor]" />
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-[#1a1f1a] rounded-[32px] border border-white/5 p-8 shadow-2xl relative flex flex-col min-h-[600px]">
+      <div className="bg-[#111111]/80 backdrop-blur-3xl rounded-[40px] border border-white/10 p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative flex flex-col min-h-[600px] overflow-hidden">
+        <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
         <div className="absolute inset-0 rounded-[32px] overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/3" />
         </div>
@@ -206,13 +210,16 @@ export default function ClientsPage() {
             <motion.div 
               key={client.id}
               variants={itemVariants}
-              className="group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 lg:px-6 lg:py-5 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-[24px] transition-all cursor-pointer shadow-sm hover:shadow-xl"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 lg:px-6 lg:py-5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#82c91e]/40 rounded-[24px] transition-all cursor-pointer shadow-sm hover:shadow-[0_0_25px_rgba(130,201,30,0.15)] backdrop-blur-md relative overflow-hidden"
             >
+              <div className="absolute top-0 right-0 w-1 h-full bg-[#82c91e] opacity-0 group-hover:opacity-100 transition-opacity" />
               {/* Name & Avatar */}
-              <div className="col-span-3 flex items-center gap-4">
+              <div className="col-span-3 flex items-center gap-4 relative z-10">
                 <div className="relative">
-                  <img src={client.avatar} alt={client.name} className="w-14 h-14 rounded-full object-cover border-2 border-[#1a1f1a] group-hover:border-[#82c91e] transition-colors shadow-lg" />
-                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#82c91e] border-2 border-[#1a1f1a] rounded-full" />
+                  <img src={client.avatar} alt={client.name} className="w-14 h-14 rounded-[16px] object-cover border border-white/10 group-hover:border-[#82c91e] transition-colors shadow-lg" />
+                  <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#82c91e] border-[3px] border-[#111111] rounded-full" />
                 </div>
                 <div>
                   <h3 className="font-black text-white text-lg group-hover:text-[#82c91e] transition-colors">{client.name}</h3>
@@ -258,9 +265,9 @@ export default function ClientsPage() {
               </div>
 
               {/* Action Button */}
-              <div className="col-span-1 flex lg:justify-end justify-center mt-4 lg:mt-0">
+              <div className="col-span-1 flex lg:justify-end justify-center mt-4 lg:mt-0 relative z-10">
                 <Link href={`/dashboard/clients/${client.id}`} onClick={(e) => e.stopPropagation()}>
-                  <button className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:bg-[#82c91e] group-hover:text-[#1a1f1a] group-hover:border-[#82c91e] group-hover:scale-110 transition-all shadow-lg">
+                  <button className="w-12 h-12 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:bg-[#82c91e] group-hover:text-[#1a1f1a] group-hover:border-[#82c91e] group-hover:scale-110 transition-all shadow-lg group-hover:shadow-[0_0_20px_rgba(130,201,30,0.4)]">
                     <ArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
                   </button>
                 </Link>

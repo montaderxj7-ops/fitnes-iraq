@@ -41,6 +41,7 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
             protein: mf.food?.protein || 0,
             carbs: mf.food?.carbs || 0,
             fats: mf.food?.fats || 0,
+            ingredients: mf.food?.ingredients || '',
           }))
         }))
       }));
@@ -111,7 +112,8 @@ export function NutritionWorkspace({ clientId, initialFoods, initialPlan, onClos
                       calories: food.calories,
                       protein: food.protein,
                       carbs: food.carbs,
-                      fats: food.fats
+                      fats: food.fats,
+                      ingredients: food.ingredients || ''
                     }]
                   };
                 }

@@ -122,8 +122,9 @@ export default function InboxPage() {
 
       <div className="flex-1 flex gap-6 overflow-hidden">
         {/* Chat List (Sidebar) */}
-        <div className="w-full lg:w-96 flex flex-col bg-[#111] border border-white/5 rounded-[2rem] overflow-hidden shrink-0">
-          <div className="p-4 border-b border-white/5">
+        <div className="w-full lg:w-96 flex flex-col bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden shrink-0 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
+          <div className="absolute inset-0 rounded-[2rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="p-4 border-b border-white/10 relative z-10">
             <div className="flex bg-black/40 p-1 rounded-xl mb-4">
               <button 
                 onClick={() => setActiveTab("active")}
@@ -157,14 +158,18 @@ export default function InboxPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 relative z-10">
             {filteredChats.map((chat) => (
-              <div 
+              <motion.div 
+                whileHover={{ scale: 1.01 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 key={chat.id}
                 onClick={() => setSelectedChat(chat)}
                 className={cn(
-                  "p-3 rounded-2xl flex gap-3 cursor-pointer transition-all mb-1",
-                  selectedChat.id === chat.id ? "bg-white/10" : "hover:bg-white/5"
+                  "p-3 rounded-[20px] flex gap-3 cursor-pointer transition-all mb-1 border",
+                  selectedChat?.id === chat.id 
+                    ? "bg-[#82c91e]/10 border-[#82c91e]/30 shadow-[0_0_20px_rgba(130,201,30,0.15)]" 
+                    : "bg-transparent border-transparent hover:bg-white/5 hover:border-white/10"
                 )}
               >
                 <div className="relative shrink-0">
@@ -193,7 +198,8 @@ export default function InboxPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="hidden lg:flex flex-1 bg-[#111] border border-white/5 rounded-[2rem] flex-col overflow-hidden relative">
+        <div className="hidden lg:flex flex-1 bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] flex-col overflow-hidden relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-0 rounded-[2rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
           {/* Active Timer Indicator Overlay if Closed */}
           {selectedChat?.status === "closed" && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-6">
@@ -205,12 +211,12 @@ export default function InboxPage() {
 
           {/* Chat Header */}
           {selectedChat && (
-            <div className="h-20 border-b border-white/5 flex items-center justify-between px-6 bg-black/20 shrink-0">
+            <div className="h-20 border-b border-white/10 flex items-center justify-between px-6 bg-black/20 shrink-0 relative z-10 backdrop-blur-md">
               <div className="flex items-center gap-4">
-                <img src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${selectedChat.clientName}&background=random`} alt={selectedChat.clientName} className="w-10 h-10 rounded-full object-cover" />
+                <img src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${selectedChat.clientName}&background=random`} alt={selectedChat.clientName} className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-sm" />
                 <div>
                   <h3 className="font-bold text-white text-lg">{selectedChat.clientName}</h3>
-                  <span className="text-xs text-neon font-medium">محادثة نشطة</span>
+                  <span className="text-xs text-[#82c91e] font-medium">محادثة نشطة</span>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -234,9 +240,9 @@ export default function InboxPage() {
             </div>
             
             {messages.map((msg, idx) => (
-              <div key={msg.id || idx} className={cn("flex gap-4", msg.sender === "coach" ? "flex-row-reverse" : "")}>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={msg.id || idx} className={cn("flex gap-4 relative z-10", msg.sender === "coach" ? "flex-row-reverse" : "")}>
                 {msg.sender === "coach" ? (
-                  <div className="w-8 h-8 rounded-full bg-neon flex items-center justify-center font-bold text-black shrink-0">C</div>
+                  <div className="w-8 h-8 rounded-[12px] bg-[#82c91e]/20 border border-[#82c91e]/40 flex items-center justify-center font-bold text-[#82c91e] shadow-[0_0_15px_rgba(130,201,30,0.2)] shrink-0">C</div>
                 ) : (
                   <img src={selectedChat?.avatar || `https://ui-avatars.com/api/?name=${selectedChat?.clientName}&background=random`} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
                 )}
@@ -248,13 +254,13 @@ export default function InboxPage() {
                 )}>
                   <p className={msg.sender === "coach" ? "text-white" : "text-gray-200"}>{msg.content}</p>
                   <div className={cn("flex items-center gap-1 mt-2", msg.sender === "coach" ? "justify-end" : "justify-start")}>
-                    <span className={cn("text-[10px]", msg.sender === "coach" ? "text-neon/70" : "text-gray-500")}>
+                    <span className={cn("text-[10px]", msg.sender === "coach" ? "text-[#82c91e]/70" : "text-gray-500")}>
                       {new Date(msg.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    {msg.sender === "coach" && <CheckCircle2 className="w-3 h-3 text-neon" />}
+                    {msg.sender === "coach" && <CheckCircle2 className="w-3 h-3 text-[#82c91e]" />}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 

@@ -107,7 +107,7 @@ export function GlobalSearch() {
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#111111] border border-white/10 rounded-2xl shadow-2xl z-[60] overflow-hidden"
+              className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] overflow-hidden"
               dir="rtl"
             >
               {/* Search Header */}

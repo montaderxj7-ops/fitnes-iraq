@@ -130,7 +130,8 @@ export function TasksManager() {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <form onSubmit={handleAddTask} className="bg-[#1a1f1a]/80 backdrop-blur-xl border border-[#82c91e]/30 rounded-[24px] p-6 mb-8 relative">
+            <form onSubmit={handleAddTask} className="bg-[#111111]/80 backdrop-blur-3xl border border-[#82c91e]/30 rounded-[32px] p-8 mb-8 relative shadow-[0_0_50px_rgba(130,201,30,0.15)] overflow-hidden">
+              <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
               <button 
                 type="button"
                 onClick={() => setIsAdding(false)}
@@ -196,8 +197,9 @@ export function TasksManager() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Pending Tasks */}
-        <div className="bg-[#1a1f1a]/50 border border-white/5 rounded-[32px] p-6 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col h-full relative overflow-hidden">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+          <div className="flex items-center justify-between mb-8 relative z-10">
             <h2 className="text-xl font-bold flex items-center gap-3 text-white">
               المهام قيد التنفيذ
               <span className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-full">
@@ -220,8 +222,13 @@ export function TasksManager() {
               </div>
             ) : (
               pendingTasks.map((task) => (
-                <div key={task.id} className="group relative bg-black/40 border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-all flex items-start justify-between gap-4 overflow-hidden">
-                  <div className={cn("absolute top-0 right-0 w-1 h-full", getStatusColor(task.status).split(' ')[0])} />
+                <motion.div 
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  key={task.id} 
+                  className="group relative bg-white/5 border border-white/10 rounded-[24px] p-5 hover:bg-white/10 hover:border-[#82c91e]/40 transition-all flex items-start justify-between gap-4 overflow-hidden shadow-sm hover:shadow-[0_0_20px_rgba(130,201,30,0.15)] backdrop-blur-md z-10"
+                >
+                  <div className={cn("absolute top-0 right-0 w-1.5 h-full opacity-80 group-hover:opacity-100 transition-opacity", getStatusColor(task.status).split(' ')[0])} />
                   
                   <div className="flex-1">
                     <p className="text-white font-medium leading-relaxed mb-3">{task.text}</p>
@@ -259,8 +266,9 @@ export function TasksManager() {
         </div>
 
         {/* Completed Tasks */}
-        <div className="bg-black/20 border border-white/5 rounded-[32px] p-6 flex flex-col h-full opacity-80 hover:opacity-100 transition-opacity">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-[#111111]/40 backdrop-blur-3xl border border-white/5 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col h-full opacity-80 hover:opacity-100 transition-opacity relative overflow-hidden">
+          <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] pointer-events-none" />
+          <div className="flex items-center justify-between mb-8 relative z-10">
             <h2 className="text-xl font-bold flex items-center gap-3 text-gray-400">
               المهام المنجزة
               <span className="bg-white/5 text-gray-400 text-xs px-2.5 py-1 rounded-full">
@@ -282,8 +290,13 @@ export function TasksManager() {
               </div>
             ) : (
               completedTasks.map((task) => (
-                <div key={task.id} className="group relative bg-white/[0.02] border border-white/5 rounded-[20px] p-4 flex items-center justify-between gap-4">
-                  <div className="flex-1 flex items-center gap-3">
+                <motion.div 
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  key={task.id} 
+                  className="group relative bg-white/[0.03] border border-white/5 rounded-[24px] p-5 flex items-center justify-between gap-4 hover:bg-white/5 transition-all z-10"
+                >
+                  <div className="flex-1 flex items-center gap-4">
                     <CheckCircle2 className="w-5 h-5 text-[#82c91e] shrink-0" />
                     <p className="text-gray-500 line-through text-sm font-medium">{task.text}</p>
                   </div>
@@ -304,7 +317,7 @@ export function TasksManager() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>

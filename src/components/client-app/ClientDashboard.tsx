@@ -8,6 +8,7 @@ import { ClientPlan } from './ClientPlan';
 import { ClientChat } from './ClientChat';
 import { getWorkoutPlan } from '@/actions/workouts';
 import { getNutritionPlan } from '@/actions/nutrition';
+import { getSupplementPlan } from '@/actions/supplements';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface ClientDashboardProps {
@@ -24,6 +25,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
   
   const [workoutStats, setWorkoutStats] = React.useState({ title: 'لا يوجد تمرين اليوم', duration: '0 دقيقة', hasWorkout: false });
   const [nutritionStats, setNutritionStats] = React.useState({ calories: 0, protein: 0, carbs: 0, fats: 0 });
+  const [supplementStats, setSupplementStats] = React.useState({ count: 0, hasSupplements: false });
 
   React.useEffect(() => {
     async function fetchStats() {
@@ -55,6 +57,12 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
               });
             });
             setNutritionStats({ calories: cals, protein: pro, carbs: car, fats: fat });
+          }
+
+          const sRes = await getSupplementPlan(userData.id);
+          if (sRes.success && sRes.plan && sRes.plan.days.length > 0) {
+            const firstDay = sRes.plan.days[0];
+            setSupplementStats({ count: firstDay.items.length, hasSupplements: true });
           }
         } catch (error) {
           console.error("Failed to fetch dashboard stats", error);
@@ -221,6 +229,36 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
               </div>
             </motion.div>
           </div>
+
+          {/* Supplement Card (Premium) */}
+          {supplementStats.hasSupplements && (
+            <motion.div variants={itemVariants} className="mt-4">
+              <div 
+                onClick={() => { setCurrentTab('plan'); setTimeout(() => {
+                  const suppTabBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes(t('plan.supplements')));
+                  if(suppTabBtn) suppTabBtn.click();
+                }, 100); }}
+                className="w-full bg-gradient-to-r from-[#1c1c1c] to-[#151515] border border-white/5 rounded-2xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer hover:border-white/10 transition-colors"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 transition-opacity group-hover:opacity-30 bg-purple-500" />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center relative border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                    <User className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h5 className="text-white font-bold text-sm mb-0.5">{t('plan.supplements')}</h5>
+                    <p className="text-xs text-purple-400 font-medium">
+                      {supplementStats.count} مكملات اليوم
+                    </p>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center relative z-10 group-hover:bg-white/10 transition-colors">
+                  <PlayCircle className="w-5 h-5 text-gray-400 group-hover:text-white" />
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Chat Alert Banner (Premium) */}
           {hasChat && (

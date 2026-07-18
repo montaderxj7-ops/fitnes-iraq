@@ -385,7 +385,10 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
                                           <p className="text-sm font-medium text-gray-200">{mf.food?.name}</p>
                                           <p className="text-[10px] text-gray-500">{mf.food?.calories} سعرة | P:{mf.food?.protein} C:{mf.food?.carbs} F:{mf.food?.fats}</p>
                                           {mf.food?.ingredients && (
-                                            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{mf.food.ingredients}</p>
+                                            <div className="mt-1.5 p-2 rounded-lg bg-black/40 border border-white/5">
+                                              <span className="text-[10px] text-blue-400 font-bold block mb-0.5">المكونات:</span>
+                                              <p className="text-[11px] text-gray-300 leading-snug">{mf.food.ingredients}</p>
+                                            </div>
                                           )}
                                         </div>
                                       </div>

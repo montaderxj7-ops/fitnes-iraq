@@ -101,7 +101,7 @@ export function NotificationsDropdown() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full mt-3 w-80 md:w-96 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            className="absolute left-0 top-full mt-3 w-80 md:w-96 bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[24px] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
             dir="rtl"
           >
             <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">

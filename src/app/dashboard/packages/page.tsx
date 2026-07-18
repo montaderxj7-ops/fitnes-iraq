@@ -187,7 +187,8 @@ export default function PackagesPage() {
         
         {/* Packages Management (Right Panel in RTL) */}
         <motion.div variants={itemVariants} className="xl:col-span-4 space-y-6">
-          <div className="flex items-center justify-between bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] p-5 shadow-lg relative overflow-hidden">
+          <div className="flex items-center justify-between bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+            <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#82c91e]/10 blur-[40px] rounded-full pointer-events-none" />
             <h2 className="text-xl font-black flex items-center gap-3 text-white relative z-10">
               <div className="w-10 h-10 rounded-xl bg-[#82c91e]/10 flex items-center justify-center border border-[#82c91e]/20">
@@ -207,9 +208,15 @@ export default function PackagesPage() {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             {packages.map((pkg) => (
-              <div key={pkg.id} className="bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] p-6 shadow-xl relative overflow-hidden group hover:border-white/20 transition-all hover:-translate-y-1">
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                key={pkg.id} 
+                className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-6 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden group hover:border-[#82c91e]/30 transition-all hover:shadow-[0_0_40px_rgba(130,201,30,0.15)]"
+              >
+                <div className="absolute inset-0 rounded-[32px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
                 {pkg.popular && (
                   <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)] z-20">
                     الأكثر طلباً 🔥
@@ -279,7 +286,8 @@ export default function PackagesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Total Earnings Card */}
-            <div className="bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all">
+            <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:border-white/20 transition-all">
+              <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
               <div className="absolute inset-0 bg-gradient-to-br from-[#82c91e]/5 to-transparent pointer-events-none" />
               <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#82c91e]/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-[#82c91e]/20 transition-colors" />
               <div className="relative z-10">
@@ -298,7 +306,8 @@ export default function PackagesPage() {
             </div>
             
             {/* Pending Amount Card */}
-            <div className="bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all">
+            <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-[#111111]/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:border-white/20 transition-all">
+              <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
               <div className="absolute -top-10 -right-10 w-48 h-48 bg-orange-500/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-orange-500/20 transition-colors" />
               <div className="relative z-10">
@@ -320,7 +329,8 @@ export default function PackagesPage() {
           </div>
 
           {/* Payments History List */}
-          <div className="bg-[#1a1f1a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl relative overflow-hidden flex flex-col">
+          <div className="bg-[#111111]/80 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col">
+            <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
             <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-white/5 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 -translate-x-1/2" />
             
             <div className="flex items-center justify-between mb-8 relative z-10">
@@ -352,12 +362,15 @@ export default function PackagesPage() {
                 <div className="text-center p-8 text-gray-500 font-medium">لا توجد عمليات دفع مسجلة حتى الآن.</div>
               ) : (
                 payments.map((payment) => (
-                  <div 
+                  <motion.div 
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     key={payment.id}
-                  className="group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 lg:px-6 lg:py-5 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-[24px] transition-all cursor-pointer shadow-sm hover:shadow-xl"
+                  className="group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 lg:px-6 lg:py-5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#82c91e]/40 rounded-[24px] transition-all cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(130,201,30,0.15)] relative overflow-hidden backdrop-blur-md"
                 >
+                  <div className="absolute top-0 right-0 w-1 h-full bg-[#82c91e] opacity-0 group-hover:opacity-100 transition-opacity" />
                   {/* Transaction ID */}
-                  <div className="col-span-2 flex items-center gap-3">
+                  <div className="col-span-2 flex items-center gap-3 relative z-10">
                     <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center border border-white/5">
                       <CreditCard className="w-4 h-4 text-gray-400" />
                     </div>
@@ -398,7 +411,7 @@ export default function PackagesPage() {
                       </span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )))}
             </div>
 
