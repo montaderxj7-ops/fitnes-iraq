@@ -62,17 +62,24 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
         });
-        await savePushSubscription(userData.id as string, JSON.parse(JSON.stringify(subscription)));
+        const res = await savePushSubscription(userData.id as string, JSON.parse(JSON.stringify(subscription)));
+        if (!res.success) {
+          throw new Error(res.error || "Failed to save subscription");
+        }
         
         // Send a test notification immediately
         const { sendTestNotification } = await import('@/actions/notifications');
-        await sendTestNotification(userData.id as string);
+        const testRes = await sendTestNotification(userData.id as string);
         
+        if (!testRes.success) {
+           console.error("Test notification failed:", testRes.error);
+        }
+
         alert("تم تفعيل الإشعارات بنجاح!");
         setSettings(prev => ({ ...prev, pushNotifications: true }));
-      } catch (err) {
+      } catch (err: any) {
         console.error('Service Worker / Push Error:', err);
-        alert("حدث خطأ أثناء تفعيل الإشعارات. تأكد من السماح للإشعارات من إعدادات المتصفح.");
+        alert(`حدث خطأ أثناء تفعيل الإشعارات: ${err.message || 'تأكد من السماح للإشعارات من إعدادات المتصفح.'}`);
       }
     } else {
       setSettings(prev => ({ ...prev, pushNotifications: false }));
