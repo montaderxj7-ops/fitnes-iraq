@@ -116,9 +116,15 @@ export function AppointmentsWidget() {
 
   const fetchAppointments = async () => {
     setIsLoading(true);
-    // Format date as YYYY-MM-DD
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    const res = await getAppointments(dateStr);
+    
+    // Calculate precise local start and end of day, then convert to absolute ISO
+    const startOfDay = new Date(selectedDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(selectedDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const res = await getAppointments(startOfDay.toISOString(), endOfDay.toISOString());
     
     if (res.success && res.appointments) {
       setAppointments(res.appointments as any[]);

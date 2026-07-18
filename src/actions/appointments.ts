@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
-export async function getAppointments(dateStr?: string) {
+export async function getAppointments(startDateISO?: string, endDateISO?: string) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
@@ -14,18 +14,11 @@ export async function getAppointments(dateStr?: string) {
     if (!profile) return { success: false, error: "No profile" };
 
     let dateFilter = {};
-    if (dateStr) {
-      // Find appointments for a specific day
-      const startOfDay = new Date(dateStr);
-      startOfDay.setHours(0, 0, 0, 0);
-      
-      const endOfDay = new Date(dateStr);
-      endOfDay.setHours(23, 59, 59, 999);
-      
+    if (startDateISO && endDateISO) {
       dateFilter = {
         date: {
-          gte: startOfDay,
-          lte: endOfDay
+          gte: new Date(startDateISO),
+          lte: new Date(endDateISO)
         }
       };
     }
