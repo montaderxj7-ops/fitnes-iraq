@@ -3,10 +3,13 @@
 import { prisma } from '@/lib/prisma';
 import webpush from 'web-push';
 
-export async function getNotifications(userId: string) {
+export async function getNotifications(clientId: string) {
   try {
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || !client.userId) return { success: false, error: 'Client not found or has no user' };
+
     const notifications = await prisma.notification.findMany({
-      where: { userId },
+      where: { userId: client.userId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
@@ -30,21 +33,24 @@ export async function markNotificationAsRead(id: string) {
   }
 }
 
-export async function savePushSubscription(userId: string, subscription: any) {
+export async function savePushSubscription(clientId: string, subscription: any) {
   try {
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || !client.userId) return { success: false, error: 'Client not found or has no user' };
+
     const { endpoint, keys } = subscription;
     if (!endpoint || !keys) return { success: false, error: 'Invalid subscription data' };
 
     await prisma.pushSubscription.upsert({
       where: { endpoint },
       create: {
-        userId,
+        userId: client.userId,
         endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
       },
       update: {
-        userId,
+        userId: client.userId,
         p256dh: keys.p256dh,
         auth: keys.auth,
       },
