@@ -135,7 +135,7 @@ export async function sendNotificationToClient(clientId: string, title: string, 
     // 1. Fetch user ID from client ID
     const client = await prisma.client.findUnique({
       where: { id: clientId },
-      include: { user: true },
+      include: { user: true, coach: true },
     });
 
     if (!client || !client.userId) {
@@ -169,8 +169,9 @@ export async function sendNotificationToClient(clientId: string, title: string, 
       const payload = JSON.stringify({
         title,
         body: message,
-        icon: '/logos/icon.png',
-        url: '/app',
+        icon: client.coach?.logo || '/logos/icon.png',
+        badge: client.coach?.logo || '/logos/icon.png', // Badge is the small monochrome icon in status bar
+        url: `/${client.coach?.slug || 'app'}`,
       });
 
       const promises = subscriptions.map(async (sub) => {
