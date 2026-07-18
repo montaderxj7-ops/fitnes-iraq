@@ -49,39 +49,6 @@ export function NotificationsBell({ userId }: { userId: string }) {
     }
   }, []);
 
-  const requestPushPermission = async () => {
-    if (!userId) {
-      alert("هذه الميزة غير متاحة في وضع المعاينة. يرجى تسجيل الدخول كمتدرب حقيقي.");
-      return;
-    }
-    
-    if ('serviceWorker' in navigator && 'PushManager' in window && userId) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('SW Registered');
-        
-        // Request permission explicitly on user click
-        const perm = await Notification.requestPermission();
-        setPermission(perm);
-        
-        if (perm === 'granted') {
-          const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-          if (vapidPublicKey) {
-            let subscription = await registration.pushManager.getSubscription();
-            if (!subscription) {
-              subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-              });
-            }
-            await savePushSubscription(userId, JSON.parse(JSON.stringify(subscription)));
-          }
-        }
-      } catch (err) {
-        console.error('Service Worker / Push Error:', err);
-      }
-    }
-  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -136,16 +103,7 @@ export function NotificationsBell({ userId }: { userId: string }) {
               )}
             </div>
 
-            {permission === 'default' && (
-              <div className="p-3 bg-[#82c91e]/10 border-b border-[#82c91e]/20 text-center">
-                <button 
-                  onClick={requestPushPermission}
-                  className="text-xs font-bold text-[#82c91e] hover:text-white transition-colors"
-                >
-                  تفعيل الإشعارات الخارجية لتصلك فوراً 🔔
-                </button>
-              </div>
-            )}
+            {/* Removed inline push permission prompt, now in Settings */}
             
             <div className="max-h-[300px] overflow-y-auto">
               {notifications.length === 0 ? (

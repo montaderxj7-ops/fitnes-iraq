@@ -3,6 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Settings, CreditCard, Bell, ChevronLeft, ChevronRight, User, Mail, Calendar, ShieldCheck, Activity, ArrowRight, ArrowLeft, Moon, Sun, Globe, Lock, Trash2, Smartphone } from 'lucide-react';
 import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { savePushSubscription } from '@/actions/notifications';
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 interface ClientProfileProps {
   coach: CoachData;
@@ -20,11 +32,38 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
     workoutReminders: true,
     waterReminders: false,
     coachMessages: true,
+    pushNotifications: false,
     twoFactorAuth: false
   });
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handlePushToggle = async () => {
+    if (!userData?.id && !settings.pushNotifications) {
+      alert("هذه الميزة غير متاحة في وضع المعاينة. يرجى تسجيل الدخول كمتدرب حقيقي.");
+      return;
+    }
+    
+    if (!settings.pushNotifications && 'serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
+        });
+        await savePushSubscription(userData.id as string, JSON.parse(JSON.stringify(subscription)));
+        alert("تم تفعيل الإشعارات بنجاح!");
+        setSettings(prev => ({ ...prev, pushNotifications: true }));
+      } catch (err) {
+        console.error('Service Worker / Push Error:', err);
+        alert("حدث خطأ أثناء تفعيل الإشعارات");
+      }
+    } else {
+      // For now, we just toggle it off in the UI, actual unsubscribe requires more logic
+      setSettings(prev => ({ ...prev, pushNotifications: !prev.pushNotifications }));
+    }
   };
 
   const containerVariants = {
@@ -284,6 +323,23 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
               {activeModal === 'notifications' && (
                 <div className="space-y-6">
                   <div>
+                    <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">الإشعارات الخارجية (الجهاز)</h3>
+                    <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden mb-6">
+                      <div className="flex items-center justify-between p-4 border-b border-white/5">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm">تفعيل الإشعارات (Push)</span>
+                          <span className="text-xs text-gray-500 mt-1">لتصلك تنبيهات النظام الغذائي والتدريب خارج التطبيق</span>
+                        </div>
+                        <div 
+                          onClick={handlePushToggle}
+                          className="w-12 h-6 rounded-full relative p-1 cursor-pointer transition-colors shrink-0 mx-2" 
+                          style={{ backgroundColor: settings.pushNotifications ? coach.primaryColor : 'rgba(255,255,255,0.1)' }}
+                        >
+                          <div className={`w-4 h-4 rounded-full absolute transition-all ${settings.pushNotifications ? (dir === 'rtl' ? 'left-1' : 'right-1') + ' bg-black' : (dir === 'rtl' ? 'right-1' : 'left-1') + ' bg-gray-400'}`} />
+                        </div>
+                      </div>
+                    </div>
+
                     <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">{t('notif.workout')}</h3>
                     <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
                       <div className="flex items-center justify-between p-4 border-b border-white/5">
