@@ -3,6 +3,73 @@
 import { prisma } from '@/lib/prisma';
 import webpush from 'web-push';
 
+export interface DynamicNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  createdAt: Date | string;
+  link: string;
+}
+
+export async function getDynamicNotifications() {
+  try {
+    const clients = await prisma.client.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100
+    });
+
+    const notifications: DynamicNotification[] = [];
+
+    clients.forEach(client => {
+      // New Client Notification
+      const daysSinceCreation = (Date.now() - new Date(client.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceCreation < 3) {
+        notifications.push({
+          id: `new-${client.id}`,
+          type: 'NEW_SUBSCRIBER',
+          title: 'مشترك جديد',
+          message: `تم انضمام ${client.name} مؤخراً.`,
+          createdAt: client.createdAt,
+          link: `/dashboard/clients/${client.id}`
+        });
+      }
+
+      // Expiring Soon Notification
+      if (client.subscriptionEnd) {
+        const daysUntilExpiry = (new Date(client.subscriptionEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+        if (daysUntilExpiry > 0 && daysUntilExpiry <= 5) {
+          notifications.push({
+            id: `expiring-${client.id}`,
+            type: 'EXPIRING_SOON',
+            title: 'اشتراك يشارف على الانتهاء',
+            message: `اشتراك ${client.name} سينتهي خلال ${Math.ceil(daysUntilExpiry)} أيام.`,
+            createdAt: new Date(Date.now() - 1000 * 60 * 60), // Mock recent time
+            link: `/dashboard/clients/${client.id}`
+          });
+        } else if (daysUntilExpiry <= 0) {
+          notifications.push({
+            id: `expired-${client.id}`,
+            type: 'EXPIRED',
+            title: 'اشتراك منتهي',
+            message: `لقد انتهى اشتراك ${client.name}.`,
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // Mock recent time
+            link: `/dashboard/clients/${client.id}`
+          });
+        }
+      }
+    });
+
+    // Sort by createdAt descending
+    notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return { success: true, notifications: notifications.slice(0, 50) };
+  } catch (error) {
+    console.error('Error fetching dynamic notifications:', error);
+    return { success: false, error: 'Failed' };
+  }
+}
+
 export async function getNotifications(clientId: string) {
   try {
     const client = await prisma.client.findUnique({ where: { id: clientId } });

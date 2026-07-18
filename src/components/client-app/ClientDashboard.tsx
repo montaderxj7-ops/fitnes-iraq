@@ -103,6 +103,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
                 <Target className="w-3 h-3" style={{ color: coach.primaryColor }} /> 
                 <span style={{ color: coach.primaryColor }}>بطل</span>
               </p>
+            </div>
           </div>
           <NotificationsBell userId={userData?.id || ''} />
         </div>
