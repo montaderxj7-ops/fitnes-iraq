@@ -96,7 +96,7 @@ export default function DashboardOverview() {
       <div className="flex-1 space-y-8 flex flex-col">
         
         {/* Header (Glassmorphism) */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#111111]/80 backdrop-blur-3xl p-8 rounded-[40px] border border-white/10 relative shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#111111]/80 backdrop-blur-3xl p-8 rounded-[40px] border border-white/10 relative shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 overflow-visible">
           {/* Subtle Inner Glow */}
           <div className="absolute inset-0 rounded-[40px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
           
