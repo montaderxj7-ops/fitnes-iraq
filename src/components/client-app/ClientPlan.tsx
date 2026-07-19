@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dumbbell, Utensils, Pill, ChevronDown, CheckCircle2, Flame, PlayCircle, Clock, Save, Check, Square, CheckSquare } from 'lucide-react';
+import { ExerciseTracker } from "./ExerciseTracker";
 import { cn } from '@/lib/utils';
 import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -64,9 +65,12 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
               title: d.name,
               rest: d.exercises.length === 0,
               exercises: d.exercises.map((ex: any) => ({
+                id: ex.id,
                 name: ex.exercise?.name || 'تمرين',
-                sets: ex.exercise?.defaultSets || 3,
-                reps: ex.exercise?.defaultReps || 12,
+                sets: ex.sets || 3,
+                reps: ex.reps || 12,
+                targetRpe: ex.targetRpe,
+                targetRir: ex.targetRir,
                 mediaUrl: ex.exercise?.mediaUrl
               }))
             }));
@@ -254,62 +258,34 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
                             const exId = `${day.day}-${idx}`;
                             const isEditing = editingWeightId === exId;
                             return (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-[1.5rem] bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group gap-4 relative overflow-hidden">
-                              <div className="flex items-start sm:items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-sm font-bold text-gray-400 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all shrink-0">
-                                  {idx + 1}
+                            <div key={idx} className="flex flex-col p-4 rounded-[1.5rem] bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group gap-4 relative overflow-hidden">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-start sm:items-center gap-4">
+                                  <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-sm font-bold text-gray-400 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all shrink-0">
+                                    {idx + 1}
+                                  </div>
+                                  <div>
+                                    <span className="font-bold text-sm sm:text-base text-gray-200 leading-tight block">{ex.name}</span>
+                                  </div>
                                 </div>
-                                <div>
-                                  <span className="font-bold text-sm sm:text-base text-gray-200 leading-tight block">{ex.name}</span>
-                                </div>
-                              </div>
-                              <div className={`flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-wider ${dir === 'rtl' ? 'mr-14 sm:mr-0' : 'ml-14 sm:ml-0'}`}>
-                                <span className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-gray-300 shadow-inner flex items-center gap-1.5 h-[38px]">
-                                  <span className="text-sm">{ex.sets}</span> {t('plan.sets')}
-                                </span>
-                                <span className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 shadow-inner flex items-center gap-1.5 h-[38px]" style={{ color: coach.primaryColor, borderColor: `${coach.primaryColor}30` }}>
-                                  <span className="text-sm">{ex.reps}</span> {t('plan.reps')}
-                                </span>
-                                {/* Weight Tracking Pill */}
-                                <div className="relative">
-                                  {isEditing ? (
-                                    <div className="flex items-center gap-1 bg-black/60 border border-white/20 px-1 py-1 rounded-xl shadow-inner h-[38px]">
-                                      <input
-                                        type="number"
-                                        value={tempWeight}
-                                        onChange={(e) => setTempWeight(e.target.value)}
-                                        placeholder="كجم"
-                                        className="bg-transparent w-12 text-center text-xs text-white focus:outline-none"
-                                        autoFocus
-                                      />
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          if(tempWeight.trim()) {
-                                            setTrackedWeights(prev => ({ ...prev, [exId]: tempWeight }));
-                                          }
-                                          setEditingWeightId(null);
-                                        }}
-                                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-white/10 hover:bg-green-500/20 text-white hover:text-green-400 transition-colors"
-                                      >
-                                        <Save className="w-3.5 h-3.5" />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setTempWeight(trackedWeights[exId] || '');
-                                        setEditingWeightId(exId);
-                                      }}
-                                      className={cn("px-3 py-2 rounded-xl border shadow-inner flex items-center gap-1.5 transition-colors h-[38px]", trackedWeights[exId] ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-black/40 border-white/10 text-gray-400 hover:text-white")}
-                                    >
-                                      <Dumbbell className="w-3 h-3" />
-                                      <span className="text-sm mt-0.5">{trackedWeights[exId] ? `${trackedWeights[exId]} كجم` : 'الوزن'}</span>
-                                    </button>
-                                  )}
+                                <div className={`flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-wider ${dir === 'rtl' ? 'mr-14 sm:mr-0' : 'ml-14 sm:ml-0'}`}>
+                                  <span className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-gray-300 shadow-inner flex items-center gap-1.5 h-[38px]">
+                                    <span className="text-sm">{ex.sets}</span> {t('plan.sets')}
+                                  </span>
+                                  <span className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 shadow-inner flex items-center gap-1.5 h-[38px]" style={{ color: coach.primaryColor, borderColor: `${coach.primaryColor}30` }}>
+                                    <span className="text-sm">{ex.reps}</span> {t('plan.reps')}
+                                  </span>
                                 </div>
                               </div>
+                              <ExerciseTracker
+                                clientId={userData.id}
+                                workoutExerciseId={ex.id || exId}
+                                targetSets={ex.sets}
+                                targetReps={ex.reps}
+                                targetRpe={ex.targetRpe}
+                                targetRir={ex.targetRir}
+                                coachPrimaryColor={coach.primaryColor}
+                              />
                             </div>
                           )})}
                         </div>

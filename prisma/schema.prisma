@@ -132,6 +132,7 @@ model Client {
   coach     CoachProfile @relation("CoachClients", fields: [coachId], references: [id], onDelete: Cascade)
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments Appointment[]
+  exerciseLogs ExerciseLog[]
 }
 
 model PaymentMethod {
@@ -250,11 +251,28 @@ model WorkoutExercise {
   exerciseId String
   sets       Int
   reps       Int
+  targetRpe  Float?
+  targetRir  Float?
   order      Int        @default(0)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   day        WorkoutDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
   exercise   Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  logs       ExerciseLog[]
+}
+
+model ExerciseLog {
+  id                String          @id @default(cuid())
+  clientId          String
+  workoutExerciseId String
+  date              DateTime        @default(now())
+  sets              Json            // Array of: { setNumber: 1, reps: 10, weight: 50, rpe: 8, rir: 2 }
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  client            Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

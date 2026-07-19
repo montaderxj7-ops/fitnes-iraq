@@ -13,6 +13,8 @@ interface WorkoutExercise {
   targetMuscle: string;
   sets: number;
   reps: number;
+  targetRpe?: number | null;
+  targetRir?: number | null;
 }
 
 interface WorkoutDay {
@@ -23,7 +25,7 @@ interface WorkoutDay {
 
 interface PlanBuilderProps {
   days: WorkoutDay[];
-  onUpdateExercise: (dayId: string, exId: string, field: 'sets' | 'reps', value: number) => void;
+  onUpdateExercise: (dayId: string, exId: string, field: 'sets' | 'reps' | 'targetRpe' | 'targetRir', value: number | null) => void;
   onRemoveExercise: (dayId: string, exId: string) => void;
   onAddDay: () => void;
 }
@@ -74,6 +76,26 @@ function SortableExerciseItem({ ex, dayId, onUpdate, onRemove }: { ex: WorkoutEx
               type="number" 
               value={ex.reps}
               onChange={(e) => onUpdate(dayId, ex.id, 'reps', parseInt(e.target.value) || 0)}
+              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-400">RPE</span>
+            <input 
+              type="number" 
+              value={ex.targetRpe || ''}
+              placeholder="-"
+              onChange={(e) => onUpdate(dayId, ex.id, 'targetRpe', e.target.value ? parseFloat(e.target.value) : null)}
+              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-400">RIR</span>
+            <input 
+              type="number" 
+              value={ex.targetRir || ''}
+              placeholder="-"
+              onChange={(e) => onUpdate(dayId, ex.id, 'targetRir', e.target.value ? parseFloat(e.target.value) : null)}
               className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
             />
           </div>

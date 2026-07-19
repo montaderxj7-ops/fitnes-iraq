@@ -13,6 +13,7 @@ import { getExercises, getWorkoutPlan } from "@/actions/workouts";
 import { getNutritionPlan, getFoodItems } from "@/actions/nutrition";
 import { getSupplementPlan, getSupplementItems } from "@/actions/supplements";
 import { getClientById } from "@/actions/clients";
+import { ExerciseLogsViewer } from "@/components/dashboard/ExerciseLogsViewer";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,6 +32,7 @@ export default function ClientProfilePage() {
   const [isBuildingWorkout, setIsBuildingWorkout] = useState(false);
   const [isBuildingNutrition, setIsBuildingNutrition] = useState(false);
   const [isBuildingSupplement, setIsBuildingSupplement] = useState(false);
+  const [isViewingLogs, setIsViewingLogs] = useState(false);
   const [exercisesLib, setExercisesLib] = useState<any[]>([]);
   const [foodsLib, setFoodsLib] = useState<any[]>([]);
   const [supplementsLib, setSupplementsLib] = useState<any[]>([]);
@@ -130,6 +132,8 @@ export default function ClientProfilePage() {
   }
 
   return (
+    <>
+    {isViewingLogs && <ExerciseLogsViewer clientId={clientId} onClose={() => setIsViewingLogs(false)} />}
     <motion.div 
       variants={containerVariants}
       initial="hidden"
@@ -244,13 +248,25 @@ export default function ClientProfilePage() {
               {currentPlan ? "يوجد نظام تدريبي مخصص لهذا المشترك." : "لا يوجد نظام تدريبي مخصص لهذا المشترك حتى الآن."}
             </p>
             
-            <button 
-              onClick={() => setIsBuildingWorkout(true)}
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-neon text-black font-black hover:bg-[#c4e649] hover:shadow-[0_0_20px_rgba(214,248,84,0.4)] hover:-translate-y-1 transition-all"
-            >
-              <Plus className="w-5 h-5" />
-              {currentPlan ? "تعديل النظام التدريبي" : "إضافة نظام تدريبي"}
-            </button>
+            <div className="flex flex-col gap-2 w-full mt-auto">
+              <button 
+                onClick={() => setIsBuildingWorkout(true)}
+                className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-neon text-black font-black hover:bg-[#c4e649] hover:shadow-[0_0_20px_rgba(214,248,84,0.4)] hover:-translate-y-1 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+                {currentPlan ? "تعديل النظام التدريبي" : "إضافة نظام تدريبي"}
+              </button>
+              
+              {currentPlan && (
+                <button 
+                  onClick={() => setIsViewingLogs(true)}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-colors"
+                >
+                  <Activity className="w-4 h-4" />
+                  عرض تقدم المتدرب (Metrics)
+                </button>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -304,5 +320,6 @@ export default function ClientProfilePage() {
 
       </div>
     </motion.div>
+    </>
   );
 }

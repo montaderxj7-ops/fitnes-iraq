@@ -92,7 +92,9 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
                 name: exercise.name,
                 targetMuscle: exercise.targetMuscle,
                 sets: exercise.defaultSets,
-                reps: exercise.defaultReps
+                reps: exercise.defaultReps,
+                targetRpe: null,
+                targetRir: null
               }]
             };
           }
@@ -104,7 +106,7 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
     // Future enhancement: Handle sorting between days using SortableContext
   };
 
-  const handleUpdateExercise = (dayId: string, exId: string, field: 'sets' | 'reps', value: number) => {
+  const handleUpdateExercise = (dayId: string, exId: string, field: 'sets' | 'reps' | 'targetRpe' | 'targetRir', value: number | null) => {
     setDays(prevDays => prevDays.map(day => {
       if (day.id === dayId) {
         return {
@@ -146,7 +148,9 @@ export function WorkoutWorkspace({ clientId, initialExercises, initialPlan, onCl
           name: ex.exercise?.name || 'تمرين',
           targetMuscle: ex.exercise?.targetMuscle || '',
           sets: ex.sets,
-          reps: ex.reps
+          reps: ex.reps,
+          targetRpe: ex.targetRpe,
+          targetRir: ex.targetRir
         }))
       }));
       setDays(clonedDays);

@@ -108,6 +108,8 @@ export async function saveWorkoutPlan(clientId: string, planData: any) {
                 exerciseId: ex.exerciseId,
                 sets: parseInt(ex.sets) || 3,
                 reps: parseInt(ex.reps) || 12,
+                targetRpe: ex.targetRpe ? parseFloat(ex.targetRpe) : null,
+                targetRir: ex.targetRir ? parseFloat(ex.targetRir) : null,
                 order: j
               }))
             }
@@ -169,6 +171,8 @@ export async function cloneWorkoutPlan(fromClientId: string, toClientId: string)
                 exerciseId: ex.exerciseId,
                 sets: ex.sets,
                 reps: ex.reps,
+                targetRpe: ex.targetRpe,
+                targetRir: ex.targetRir,
                 order: ex.order
               }))
             }
