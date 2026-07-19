@@ -74,7 +74,7 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
   useEffect(() => {
     if (!builderStep) {
       try {
-        const stored = localStorage.getItem('client_user_data');
+        const stored = localStorage.getItem(`client_user_data_${coach.id}`);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && parsed.id) {
@@ -115,7 +115,7 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
               coach={coach}
               onSuccess={(data: any) => {
                 setUserData(data);
-                localStorage.setItem('client_user_data', JSON.stringify(data));
+                localStorage.setItem(`client_user_data_${coach.id}`, JSON.stringify(data));
                 if (data.package) {
                   const matchedPkg = coach.packages.find(p => p.name === data.package);
                   if (matchedPkg) setSelectedPackage(matchedPkg);
@@ -201,7 +201,7 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
                     intakeData: data
                   };
                   setUserData(finalUser);
-                  localStorage.setItem('client_user_data', JSON.stringify(finalUser));
+                  localStorage.setItem(`client_user_data_${coach.id}`, JSON.stringify(finalUser));
                 }
                 setStep('success');
               }}
@@ -288,13 +288,13 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
               selectedPackage={selectedPackage || coach.packages[0]}
               onLogout={() => {
                 setUserData(null);
-                localStorage.removeItem('client_user_data');
+                localStorage.removeItem(`client_user_data_${coach.id}`);
                 setStep('welcome');
               }}
               onUpdateUser={(updated) => {
                 const newData = { ...userData, ...updated };
                 setUserData(newData);
-                localStorage.setItem('client_user_data', JSON.stringify(newData));
+                localStorage.setItem(`client_user_data_${coach.id}`, JSON.stringify(newData));
               }}
             />
           </motion.div>
