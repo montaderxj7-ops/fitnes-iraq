@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Settings, CreditCard, Bell, ChevronLeft, ChevronRight, User, Mail, Calendar, ShieldCheck, Activity, ArrowRight, ArrowLeft, Moon, Sun, Globe, Lock, Trash2, Smartphone } from 'lucide-react';
+import { LogOut, Settings, CreditCard, Bell, ChevronLeft, ChevronRight, User, Mail, Calendar, ShieldCheck, Activity, ArrowRight, ArrowLeft, Globe, Lock, Trash2 } from 'lucide-react';
 import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { savePushSubscription } from '@/actions/notifications';
@@ -30,8 +30,6 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
   const { t, language, setLanguage, dir } = useLanguage();
   const [activeModal, setActiveModal] = useState<'settings' | 'notifications' | 'privacy' | null>(null);
   const [settings, setSettings] = useState({
-    darkMode: true,
-    systemTheme: false,
     workoutReminders: true,
     waterReminders: false,
     coachMessages: true,
@@ -332,38 +330,6 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
             <div className="flex-1 overflow-y-auto p-6 pb-24">
               {activeModal === 'settings' && (
                 <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">{t('settings.appearance')}</h3>
-                    <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
-                      <div className="flex items-center justify-between p-4 border-b border-white/5">
-                        <div className="flex items-center gap-3">
-                          <Moon className="w-5 h-5 text-gray-400" />
-                          <span className="font-bold text-sm">{t('settings.darkMode')}</span>
-                        </div>
-                        <div 
-                          onClick={() => toggleSetting('darkMode')}
-                          className="w-12 h-6 rounded-full relative p-1 cursor-pointer transition-colors" 
-                          style={{ backgroundColor: settings.darkMode ? coach.primaryColor : 'rgba(255,255,255,0.1)' }}
-                        >
-                          <div className={`w-4 h-4 rounded-full absolute transition-all ${settings.darkMode ? (dir === 'rtl' ? 'left-1' : 'right-1') + ' bg-black' : (dir === 'rtl' ? 'right-1' : 'left-1') + ' bg-gray-400'}`} />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                          <Smartphone className="w-5 h-5 text-gray-400" />
-                          <span className="font-bold text-sm">{t('settings.systemTheme')}</span>
-                        </div>
-                        <div 
-                          onClick={() => toggleSetting('systemTheme')}
-                          className="w-12 h-6 rounded-full relative p-1 cursor-pointer transition-colors" 
-                          style={{ backgroundColor: settings.systemTheme ? coach.primaryColor : 'rgba(255,255,255,0.1)' }}
-                        >
-                          <div className={`w-4 h-4 rounded-full absolute transition-all ${settings.systemTheme ? (dir === 'rtl' ? 'left-1' : 'right-1') + ' bg-black' : (dir === 'rtl' ? 'right-1' : 'left-1') + ' bg-gray-400'}`} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <div>
                     <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">{t('settings.languageRegion')}</h3>
                     <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden p-2 space-y-1">
