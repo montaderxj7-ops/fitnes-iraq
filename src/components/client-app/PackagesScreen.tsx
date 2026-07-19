@@ -127,7 +127,7 @@ export function PackagesScreen({ coach, onSelectPackage, onBack }: PackagesScree
                             : Number(String(pkg.price).replace(/,/g, '')).toLocaleString()}
                         </span>
                         <span className="text-sm text-gray-500 font-bold tracking-wider">IQD</span>
-                        <span className="text-xs text-gray-600 font-medium mr-1">/ شهر</span>
+                        <span className="text-xs text-gray-600 font-medium mr-1">/ {t('packages.month') || 'شهر'}</span>
                       </div>
                     </div>
                   </div>
@@ -148,8 +148,8 @@ export function PackagesScreen({ coach, onSelectPackage, onBack }: PackagesScree
                           <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: coach.primaryColor }} />
                         </div>
                         <span className="leading-snug font-medium">
-                          متابعة عبر المحادثة ({pkg.chatDays})
-                          <span className="text-gray-500 block text-xs mt-1">ساعات التواصل: {pkg.chatHours}</span>
+                          {t('packages.chat_support', { days: pkg.chatDays }).replace('{days}', pkg.chatDays.toString())}
+                          <span className="text-gray-500 block text-xs mt-1">{t('packages.chat_hours', { hours: pkg.chatHours }).replace('{hours}', pkg.chatHours.toString())}</span>
                         </span>
                       </li>
                     )}

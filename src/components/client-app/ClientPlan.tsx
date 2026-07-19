@@ -133,7 +133,7 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
         <div className="pt-8 px-6 pb-4">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl font-black text-white mb-2">{t('plan.title')}</h1>
-            <p className="text-gray-400 text-sm">هنا تجد كل تفاصيل خطتك المصممة خصيصاً لك.</p>
+            <p className="text-gray-400 text-sm">{t('plan.subtitle')}</p>
           </motion.div>
         </div>
 
@@ -194,9 +194,9 @@ export function ClientPlan({ coach, userData }: ClientPlanProps) {
             >
               <div className="px-6 space-y-4">
                 {isLoadingPlan ? (
-                  <div className="text-center text-gray-500 text-sm py-10">جاري تحميل الخطة التدريبية...</div>
+                  <div className="text-center text-gray-500 text-sm py-10">{t('plan.loading')}</div>
                 ) : workoutPlan.length === 0 ? (
-                  <div className="text-center text-gray-500 text-sm py-10">لا توجد خطة تدريبية مخصصة لك حتى الآن.</div>
+                  <div className="text-center text-gray-500 text-sm py-10">{t('plan.empty')}</div>
                 ) : workoutPlan.map((day) => (
                   <motion.div variants={itemVariants} key={day.day} className="bg-gradient-to-br from-[#1a1a1a] to-[#111111] border border-white/5 rounded-[2rem] overflow-hidden shadow-lg relative group">
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

@@ -106,7 +106,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
               <p className="text-white font-bold text-lg leading-tight group-hover:text-gray-200 transition-colors">{t('dash.welcome')} {userData?.name ? userData.name.split(' ')[0] : t('dash.trainee')}</p>
               <p className="text-xs text-gray-400 flex items-center gap-1">
                 <Target className="w-3 h-3" style={{ color: coach.primaryColor }} /> 
-                <span style={{ color: coach.primaryColor }}>بطل</span>
+                <span style={{ color: coach.primaryColor }}>{t('dash.champion')}</span>
               </p>
             </div>
           </div>

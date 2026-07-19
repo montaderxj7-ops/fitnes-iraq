@@ -362,12 +362,12 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
               {activeModal === 'notifications' && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">الإشعارات الخارجية (الجهاز)</h3>
+                    <h3 className="text-sm font-bold text-gray-500 mb-3 px-2">{t('profile.pushNotifications')}</h3>
                     <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden mb-6">
                       <div className="flex items-center justify-between p-4 border-b border-white/5">
                         <div className="flex flex-col">
-                          <span className="font-bold text-sm">تفعيل الإشعارات (Push)</span>
-                          <span className="text-xs text-gray-500 mt-1">لتصلك تنبيهات النظام الغذائي والتدريب خارج التطبيق</span>
+                          <span className="font-bold text-sm">{t('profile.enablePush')}</span>
+                          <span className="text-xs text-gray-500 mt-1">{t('profile.pushDesc')}</span>
                           <span className="text-[10px] text-gray-600 mt-1" style={{ fontFamily: 'monospace' }}>Status: {debugPush}</span>
                         </div>
                         <div 
@@ -486,7 +486,7 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
           >
             <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 flex flex-col items-center">
-              <h3 className="text-white font-bold mb-4 text-lg">تحديد الصورة</h3>
+              <h3 className="text-white font-bold mb-4 text-lg">{t('profile.cropImage')}</h3>
               <div className="relative w-full h-64 bg-black/50 rounded-xl overflow-hidden mb-4">
                 <Cropper
                   image={selectedImage}
@@ -509,7 +509,7 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
                   onClick={() => setIsCropping(false)}
                   className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors"
                 >
-                  إلغاء
+                  {t('profile.cancel')}
                 </button>
                 <button 
                   onClick={async () => {
@@ -523,7 +523,7 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
                   className="flex-1 py-3 rounded-xl font-bold transition-all text-black"
                   style={{ backgroundColor: coach.primaryColor }}
                 >
-                  حفظ الصورة
+                  {t('profile.saveImage')}
                 </button>
               </div>
             </div>

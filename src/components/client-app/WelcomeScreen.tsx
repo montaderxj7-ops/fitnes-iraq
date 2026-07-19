@@ -104,7 +104,7 @@ export function WelcomeScreen({ coach, onNext, onLogin }: WelcomeScreenProps) {
             onClick={onLogin}
             className="group w-full h-[56px] rounded-full font-bold text-[16px] flex items-center justify-center gap-2.5 bg-transparent border border-white/10 text-white/70 hover:bg-white/5 hover:text-white hover:border-white/20 transition-all duration-300 active:scale-[0.98]"
           >
-            <span>تسجيل الدخول إلى حسابك</span>
+            <span>{t('welcome.loginAccount') || 'تسجيل الدخول إلى حسابك'}</span>
             <LogIn className="w-5 h-5 opacity-60 group-hover:opacity-100" />
           </button>
         </motion.div>

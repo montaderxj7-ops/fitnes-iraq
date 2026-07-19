@@ -97,9 +97,9 @@ export function NotificationsBell({ userId }: { userId: string }) {
             className={`absolute top-12 ${dir === 'rtl' ? 'left-0' : 'right-0'} w-80 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden`}
           >
             <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#1a1a1a]">
-              <h3 className="font-bold text-white text-sm">الإشعارات</h3>
+              <h3 className="font-bold text-white text-sm">{t('notif.title')}</h3>
               {unreadCount > 0 && (
-                <span className="text-xs bg-[#82c91e]/20 text-[#82c91e] px-2 py-1 rounded-full">{unreadCount} جديد</span>
+                <span className="text-xs bg-[#82c91e]/20 text-[#82c91e] px-2 py-1 rounded-full">{unreadCount} {t('notif.new')}</span>
               )}
             </div>
 
@@ -109,7 +109,7 @@ export function NotificationsBell({ userId }: { userId: string }) {
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 flex flex-col items-center">
                   <Bell className="w-8 h-8 mb-3 opacity-20" />
-                  <p className="text-sm">لا توجد إشعارات حالياً</p>
+                  <p className="text-sm">{t('notif.empty')}</p>
                 </div>
               ) : (
                 notifications.map(n => (
