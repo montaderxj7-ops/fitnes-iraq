@@ -173,7 +173,6 @@ export async function sendNotificationToClient(clientId: string, title: string, 
         title,
         body: message,
         icon: validIcon,
-        badge: validIcon,
         url: `/${client.coach?.slug || 'app'}`,
       });
 
@@ -233,7 +232,6 @@ export async function sendTestNotification(clientId: string) {
         title: "✅ إشعار تجريبي",
         body: "ممتاز! نظام الإشعارات يعمل الآن على جهازك بنجاح.",
         icon: '/log.png',
-        badge: '/log.png',
         url: '/app',
       });
 
