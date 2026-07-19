@@ -25,7 +25,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
   const [currentTab, setCurrentTab] = React.useState<'home' | 'profile' | 'plan'>('home');
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   
-  const [workoutStats, setWorkoutStats] = React.useState({ title: 'لا يوجد تمرين اليوم', duration: '0 دقيقة', hasWorkout: false });
+  const [workoutStats, setWorkoutStats] = React.useState({ title: '', duration: '0', hasWorkout: false });
   const [nutritionStats, setNutritionStats] = React.useState({ calories: 0, protein: 0, carbs: 0, fats: 0 });
   const [supplementStats, setSupplementStats] = React.useState({ count: 0, hasSupplements: false });
 
@@ -40,7 +40,7 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
               const estimatedDuration = firstDay.exercises.length * 10; // ~10 mins per exercise
               setWorkoutStats({
                 title: firstDay.name,
-                duration: `${estimatedDuration} دقيقة`,
+                duration: `${estimatedDuration}`,
                 hasWorkout: true
               });
             }
@@ -124,8 +124,8 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
           <motion.div variants={itemVariants} className="relative rounded-[2rem] p-6 overflow-hidden shadow-2xl border border-white/10" style={{ backgroundColor: coach.primaryColor }}>
             {/* Dynamic premium gradients */}
             <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/20" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/30 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
+            <div className={`absolute top-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -translate-y-1/2 ${dir === 'rtl' ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2'}`} />
+            <div className={`absolute bottom-0 w-48 h-48 bg-black/30 rounded-full blur-3xl translate-y-1/3 ${dir === 'rtl' ? 'left-0 -translate-x-1/3' : 'right-0 translate-x-1/3'}`} />
             
             {/* Content */}
             <div className="relative z-10 w-[65%] flex flex-col justify-center min-h-[140px]">
@@ -140,13 +140,13 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
               </p>
             </div>
 
-            {/* Coach/Athlete Image overlaying the right side */}
-            <div className="absolute bottom-0 left-0 w-[55%] h-[120%] pointer-events-none">
+            {/* Coach/Athlete Image overlaying the side */}
+            <div className={`absolute bottom-0 w-[55%] h-[120%] pointer-events-none ${dir === 'rtl' ? 'left-0' : 'right-0'}`}>
               {coach.dashboardHeroImage && (
                 <img 
                   src={coach.dashboardHeroImage} 
                   alt="Athlete" 
-                  className="w-full h-full object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)] scale-110 translate-y-2 -translate-x-4"
+                  className={`w-full h-full object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)] scale-110 translate-y-2 ${dir === 'rtl' ? '-translate-x-4' : 'translate-x-4'}`}
                 />
               )}
             </div>
@@ -170,9 +170,10 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout, on
                   </div>
                   <p className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">{t('dash.workout')}</p>
                 </div>
-                <h4 className="text-white font-black text-xl leading-tight drop-shadow-md whitespace-pre-wrap">{workoutStats.title}</h4>
-                <p className="text-xs text-gray-500 mt-2 font-medium">
-                  {workoutStats.duration}
+                <h4 className="text-white font-black text-xl leading-tight drop-shadow-md whitespace-pre-wrap">{workoutStats.title || t('dash.workout')}</h4>
+                <p className="text-xs text-gray-500 mt-2 font-medium flex items-center gap-1">
+                  <span>{workoutStats.duration}</span>
+                  <span>{t('dash.minute')}</span>
                 </p>
               </div>
               
