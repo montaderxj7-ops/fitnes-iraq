@@ -218,7 +218,7 @@ export default function ClientsPage() {
               {/* Name & Avatar */}
               <div className="col-span-3 flex items-center gap-4 relative z-10">
                 <div className="relative">
-                  <img src={client.avatar} alt={client.name} className="w-14 h-14 rounded-[16px] object-cover border border-white/10 group-hover:border-[#82c91e] transition-colors shadow-lg" />
+                  <img src={client.image || `https://i.pravatar.cc/150?u=${client.id}`} alt={client.name} className="w-14 h-14 rounded-[16px] object-cover border border-white/10 group-hover:border-[#82c91e] transition-colors shadow-lg" />
                   <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#82c91e] border-[3px] border-[#111111] rounded-full" />
                 </div>
                 <div>

@@ -314,3 +314,16 @@ export async function registerClientPwa(coachId: string, data: {
     return { success: false, error: "Failed to register client" };
   }
 }
+
+export async function updateClientImage(clientId: string, imageBase64: string) {
+  try {
+    const updatedClient = await prisma.client.update({
+      where: { id: clientId },
+      data: { image: imageBase64 }
+    });
+    return { success: true, image: updatedClient.image };
+  } catch (error) {
+    console.error("Error updating client image:", error);
+    return { success: false, error: "Failed to update image" };
+  }
+}

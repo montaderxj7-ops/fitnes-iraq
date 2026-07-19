@@ -157,7 +157,7 @@ export default function ClientProfilePage() {
           
           <div className="flex flex-col md:flex-row gap-6 relative z-10">
             <div className="flex flex-col items-center gap-4 shrink-0">
-              <img src={clientData.avatar || `https://i.pravatar.cc/150?u=${clientData.id}`} alt={clientData.name} className="w-24 h-24 rounded-full object-cover border-4 border-[#1a1a1a] shadow-[0_0_20px_rgba(214,248,84,0.2)]" />
+              <img src={clientData.image || `https://i.pravatar.cc/150?u=${clientData.id}`} alt={clientData.name} className="w-24 h-24 rounded-full object-cover border-4 border-[#1a1a1a] shadow-[0_0_20px_rgba(214,248,84,0.2)]" />
               <div className="text-center">
                 <h2 className="text-xl font-bold text-white">{clientData.name}</h2>
                 <span className={`px-3 py-1 rounded-full text-xs font-bold mt-2 inline-block border ${

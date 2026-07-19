@@ -14,12 +14,13 @@ import { NotificationsBell } from './NotificationsBell';
 
 interface ClientDashboardProps {
   coach: CoachData;
-  userData: { id?: string; name: string; email: string; intakeData?: Record<string, string> };
+  userData: { id?: string; name: string; email: string; image?: string; intakeData?: Record<string, string> };
   selectedPackage: any;
   onLogout?: () => void;
+  onUpdateUser?: (updated: any) => void;
 }
 
-export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: ClientDashboardProps) {
+export function ClientDashboard({ coach, userData, selectedPackage, onLogout, onUpdateUser }: ClientDashboardProps) {
   const { t, dir } = useLanguage();
   const [currentTab, setCurrentTab] = React.useState<'home' | 'profile' | 'plan'>('home');
   const [isChatOpen, setIsChatOpen] = React.useState(false);
@@ -94,8 +95,12 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
         {/* Top Header */}
         <div className="flex items-center justify-between p-6 pb-2 relative z-50">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setCurrentTab('profile')}>
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#222] group-hover:border-white/20 transition-colors">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="User" className="w-full h-full object-cover" />
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#222] bg-[#1a1a1a] flex items-center justify-center group-hover:border-white/20 transition-colors">
+              {userData?.image ? (
+                <img src={userData.image} alt="User" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-6 h-6 text-gray-500" />
+              )}
             </div>
             <div>
               <p className="text-white font-bold text-lg leading-tight group-hover:text-gray-200 transition-colors">{t('dash.welcome')} {userData?.name ? userData.name.split(' ')[0] : t('dash.trainee')}</p>
@@ -294,7 +299,8 @@ export function ClientDashboard({ coach, userData, selectedPackage, onLogout }: 
             coach={coach} 
             userData={userData} 
             selectedPackage={selectedPackage}
-            onLogout={onLogout} 
+            onLogout={onLogout}
+            onUpdateUser={onUpdateUser}
           />
         )}
       </div>

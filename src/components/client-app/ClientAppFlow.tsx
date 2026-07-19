@@ -57,7 +57,7 @@ type Step = 'welcome' | 'packages' | 'checkout' | 'auth' | 'intake' | 'success' 
 export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
   const [step, setStep] = useState<Step>('welcome');
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
-  const [userData, setUserData] = useState<{ name: string; email: string; password?: string; intakeData?: Record<string, string> } | null>(null);
+  const [userData, setUserData] = useState<{ id?: string; name: string; email: string; password?: string; image?: string; intakeData?: Record<string, string> } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
 
   // Sync with builder step
@@ -279,14 +279,23 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
         {step === 'dashboard' && (
           <motion.div key="dashboard" variants={variants} initial="initial" animate="animate" exit="exit" className="h-full">
             <ClientDashboard 
-              coach={coach} 
+              coach={coach}
               userData={userData || { 
                 name: 'أحمد محمد', 
                 email: 'ahmed@example.com',
                 intakeData: {}
               }}
               selectedPackage={selectedPackage || coach.packages[0]}
-              onLogout={() => setStep('welcome')}
+              onLogout={() => {
+                setUserData(null);
+                localStorage.removeItem('client_user_data');
+                setStep('welcome');
+              }}
+              onUpdateUser={(updated) => {
+                const newData = { ...userData, ...updated };
+                setUserData(newData);
+                localStorage.setItem('client_user_data', JSON.stringify(newData));
+              }}
             />
           </motion.div>
         )}

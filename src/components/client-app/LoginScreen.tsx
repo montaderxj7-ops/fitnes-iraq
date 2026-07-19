@@ -22,6 +22,7 @@ export function LoginScreen({ coach, onSuccess, onBack }: any) {
         id: res.client.id,
         name: res.client.name,
         email: res.client.email || email,
+        image: res.client.image,
         package: res.client.package,
         intakeData: {
           age: res.client.age?.toString() || '',

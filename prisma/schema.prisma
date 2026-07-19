@@ -122,6 +122,7 @@ model Client {
   height    Float?
   goal      String?
   injuries  String?
+  image     String?
   package   String
   status    String       @default("active")
   startDate DateTime     @default(now())

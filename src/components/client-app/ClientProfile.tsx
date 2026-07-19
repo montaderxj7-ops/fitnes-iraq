@@ -18,12 +18,13 @@ function urlBase64ToUint8Array(base64String: string) {
 
 interface ClientProfileProps {
   coach: CoachData;
-  userData: { name: string; email: string; intakeData?: Record<string, string> };
+  userData: { id?: string; name: string; email: string; image?: string; intakeData?: Record<string, string> };
   selectedPackage: any;
   onLogout?: () => void;
+  onUpdateUser?: (updated: any) => void;
 }
 
-export function ClientProfile({ coach, userData, selectedPackage, onLogout }: ClientProfileProps) {
+export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUpdateUser }: ClientProfileProps) {
   const { t, language, setLanguage, dir } = useLanguage();
   const [activeModal, setActiveModal] = useState<'settings' | 'notifications' | 'privacy' | null>(null);
   const [settings, setSettings] = useState({
@@ -133,17 +134,44 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
         >
           {/* Avatar */}
           <motion.div variants={itemVariants} className="relative mb-4">
-            <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-white/20 to-transparent">
-              <div className="w-full h-full rounded-full bg-[#1a1a1a] flex items-center justify-center border-2 border-[#111] overflow-hidden">
-                <User className="w-10 h-10 text-gray-500" />
+            <label className="cursor-pointer block relative">
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || !userData.id) return;
+                  if (file.size > 2 * 1024 * 1024) {
+                    alert("حجم الصورة يجب أن لا يتجاوز 2 ميجابايت");
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onloadend = async () => {
+                    const base64 = reader.result as string;
+                    if (onUpdateUser) onUpdateUser({ image: base64 });
+                    const { updateClientImage } = await import('@/actions/clients');
+                    await updateClientImage(userData.id as string, base64);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-white/20 to-transparent">
+                <div className="w-full h-full rounded-full bg-[#1a1a1a] flex items-center justify-center border-2 border-[#111] overflow-hidden">
+                  {userData.image ? (
+                    <img src={userData.image} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-gray-500" />
+                  )}
+                </div>
               </div>
-            </div>
-            <div 
-              className="absolute bottom-1 left-1 w-6 h-6 rounded-full border-2 border-[#0a0a0a] flex items-center justify-center"
-              style={{ backgroundColor: coach.primaryColor }}
-            >
-              <ShieldCheck className="w-3 h-3 text-black" />
-            </div>
+              <div 
+                className="absolute bottom-1 left-1 w-6 h-6 rounded-full border-2 border-[#0a0a0a] flex items-center justify-center pointer-events-none"
+                style={{ backgroundColor: coach.primaryColor }}
+              >
+                <ShieldCheck className="w-3 h-3 text-black" />
+              </div>
+            </label>
           </motion.div>
 
           <motion.h2 variants={itemVariants} className="text-2xl font-black mb-1 text-center">
