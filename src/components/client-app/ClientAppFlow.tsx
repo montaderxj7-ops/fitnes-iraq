@@ -70,6 +70,24 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
     else if (builderStep === 6) setStep('dashboard');
   }, [builderStep]);
 
+  // Persist authentication state
+  useEffect(() => {
+    if (!builderStep) {
+      try {
+        const stored = localStorage.getItem('client_user_data');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.id) {
+            setUserData(parsed);
+            setStep('dashboard');
+          }
+        }
+      } catch (e) {
+        console.error("Error reading auth state", e);
+      }
+    }
+  }, [builderStep]);
+
   // Screen transition variants
   const variants = {
     initial: { opacity: 0, x: 20 },
@@ -97,6 +115,7 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
               coach={coach}
               onSuccess={(data: any) => {
                 setUserData(data);
+                localStorage.setItem('client_user_data', JSON.stringify(data));
                 if (data.package) {
                   const matchedPkg = coach.packages.find(p => p.name === data.package);
                   if (matchedPkg) setSelectedPackage(matchedPkg);
@@ -172,6 +191,17 @@ export function ClientAppFlow({ coach, builderStep }: ClientAppFlowProps) {
                     alert(res.error || "حدث خطأ أثناء التسجيل");
                     return;
                   }
+                  
+                  // Save auth session on registration success
+                  const finalUser = {
+                    id: res.client?.id || '',
+                    name: userData.name,
+                    email: userData.email,
+                    package: selectedPackage?.name || coach.packages[0].name,
+                    intakeData: data
+                  };
+                  setUserData(finalUser);
+                  localStorage.setItem('client_user_data', JSON.stringify(finalUser));
                 }
                 setStep('success');
               }}
