@@ -35,9 +35,9 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
     pushNotifications: false,
     twoFactorAuth: false
   });
+  const [debugPush, setDebugPush] = useState<string>("Checking...");
 
   useEffect(() => {
-    // Check actual push subscription status when component mounts
     const checkSubscription = async () => {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         try {
@@ -46,11 +46,18 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
             const subscription = await registration.pushManager.getSubscription();
             if (subscription) {
               setSettings(prev => ({ ...prev, pushNotifications: true }));
+              setDebugPush("Subscribed");
+            } else {
+              setDebugPush("Not subscribed");
             }
+          } else {
+            setDebugPush("No registration");
           }
-        } catch (e) {
-          console.error("Error checking subscription:", e);
+        } catch (e: any) {
+          setDebugPush("Error: " + e.message);
         }
+      } else {
+        setDebugPush("Not supported");
       }
     };
     checkSubscription();
@@ -361,6 +368,7 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
                         <div className="flex flex-col">
                           <span className="font-bold text-sm">تفعيل الإشعارات (Push)</span>
                           <span className="text-xs text-gray-500 mt-1">لتصلك تنبيهات النظام الغذائي والتدريب خارج التطبيق</span>
+                          <span className="text-[10px] text-gray-600 mt-1" style={{ fontFamily: 'monospace' }}>Status: {debugPush}</span>
                         </div>
                         <div 
                           onClick={handlePushToggle}

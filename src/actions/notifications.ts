@@ -167,10 +167,14 @@ export async function sendNotificationToClient(clientId: string, title: string, 
       );
 
       const payload = JSON.stringify({
+      const coachLogo = client.coach?.logo;
+      const validIcon = coachLogo && !coachLogo.startsWith('data:image') ? coachLogo : '/logos/icon.png';
+
+      const payload = JSON.stringify({
         title,
         body: message,
-        icon: client.coach?.logo || undefined,
-        badge: client.coach?.logo || undefined,
+        icon: validIcon,
+        badge: validIcon,
         url: `/${client.coach?.slug || 'app'}`,
       });
 
