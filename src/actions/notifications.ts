@@ -166,8 +166,8 @@ export async function sendNotificationToClient(clientId: string, title: string, 
         process.env.VAPID_PRIVATE_KEY
       );
 
-      const coachLogo = client.coach?.logo;
-      const validIcon = coachLogo && !coachLogo.startsWith('data:image') ? coachLogo : '/logos/icon.png';
+      const coachSlug = client.coach?.slug;
+      const validIcon = coachSlug ? `/api/logo/${coachSlug}` : '/log.png';
 
       const payload = JSON.stringify({
         title,
@@ -232,7 +232,8 @@ export async function sendTestNotification(clientId: string) {
       const payload = JSON.stringify({
         title: "✅ إشعار تجريبي",
         body: "ممتاز! نظام الإشعارات يعمل الآن على جهازك بنجاح.",
-        icon: '/logos/icon.png',
+        icon: '/log.png',
+        badge: '/log.png',
         url: '/app',
       });
 
