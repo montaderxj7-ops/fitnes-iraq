@@ -18,7 +18,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function NotificationsBell({ userId }: { userId: string }) {
-  const { dir } = useLanguage();
+  const { t, dir } = useLanguage();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
