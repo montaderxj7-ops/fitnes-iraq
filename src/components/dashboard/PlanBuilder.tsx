@@ -54,54 +54,55 @@ function SortableExerciseItem({ ex, dayId, onUpdate, onRemove }: { ex: WorkoutEx
         <GripVertical className="w-4 h-4" />
       </div>
       
-      <div className="flex-1 min-w-0 flex items-center justify-between">
-        <div className="truncate pr-2">
-          <h5 className="text-sm font-bold text-white truncate">{ex.name}</h5>
-          <span className="text-[10px] text-gray-500 font-medium">{ex.targetMuscle}</span>
+      <div className="flex-1 flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-1">
+        <div className="pr-2 xl:max-w-[200px]">
+          <h5 className="text-sm font-bold text-white whitespace-normal break-words leading-tight">{ex.name}</h5>
+          <span className="text-[10px] text-gray-500 font-medium mt-1 inline-block">{ex.targetMuscle}</span>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-400">الجولات</span>
+        <div className="flex flex-wrap items-center gap-2 xl:gap-3 shrink-0" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
+            <span className="text-[11px] text-gray-400 font-medium">الجولات</span>
             <input 
               type="number" 
               value={ex.sets}
               onChange={(e) => onUpdate(dayId, ex.id, 'sets', parseInt(e.target.value) || 0)}
-              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+              className="w-10 bg-white/5 border border-transparent hover:border-white/20 rounded px-1 text-center text-sm font-bold text-white focus:border-neon outline-none transition-colors"
             />
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-400">التكرارات</span>
+          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
+            <span className="text-[11px] text-gray-400 font-medium">التكرارات</span>
             <input 
               type="number" 
               value={ex.reps}
               onChange={(e) => onUpdate(dayId, ex.id, 'reps', parseInt(e.target.value) || 0)}
-              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+              className="w-10 bg-white/5 border border-transparent hover:border-white/20 rounded px-1 text-center text-sm font-bold text-white focus:border-neon outline-none transition-colors"
             />
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-400">RPE</span>
+          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
+            <span className="text-[11px] text-gray-400 font-medium">RPE</span>
             <input 
               type="number" 
               value={ex.targetRpe || ''}
               placeholder="-"
               onChange={(e) => onUpdate(dayId, ex.id, 'targetRpe', e.target.value ? parseFloat(e.target.value) : null)}
-              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+              className="w-10 bg-white/5 border border-transparent hover:border-white/20 rounded px-1 text-center text-sm font-bold text-white focus:border-neon outline-none transition-colors"
             />
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-400">RIR</span>
+          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5">
+            <span className="text-[11px] text-gray-400 font-medium">RIR</span>
             <input 
               type="number" 
               value={ex.targetRir || ''}
               placeholder="-"
               onChange={(e) => onUpdate(dayId, ex.id, 'targetRir', e.target.value ? parseFloat(e.target.value) : null)}
-              className="w-10 bg-white/5 border border-white/10 rounded px-1 py-0.5 text-center text-xs text-white focus:border-neon outline-none"
+              className="w-10 bg-white/5 border border-transparent hover:border-white/20 rounded px-1 text-center text-sm font-bold text-white focus:border-neon outline-none transition-colors"
             />
           </div>
           <button 
             onClick={() => onRemove(dayId, ex.id)}
-            className="p-1.5 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded transition-colors opacity-0 group-hover:opacity-100"
+            className="p-2 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all opacity-0 group-hover:opacity-100 bg-red-400/10"
+            title="حذف التمرين"
           >
             <Trash2 className="w-4 h-4" />
           </button>
