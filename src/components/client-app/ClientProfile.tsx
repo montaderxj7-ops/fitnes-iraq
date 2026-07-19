@@ -4,6 +4,8 @@ import { LogOut, Settings, CreditCard, Bell, ChevronLeft, ChevronRight, User, Ma
 import { CoachData } from './ClientAppFlow';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { savePushSubscription } from '@/actions/notifications';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/lib/cropImage';
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -37,6 +39,12 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
     twoFactorAuth: false
   });
   const [debugPush, setDebugPush] = useState<string>("Checking...");
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   useEffect(() => {
     const checkSubscription = async () => {
@@ -139,19 +147,17 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
                 type="file" 
                 accept="image/*" 
                 className="hidden" 
-                onChange={async (e) => {
+                onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file || !userData.id) return;
-                  if (file.size > 2 * 1024 * 1024) {
-                    alert("حجم الصورة يجب أن لا يتجاوز 2 ميجابايت");
+                  if (file.size > 5 * 1024 * 1024) {
+                    alert("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت");
                     return;
                   }
                   const reader = new FileReader();
-                  reader.onloadend = async () => {
-                    const base64 = reader.result as string;
-                    if (onUpdateUser) onUpdateUser({ image: base64 });
-                    const { updateClientImage } = await import('@/actions/clients');
-                    await updateClientImage(userData.id as string, base64);
+                  reader.onloadend = () => {
+                    setSelectedImage(reader.result as string);
+                    setIsCropping(true);
                   };
                   reader.readAsDataURL(file);
                 }}
@@ -501,6 +507,59 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout, onUp
                   </div>
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cropper Modal */}
+      <AnimatePresence>
+        {isCropping && selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          >
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 flex flex-col items-center">
+              <h3 className="text-white font-bold mb-4 text-lg">تحديد الصورة</h3>
+              <div className="relative w-full h-64 bg-black/50 rounded-xl overflow-hidden mb-4">
+                <Cropper
+                  image={selectedImage}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  cropShape="round"
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={(_, croppedPixels) => setCroppedAreaPixels(croppedPixels)}
+                />
+              </div>
+              <input 
+                type="range" min={1} max={3} step={0.1} value={zoom} 
+                onChange={(e) => setZoom(Number(e.target.value))} 
+                className="w-full mb-6 accent-[#82c91e]" 
+              />
+              <div className="flex gap-3 w-full">
+                <button 
+                  onClick={() => setIsCropping(false)}
+                  className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button 
+                  onClick={async () => {
+                    if (!croppedAreaPixels || !selectedImage || !userData.id) return;
+                    setIsCropping(false);
+                    const croppedBase64 = await getCroppedImg(selectedImage, croppedAreaPixels);
+                    if (onUpdateUser) onUpdateUser({ image: croppedBase64 });
+                    const { updateClientImage } = await import('@/actions/clients');
+                    await updateClientImage(userData.id as string, croppedBase64);
+                  }}
+                  className="flex-1 py-3 rounded-xl font-bold transition-all text-black"
+                  style={{ backgroundColor: coach.primaryColor }}
+                >
+                  حفظ الصورة
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
