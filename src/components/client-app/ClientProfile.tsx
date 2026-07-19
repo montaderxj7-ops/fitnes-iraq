@@ -41,7 +41,7 @@ export function ClientProfile({ coach, userData, selectedPackage, onLogout }: Cl
     const checkSubscription = async () => {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         try {
-          const registration = await navigator.serviceWorker.getRegistration();
+          const registration = await navigator.serviceWorker.register('/sw.js');
           if (registration) {
             const subscription = await registration.pushManager.getSubscription();
             if (subscription) {
