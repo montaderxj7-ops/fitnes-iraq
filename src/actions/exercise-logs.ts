@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function saveExerciseLog(data: {
@@ -17,7 +17,7 @@ export async function saveExerciseLog(data: {
     const endOfDay = new Date(data.date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const existingLog = await db.exerciseLog.findFirst({
+    const existingLog = await prisma.exerciseLog.findFirst({
       where: {
         clientId: data.clientId,
         workoutExerciseId: data.workoutExerciseId,
@@ -33,7 +33,7 @@ export async function saveExerciseLog(data: {
     const setsJson = data.sets as any;
 
     if (existingLog) {
-      await db.exerciseLog.update({
+      await prisma.exerciseLog.update({
         where: { id: existingLog.id },
         data: {
           sets: setsJson,
@@ -41,7 +41,7 @@ export async function saveExerciseLog(data: {
         }
       });
     } else {
-      await db.exerciseLog.create({
+      await prisma.exerciseLog.create({
         data: {
           clientId: data.clientId,
           workoutExerciseId: data.workoutExerciseId,
@@ -67,7 +67,7 @@ export async function getExerciseLogs(clientId: string, workoutExerciseId?: stri
       whereClause.workoutExerciseId = workoutExerciseId;
     }
 
-    const logs = await db.exerciseLog.findMany({
+    const logs = await prisma.exerciseLog.findMany({
       where: whereClause,
       orderBy: { date: 'desc' },
       include: {
