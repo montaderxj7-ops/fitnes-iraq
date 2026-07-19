@@ -166,7 +166,6 @@ export async function sendNotificationToClient(clientId: string, title: string, 
         process.env.VAPID_PRIVATE_KEY
       );
 
-      const payload = JSON.stringify({
       const coachLogo = client.coach?.logo;
       const validIcon = coachLogo && !coachLogo.startsWith('data:image') ? coachLogo : '/logos/icon.png';
 
