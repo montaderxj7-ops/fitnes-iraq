@@ -12,9 +12,26 @@ export interface DynamicNotification {
   link: string;
 }
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
 export async function getDynamicNotifications() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !session.user.id) {
+      return { success: false, notifications: [] };
+    }
+
+    const coachProfile = await prisma.coachProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!coachProfile) {
+      return { success: false, notifications: [] };
+    }
+
     const clients = await prisma.client.findMany({
+      where: { coachId: coachProfile.id },
       orderBy: { createdAt: 'desc' },
       take: 100
     });
